@@ -32,7 +32,7 @@ Vous trouverez des exemples d'utilisation spécifiques à Google Sheets (récup�
 
 Si vous souhaitez utiliser PortfolioAnalytics avec un navigateur, vous pouvez télécharger le code source [ici](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.js) et/ou le code source minifié [ici](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.min.js).
 
-Ensuite, il suffit de l'inclure ce code source dans la page HTML, par exemple :
+Il vous suffit ensuite d'inclure le code téléchargé dans une page HTML, par exemple :
 
 ```html
 	<script src="portfolio_analytics.dist.min.js" type="text/javascript"></script>
