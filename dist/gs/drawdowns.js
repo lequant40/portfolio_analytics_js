@@ -113,6 +113,7 @@
   * also called the portfolio underwater equity curve.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Drawdown_(economics)">https://en.wikipedia.org/wiki/Drawdown_(economics)</a>
+  * @see <a href="http://papers.ssrn.com/sol3/papers.cfm?abstract_id=223323">Portfolio Optimization with Drawdown Constraints, Chekhlov et al.</a>
   * 
   * @param {Array.<number>} iEquityCurve the portfolio equity curve.
   * @return {Array.<number>} the values of the computed drawdown function.

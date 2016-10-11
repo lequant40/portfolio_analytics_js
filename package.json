@@ -30,5 +30,8 @@
   "bugs": {
     "url": "https://github.com/lequant40/portfolio_analytics_js/issues"
   },
-  "main": "./dist/portfolio_analytics.min.js"
+  "main": "./dist/portfolio_analytics.min.js",
+  "scripts": {
+    "test": "grunt test"
+  }
 }

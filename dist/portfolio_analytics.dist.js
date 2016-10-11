@@ -296,7 +296,7 @@ PortfolioAnalytics = (function(self) {
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
  */
 
-/* Start Not to be used as is in Google Spreadsheet */
+/* Start Not to be used as is in Google Sheets */
 
 var PortfolioAnalytics = PortfolioAnalytics || {};
 
@@ -307,7 +307,7 @@ PortfolioAnalytics = (function(self) {
   self.assertPositiveInteger = function(iNumber) { return assertPositiveInteger(iNumber); } 
   /* End Wrapper public methods */
     
-/* End Not to be used as is in Google Spreadsheet */  
+/* End Not to be used as is in Google Sheets */  
   
 	/**
 	* @function assertArray
@@ -394,10 +394,10 @@ PortfolioAnalytics = (function(self) {
 	  }
 	}
 
-/* Start Not to be used as is in Google Spreadsheet */
+/* Start Not to be used as is in Google Sheets */
    
    return self;
   
 })(PortfolioAnalytics || {});
 
-/* End Not to be used as is in Google Spreadsheet */
+/* End Not to be used as is in Google Sheets */

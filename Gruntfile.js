@@ -14,8 +14,8 @@ module.exports = function(grunt) {
       portfolio_analytics_gs: {
 		options: {
 			blocks: [
-			{ start_block: "/* Start Not to be used as is in Google Spreadsheet */",
-			  end_block: "/* End Not to be used as is in Google Spreadsheet */"
+			{ start_block: "/* Start Not to be used as is in Google Sheets */",
+			  end_block: "/* End Not to be used as is in Google Sheets */"
 			}
 			],
 			pattern: /self\./g
@@ -76,13 +76,16 @@ module.exports = function(grunt) {
   });
 
   //
-  grunt.registerTask('deliver', 'Builds the app into a distributable package and tests it.', function() {
+  grunt.registerTask('test', 'Tests the app.', function() {
 	// Minify the app in dev mode and run unit tests
 	grunt.task.run('concat:portfolio_analytics_dev');
 	grunt.task.run('uglify:portfolio_analytics_dev');
 	grunt.task.run('qunit');
+  });
 
-    // If successful, minify the app in dist mode (i.e., removing access to private methods...)
+  //
+  grunt.registerTask('deliver', 'Builds the app into a distributable package.', function() {
+    // Minify the app in dist mode (i.e., removing access to private methods...)
 	grunt.task.run('concat:portfolio_analytics_dist');
 	grunt.task.run('strip_code:portfolio_analytics_dist');
 	grunt.task.run('uglify:portfolio_analytics_dist');
@@ -90,6 +93,10 @@ module.exports = function(grunt) {
     // And generate the Google Spreadsheet version
 	grunt.task.run('strip_code:portfolio_analytics_gs');
   });
-
-
+  
+  //
+  grunt.registerTask('deliver_gs', 'Builds the Google Sheets app version.', function() {
+    // Generate the Google Sheets version
+	grunt.task.run('strip_code:portfolio_analytics_gs');
+  });
 };

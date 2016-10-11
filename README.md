@@ -24,15 +24,15 @@ Après avoir cherché en vain mon bonheur sur Internet (codes incomplets, ou ave
 Si vous souhaitez utiliser PortfolioAnalytics avec Google Sheets dans vos feuilles de calcul, vous pouvez soit :
 
 - (Solution recommandée) Importer la bibliothèque externe de Script ID 1NXwj16pdgcJT-XG5LiWRJyRW604Dj26U4lqgGsJJfOKLum4y9grakXPI
-- Importer les fichiers JavaScript contenus dans [le répertoire dist/gs](https://github.com/lequant40/portfolio_analytics_js/master/dist/gs)
+- Importer les fichiers JavaScript contenus dans [le répertoire dist/gs](https://github.com/lequant40/portfolio_analytics_js/tree/master/dist/gs)
 
 Vous trouverez des exemples d'utilisation spécifiques à Google Sheets (récupération des données depuis une plage de cellules, etc.) dans [cette feuille de calcul](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing).
 
 ### Utilisation avec un navigateur
 
-Si vous souhaitez utiliser PortfolioAnalytics avec un navigateur, vous pouvez télécharger le code source [ici](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.js) et/ou le code source minifié [ici](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.min.js).
+Si vous souhaitez utiliser PortfolioAnalytics avec un navigateur, vous pouvez télécharger [le code source](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.js) et/ou [le code source minifié](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.min.js).
 
-Ensuite, il suffit de l'inclure ce code source dans la page HTML, par exemple :
+Il vous suffit ensuite d'inclure ce code dans une page HTML, par exemple :
 
 ```html
 	<script src="portfolio_analytics.dist.min.js" type="text/javascript"></script>
@@ -46,34 +46,57 @@ A venir...
 
 ```js
 // Mesures liées aux pertes (drawdowns)
-PortfolioAnalytics.maxDrawdown([1, 2, 1]); // == 0.5 - la perte maximale (maximum drawdown)
-PortfolioAnalytics.drawdownFunction([1, 2, 1], 0, 2); // == [0.5, 1.0, 2.0] - la fonction de pertes (drawdown function)
-PortfolioAnalytics.topDrawdowns([1, 2, 1], 1); // == [[0.5, 1.0, 2.0]] - les 'n' pertes maximales (second largest drawdown, and more generally, the 'n' largest drawdowns)
+PortfolioAnalytics.maxDrawdown([1, 2, 1]); 
+// == 0.5 - la perte maximale (maximum drawdown)
+
+PortfolioAnalytics.drawdownFunction([1, 2, 1], 0, 2); 
+// == [0.5, 1.0, 2.0] - la fonction de pertes (drawdown function)
+
+PortfolioAnalytics.topDrawdowns([1, 2, 1], 1); 
+// == [[0.5, 1.0, 2.0]] - les 'n' pertes maximales (second largest drawdown, etc.)
 ```
 
 
-## Contribution
+## Comment contribuer ?
 
-### Clonage du projet depuis [Github](https://github.com/)
+### Cloner le projet depuis [Github](https://github.com/)
 
 ```
 git clone git://github.com/lequant40/portfolio_analytics_js.git
-
 cd portfolio_analytics_js
 ```
 
-### Installation des dépendances [Grunt](http://gruntjs.com/):
+### Installer les dépendances [Grunt](http://gruntjs.com/):
 
 ```
 npm install
 ```
 
-### Compilation et tests
+### Développer...
 
-La commande suivante génère plusieurs fichiers dans le répertoire `dist` et exécute les tests unitaires (répertoire `test`) [QUnit](https://qunitjs.com/) sur le fichier `dist\portfolio_analytics.dev.min.js` :
+### Compiler
+
+- La commande suivante génère les fichiers à utiliser dans un navigateur ou avec Node.js dans le répertoire `dist` :
 
 ```
 grunt deliver
+```
+
+- La commande suivante génère les fichiers à utiliser avec Google Sheets dans le répertoire `dist\gs` :
+
+```
+grunt deliver
+```
+### Tester
+
+L'une ou l'autre des deux commandes suivantes exécute les tests unitaires [QUnit](https://qunitjs.com/) du répertoire `test` sur le fichier généré `dist\portfolio_analytics.dev.min.js` :
+
+```
+npm test
+```
+
+```
+grunt test
 ```
 
 
