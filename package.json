@@ -1,0 +1,34 @@
+{
+  "name": "portfolio_analytics",
+  "version": "0.0.1",
+  "date": "2016-10-06",
+  "author": "Roman Rubsamen <roman.rubsamen@gmail.com>",
+  "contributors": [],
+  "description": "A JavaScript library to measure portfolio performances.",
+  "license": "MIT",
+  "directories": {
+    "lib": "lib",
+    "test": "tests"
+  },
+  "keywords": [
+    "quantitative analysis",
+    "finance",
+    "portfolio performances",
+	"statistics"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lequant40/portfolio_analytics_js.git"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.0",
+    "grunt-contrib-qunit": "^1.2.0",
+    "grunt-contrib-uglify": "^1.0.2",
+	"grunt-strip-code": "^1.0.4",
+	"grunt-contrib-concat": "^1.0.1"
+  },
+  "bugs": {
+    "url": "https://github.com/lequant40/portfolio_analytics_js/issues"
+  },
+  "main": "./dist/portfolio_analytics.min.js"
+}
