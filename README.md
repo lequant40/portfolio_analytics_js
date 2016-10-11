@@ -46,9 +46,14 @@ A venir...
 
 ```js
 // Mesures liées aux pertes (drawdowns)
-PortfolioAnalytics.maxDrawdown([1, 2, 1]); // == 0.5 - la perte maximale (maximum drawdown)
-PortfolioAnalytics.drawdownFunction([1, 2, 1], 0, 2); // == [0.5, 1.0, 2.0] - la fonction de pertes (drawdown function)
-PortfolioAnalytics.topDrawdowns([1, 2, 1], 1); // == [[0.5, 1.0, 2.0]] - les 'n' pertes maximales (second largest drawdown, and more generally, the 'n' largest drawdowns)
+PortfolioAnalytics.maxDrawdown([1, 2, 1]); 
+// == 0.5 - la perte maximale (maximum drawdown)
+
+PortfolioAnalytics.drawdownFunction([1, 2, 1], 0, 2); 
+// == [0.5, 1.0, 2.0] - la fonction de pertes (drawdown function)
+
+PortfolioAnalytics.topDrawdowns([1, 2, 1], 1); 
+// == [[0.5, 1.0, 2.0]] - les 'n' pertes maximales (second largest drawdown, etc.)
 ```
 
 
