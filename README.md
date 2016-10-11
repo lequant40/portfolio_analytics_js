@@ -57,23 +57,24 @@ PortfolioAnalytics.topDrawdowns([1, 2, 1], 1);
 ```
 
 
-## Contribuer
+## Comment contribuer ?
 
-### Clonage du projet depuis [Github](https://github.com/)
+### Cloner le projet depuis [Github](https://github.com/)
 
 ```
 git clone git://github.com/lequant40/portfolio_analytics_js.git
-
 cd portfolio_analytics_js
 ```
 
-### Installation des dépendances [Grunt](http://gruntjs.com/):
+### Installer les dépendances [Grunt](http://gruntjs.com/):
 
 ```
 npm install
 ```
 
-### Compilation et tests
+### Développer...
+
+### Compiler et tester
 
 La commande suivante génère plusieurs fichiers dans le répertoire `dist` et exécute les tests unitaires (répertoire `test`) [QUnit](https://qunitjs.com/) sur le fichier `dist\portfolio_analytics.dev.min.js` :
 
