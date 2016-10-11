@@ -57,7 +57,7 @@ PortfolioAnalytics.topDrawdowns([1, 2, 1], 1);
 ```
 
 
-## Contribution
+## Contribuer
 
 ### Clonage du projet depuis [Github](https://github.com/)
 
