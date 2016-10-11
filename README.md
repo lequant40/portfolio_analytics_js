@@ -74,12 +74,29 @@ npm install
 
 ### Développer...
 
-### Compiler et tester
+### Compiler
 
-La commande suivante génère plusieurs fichiers dans le répertoire `dist` et exécute les tests unitaires [QUnit](https://qunitjs.com/) du répertoire `test` sur le fichier généré `dist\portfolio_analytics.dev.min.js` :
+- La commande suivante génère les fichiers à utiliser dans un navigateur ou avec Node.js dans le répertoire `dist` :
 
 ```
 grunt deliver
+```
+
+- La commande suivante génère les fichiers à utiliser avec Google Sheets dans le répertoire `dist\gs` :
+
+```
+grunt deliver
+```
+### Tester
+
+L'une ou l'autre des deux commandes suivantes exécute les tests unitaires [QUnit](https://qunitjs.com/) du répertoire `test` sur le fichier généré `dist\portfolio_analytics.dev.min.js` :
+
+```
+npm test
+```
+
+```
+grunt test
 ```
 
 
