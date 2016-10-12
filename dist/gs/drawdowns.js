@@ -127,7 +127,7 @@
     var highWaterMark = -Infinity;
     
     // Input checks
-    PortfolioAnalytics.assertArray(iEquityCurve);
+    assertArray(iEquityCurve);
     
     // Other initialisations
     var ddVector = new Array(iEquityCurve.length);
