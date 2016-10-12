@@ -15,7 +15,8 @@ Après avoir cherché en vain mon bonheur sur Internet (codes incomplets, ou ave
 - Compatible avec Google Sheets
 - Compatible avec les navigateurs supportant le ECMAScript 5 (i.e., développement front-end)
 - Compatible avec [Node.js](https://nodejs.org/) (i.e., développement back-end)
-- Code testé, documenté et lisible (en tout cas, j'espère :-))
+- Code testé et intégré de manière continue avec [Travis CI](https://travis-ci.org/)
+- Code documenté avec [JSDoc](http://usejsdoc.org/)
 
 ## Utilisation
 
@@ -59,12 +60,8 @@ PortfolioAnalytics.topDrawdowns([1, 2, 1], 1);
 
 ## Comment contribuer ?
 
-### Cloner le projet depuis [Github](https://github.com/)
+### Forker le projet depuis [Github](https://github.com/)...
 
-```
-git clone git://github.com/lequant40/portfolio_analytics_js.git
-cd portfolio_analytics_js
-```
 
 ### Installer les dépendances [Grunt](http://gruntjs.com/):
 
@@ -98,6 +95,8 @@ npm test
 ```
 grunt test
 ```
+
+### Soumettre une pull-request...
 
 
 ## License
