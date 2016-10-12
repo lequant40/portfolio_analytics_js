@@ -63,7 +63,7 @@ PortfolioAnalytics.topDrawdowns([1, 2, 1], 1);
 ### Forker le projet depuis [Github](https://github.com/)...
 
 
-### Installer les dépendances [Grunt](http://gruntjs.com/):
+### Installer les dépendances [Grunt](http://gruntjs.com/)
 
 ```
 npm install
