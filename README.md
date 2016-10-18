@@ -46,7 +46,7 @@ A venir...
 ### Exemples
 
 ```js
-// Mesures liées aux pertes (drawdowns)
+/* Mesures liées aux pertes (drawdowns) */
 PortfolioAnalytics.maxDrawdown([1, 2, 1]); 
 // == 0.5 - la perte maximale (maximum drawdown)
 
