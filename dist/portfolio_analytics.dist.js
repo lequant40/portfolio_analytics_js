@@ -133,8 +133,8 @@ PortfolioAnalytics = (function(self) {
   * @return {Array.<number>} the values of the computed drawdown function.
   *
   * @example
-  * drawdownFunction([1, 2, 1], 0, 2); 
-  * // [0.5, 1.0, 2.0], i.e. 50% drawdown, starting at index 1 and ending at index 2
+  * drawdownFunction([1, 2, 1]); 
+  * // [0.0, 0.0, 0.5], i.e. no drawdowns at indexes 0/1, 50% drawdown at index 2  
   */
   function drawdownFunction(iEquityCurve) {
     // Initialisations
@@ -186,7 +186,7 @@ PortfolioAnalytics = (function(self) {
   *
   * @example
   * topDrawdowns([1, 2, 1], 1);
-  * // [[0.5, 1.0, 2.0]];
+  * // [[0.5, 1.0, 2.0]], i.e. top 1 drawdown is 50%, starting at index 1 and ending at index 2
   *
   * @example
   * topDrawdowns([1,2, 1], 1)[0][0] == maxDrawdown([1, 2, 1]); 
