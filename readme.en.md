@@ -45,7 +45,7 @@ To be done...
 ### Examples
 
 ```js
-// Drawdown linked analytics
+/* Drawdown related analytics */
 PortfolioAnalytics.maxDrawdown([1, 2, 1]); 
 // == 0.5 - the maximum drawdown
 
