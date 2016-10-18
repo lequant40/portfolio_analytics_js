@@ -2,4 +2,4 @@ language: node_js
 node_js:
   - "node"
 install: npm install
-before_script: grunt deliver
+after_script: grunt deliver
