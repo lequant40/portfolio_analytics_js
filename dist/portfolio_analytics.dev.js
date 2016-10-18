@@ -15,6 +15,9 @@ PortfolioAnalytics = (function(self) {
   /* End Wrapper public methods */
   
   
+  /* Start Wrapper private methods - Unit tests usage only */
+  self.maxDrawdown_ = function(iEquityCurve, iIdxStart, iIdxEnd) { return maxDrawdown_(iEquityCurve, iIdxStart, iIdxEnd); }
+  /* End Wrapper private methods - Unit tests usage only */
 
 /* End Not to be used as is in Google Sheets */  
   

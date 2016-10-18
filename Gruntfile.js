@@ -88,8 +88,8 @@ module.exports = function(grunt) {
   //
   grunt.registerTask('deliver', 'Builds the app into a distributable package.', function() {
     // Minify the app in dist mode (i.e., removing access to private methods...)
+    grunt.task.run('strip_code:portfolio_analytics_dist');
 	grunt.task.run('concat:portfolio_analytics_dist');
-	grunt.task.run('strip_code:portfolio_analytics_dist');
 	grunt.task.run('uglify:portfolio_analytics_dist');
 	
 	// Run the non-dev unit tests
