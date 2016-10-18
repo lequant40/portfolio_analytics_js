@@ -1,92 +1,95 @@
-| [English version](readme.en.md)
+| [French version](readme.fr.md)
 
 # PortfolioAnalytics v0.0.1 ([Changelog](changelog.md))
 
 [![Travis Build Status](https://travis-ci.org/lequant40/portfolio_analytics_js.svg?style=flat)](https://travis-ci.org/lequant40/portfolio_analytics_js)
 
-Pour le suivi des performances de mes stratégies d'investissement en bourse, ainsi que pour l'analyse des stratégies que je publie sur mon blog [Le Quant 40](http://www.lequant40.com/), j'avais besoin de fonctions de mesures de performances de portefeuille en JavaScript.
+In order to track my personal stock market investments performances, as well as to analyse trading strategies on my blog [Le Quant 40](http://www.lequant40.com/), I wanted to use portfolio performances measures computed in JavaScript.
 
-Pourquoi en JavaScript ? Principalement parce que je suis un utilisateur inconditionel de [Google Sheets](https://www.google.fr/intl/fr/sheets/about/), qui est facilement extensible grâce à [Google Apps Script](https://developers.google.com/apps-script/), un language dérivé du JavaScript. 
+Why in JavaScript ? Because I am a fan of [Google Sheets](https://www.google.com/sheets/about/), which is easily extensible thanks to [Google Apps Script](https://developers.google.com/apps-script/), a JavaScript-based language.
 
-Après avoir cherché en vain mon bonheur sur Internet (codes incomplets, ou avec trop de dépendances, ou non documentés, ou comportant beaucoup d'erreurs...), j'ai décidé de créer ma propre bibliothèque de fonctions, en espérant qu'elle puisse être utile à quelqu'un d'autre que moi...
+After several fruitless hours of Googling (incomplete codes, incorrect codes, undocumented codes...), I decided to create my own JavaScript library of such portfolio performances measures, hoping that it could be useful to other people...
 
-## Caractéristiques
 
-- Compatible avec Google Sheets
-- Compatible avec les navigateurs supportant le ECMAScript 5 (i.e., développement front-end)
-- Compatible avec [Node.js](https://nodejs.org/) (i.e., développement back-end)
-- Code testé et intégré de manière continue avec [Travis CI](https://travis-ci.org/)
-- Code documenté avec [JSDoc](http://usejsdoc.org/)
+## Features
 
-## Utilisation
+- Compatible with Google Sheets
+- Compatible with any browser supporting ECMAScript 5 (i.e., front-end development)
+- Compatible with [Node.js](https://nodejs.org/) (i.e., back-end development)
+- Code continuously tested and integrated by [Travis CI](https://travis-ci.org/)
+- Code documented using [JSDoc](http://usejsdoc.org/)
 
-### Utilisation avec Google Sheets
+## Usage
 
-Si vous souhaitez utiliser PortfolioAnalytics avec Google Sheets dans vos feuilles de calcul, vous pouvez soit :
+### Usage in Google Sheets
 
-- (Solution recommandée) [Importer la bibliothèque externe](https://developers.google.com/apps-script/guide_libraries) de Script ID 1NXwj16pdgcJT-XG5LiWRJyRW604Dj26U4lqgGsJJfOKLum4y9grakXPI
-- Importer les fichiers JavaScript contenus dans [le répertoire dist/gs](https://github.com/lequant40/portfolio_analytics_js/tree/master/dist/gs)
+If you would like to use PortfolioAnalytics in Google Sheets, you can either:
 
-Vous trouverez des exemples d'utilisation spécifiques à Google Sheets (récupération des données depuis une plage de cellules, etc.) dans [cette feuille de calcul](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing).
+- (Recommended) [Import the external Google Apps Script library](https://developers.google.com/apps-script/guide_libraries) with Script ID 1NXwj16pdgcJT-XG5LiWRJyRW604Dj26U4lqgGsJJfOKLum4y9grakXPI from your spreadsheet
+- Import the JavaScript files from the [dist/gs directory](https://github.com/lequant40/portfolio_analytics_js/tree/master/dist/gs) into your spreadsheet
 
-### Utilisation avec un navigateur
+You can find examples of PortfolioAnalytics usage in Google Sheets (data retrieval from cells...) in [this spreadsheet](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing). 
 
-Si vous souhaitez utiliser PortfolioAnalytics avec un navigateur, vous pouvez télécharger [le code source](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.js) et/ou [le code source minifié](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.min.js).
 
-Il vous suffit ensuite d'inclure ce code dans une page HTML, par exemple :
+### Usage inside a browser
 
+If you would like to use PortfolioAnalytics inside a browser you can download [its source code](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.js) and/or [its minified source code](http://raw.github.com/lequant40/portfolio_analytics_js/master/dist/portfolio_analytics.dist.min.js).
+
+You then just need to include this code in an HTML page, e.g.:
 ```html
 	<script src="portfolio_analytics.dist.min.js" type="text/javascript"></script>
 ```
 
-### Utilisation avec Node.js
+### Usage with Node.js
 
-A venir...
+To be done...
 
-### Exemples
+### Examples
+
+#### Drawdowns related measures
 
 ```js
-/* Mesures liées aux pertes (drawdowns) */
 PortfolioAnalytics.maxDrawdown([1, 2, 1]); 
-// == 0.5 - la perte maximale (maximum drawdown)
+// == 0.5 - the maximum drawdown
 
-PortfolioAnalytics.drawdownFunction([1, 2, 1], 0, 2); 
-// == [0.5, 1.0, 2.0] - la fonction de pertes (drawdown function)
+PortfolioAnalytics.drawdownFunction([1, 2, 1]); 
+// == [0.0, 0.0, 0.5] - the drawdown function
 
 PortfolioAnalytics.topDrawdowns([1, 2, 1], 1); 
-// == [[0.5, 1.0, 2.0]] - les 'n' pertes maximales (second largest drawdown, etc.)
+// == [[0.5, 1.0, 2.0]] - the top 'n' drawdowns (second largest drawdown, etc.) with their start/end indexes
 ```
 
 
-## Comment contribuer ?
+## How to contribute ?
 
-### Forker le projet depuis [Github](https://github.com/)...
+### Fork the projet from [Github](https://github.com/)...
 
 
-### Installer les dépendances [Grunt](http://gruntjs.com/)
+### Instal the [Grunt](http://gruntjs.com/) dependencies
 
 ```
 npm install
 ```
 
-### Développer...
+### Develop...
 
-### Compiler
+### Compile
 
-- La commande suivante génère les fichiers à utiliser dans un navigateur ou avec Node.js dans le répertoire `dist` :
+- The following command generates the files to be used inside a browser or with Node.js in the `dist` directory:
+
+```
+grunt deliver
+```
+
+- The following command generates the files to be used in Google Sheets in the `dist\gs` directory:
 
 ```
 grunt deliver
 ```
 
-- La commande suivante génère les fichiers à utiliser avec Google Sheets dans le répertoire `dist\gs` :
+### Test
 
-```
-grunt deliver
-```
-### Tester
-
-L'une ou l'autre des deux commandes suivantes exécute les tests unitaires [QUnit](https://qunitjs.com/) du répertoire `test` sur le fichier généré `dist\portfolio_analytics.dev.min.js` :
+Any of the following two commands run the [QUnit](https://qunitjs.com/) unit tests contained in the `test` directory on the generated file `dist\portfolio_analytics.dev.min.js`:
 
 ```
 npm test
@@ -96,10 +99,10 @@ npm test
 grunt test
 ```
 
-### Soumettre une pull-request...
+### Submit a pull-request...
 
 
 ## License
 
-[License MIT](https://fr.wikipedia.org/wiki/Licence_MIT)
+[MIT License](https://en.wikipedia.org/wiki/MIT_License)
 

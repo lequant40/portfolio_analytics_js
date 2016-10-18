@@ -1,139 +1,139 @@
 // ------------------------------------------------------------
-QUnit.module('Types module', {
+QUnit.module('Types internal module', {
 });
 
 
 QUnit.test('Array', function(assert) {   
   assert.throws(function() {
-      PortfolioAnalytics.assertArray();
+      PortfolioAnalytics.assertArray_();
     },
     new Error("input must be an array"),
     "No input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertArray(1);
+      PortfolioAnalytics.assertArray_(1);
     },
     new Error("input must be an array"),
     "No array input argument"
   );
   
   
-  PortfolioAnalytics.assertArray([]);
+  PortfolioAnalytics.assertArray_([]);
   assert.ok(true, "Empty array input argument");
 
-  PortfolioAnalytics.assertArray(['a']);
+  PortfolioAnalytics.assertArray_(['a']);
   assert.ok(true, "Non empty array input argument");  
 });
 
 
 QUnit.test('Positive number', function(assert) {    
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveNumber();
+      PortfolioAnalytics.assertPositiveNumber_();
     },
     new Error("input must be a positive number"),
     "No input argument"
   );
 
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveNumber(-2.3);
+      PortfolioAnalytics.assertPositiveNumber_(-2.3);
     },
     new Error("input must be a positive number"),
     "Negative number input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveNumber(NaN);
+      PortfolioAnalytics.assertPositiveNumber_(NaN);
     },
     new Error("input must be a positive number"),
     "NaN input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveNumber(Infinity);
+      PortfolioAnalytics.assertPositiveNumber_(Infinity);
     },
     new Error("input must be a positive number"),
     "Infinity input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveNumber(-Infinity);
+      PortfolioAnalytics.assertPositiveNumber_(-Infinity);
     },
     new Error("input must be a positive number"),
     "-Infinity input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveNumber('1');
+      PortfolioAnalytics.assertPositiveNumber_('1');
     },
     new Error("input must be a positive number"),
     "String input argument"
   );
   
   
-  PortfolioAnalytics.assertPositiveNumber(0);
+  PortfolioAnalytics.assertPositiveNumber_(0);
   assert.ok(true, "Zero number input argument");
   
-  PortfolioAnalytics.assertPositiveNumber(1.2);
+  PortfolioAnalytics.assertPositiveNumber_(1.2);
   assert.ok(true, "Positive number input argument");
 });
 
 
 QUnit.test('Positive integer', function(assert) {    
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveInteger();
+      PortfolioAnalytics.assertPositiveInteger_();
     },
     new Error("input must be a positive integer"),
     "No input argument"
   );
 
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveInteger(-2.3);
+      PortfolioAnalytics.assertPositiveInteger_(-2.3);
     },
     new Error("input must be a positive integer"),
     "Negative number input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveInteger(-2);
+      PortfolioAnalytics.assertPositiveInteger_(-2);
     },
     new Error("input must be a positive integer"),
     "Negative integer input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveInteger(NaN);
+      PortfolioAnalytics.assertPositiveInteger_(NaN);
     },
     new Error("input must be a positive integer"),
     "NaN input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveInteger(Infinity);
+      PortfolioAnalytics.assertPositiveInteger_(Infinity);
     },
     new Error("input must be a positive integer"),
     "Infinity input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveInteger(-Infinity);
+      PortfolioAnalytics.assertPositiveInteger_(-Infinity);
     },
     new Error("input must be a positive integer"),
     "-Infinity input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveInteger('1');
+      PortfolioAnalytics.assertPositiveInteger_('1');
     },
     new Error("input must be a positive integer"),
     "String input argument"
   );
   
   
-  PortfolioAnalytics.assertPositiveInteger(0);
+  PortfolioAnalytics.assertPositiveInteger_(0);
   assert.ok(true, "Zero number input argument");
 
-  PortfolioAnalytics.assertPositiveInteger(1);
+  PortfolioAnalytics.assertPositiveInteger_(1);
   assert.ok(true, "Positive integer input argument");
 });
 

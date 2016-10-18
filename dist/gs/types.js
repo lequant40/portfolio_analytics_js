@@ -5,21 +5,21 @@
 
   
 	/**
-	* @function assertArray
+	* @function assertArray_
 	*
 	* @description Throws an error if the input parameter is not an array.
 	* 
 	* @param {iArray} iArray input parameter.
 	*
 	* @example
-	* assertArray([]); 
+	* assertArray_([]); 
 	* //
 	*
 	* @example
-	* assertArray(1); 
+	* assertArray_(1); 
 	* // Error("input must be an array")
 	*/
-	function assertArray(iArray) {
+	function assertArray_(iArray) {
 	  if (!arguments.length || !Array.isArray(iArray)) {
 		throw new Error("input must be an array");
 	  }
@@ -27,24 +27,24 @@
 	 
 
 	/**
-	* @function assertPositiveNumber
+	* @function assertPositiveNumber_
 	*
 	* @description Throws an error if the input parameter is not a positive (finite) number.
 	* 
 	* @param {iNumber} iNumber input parameter.
 	*
 	* @example
-	* assertPositiveNumber(-2.3); 
+	* assertPositiveNumber_(-2.3); 
 	* // Error("input must be a positive number")
 	*
 	* @example
-	* assertPositiveNumber(1);
+	* assertPositiveNumber_(1);
 	*
 	* @example
-	* assertPositiveNumber(NaN);
+	* assertPositiveNumber_(NaN);
 	* // Error("input must be a positive number")
 	*/
-	function assertPositiveNumber(iNumber) {
+	function assertPositiveNumber_(iNumber) {
 	  if (!arguments.length || 
 	      !(typeof iNumber === 'number') || 
 		  isNaN(iNumber) || 
@@ -57,27 +57,27 @@
 
 
 	/**
-	* @function assertPositiveInteger
+	* @function assertPositiveInteger_
 	*
 	* @description Throws an error if the input parameter is not a positive integer.
 	* 
 	* @param {iNumber} iNumber input parameter.
 	*
 	* @example
-	* assertPositiveInteger(-2.3); 
+	* assertPositiveInteger_(-2.3); 
 	* // Error("input must be a positive integer")
 	*
 	* @example
-	* assertPositiveInteger(1);
+	* assertPositiveInteger_(1);
 	*
 	* @example
-	* assertPositiveInteger(NaN);
+	* assertPositiveInteger_(NaN);
 	* // Error("input must be a positive integer")
 	*/
-	function assertPositiveInteger(iNumber) {
+	function assertPositiveInteger_(iNumber) {
 	  // A positive integer is a positive number...
 	  try {
-		assertPositiveNumber(iNumber);
+		assertPositiveNumber_(iNumber);
 	  }
 	  catch (e) {
 		throw new Error("input must be a positive integer");

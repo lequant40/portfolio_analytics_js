@@ -3,7 +3,7 @@
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
  */
 
-/* Start Not to be used as is in Google Spreadsheet */
+/* Start Not to be used as is in Google Sheets */
  
 var PortfolioAnalytics = PortfolioAnalytics || {};
 
@@ -16,7 +16,7 @@ PortfolioAnalytics = (function(self) {
   
   
 
-/* End Not to be used as is in Google Spreadsheet */  
+/* End Not to be used as is in Google Sheets */  
   
   /**
   * @function maxDrawdown
@@ -42,18 +42,18 @@ PortfolioAnalytics = (function(self) {
   */
   function maxDrawdown(iEquityCurve) {
     // Input checks
-    self.assertArray(iEquityCurve);
+    self.assertArray_(iEquityCurve);
     
     // Compute the maximum drawdown and its associated duration
-	var maxDd_ = maxDrawdown_(iEquityCurve, 0, iEquityCurve.length-1);
+    var maxDd_ = maxDrawdown_(iEquityCurve, 0, iEquityCurve.length-1);
     
     // Return the maximum drawdown
-	if (maxDd_[0] == -Infinity) {
-		return 0.0;
-	}
-	else {
-		return maxDd_[0];
-	}
+    if (maxDd_[0] == -Infinity) {
+      return 0.0;
+    }
+    else {
+      return maxDd_[0];
+    }
   }
   
   
@@ -99,7 +99,7 @@ PortfolioAnalytics = (function(self) {
     // Loop over all the values to compute the maximum drawdown
     for (var i=iIdxStart; i<iIdxEnd+1; ++i) {
       // Check that the equity curve value is a positive number, as this could not be done before
-      self.assertPositiveNumber(iEquityCurve[i]);
+      self.assertPositiveNumber_(iEquityCurve[i]);
       
       if (iEquityCurve[i] > highWaterMark) {
         highWaterMark = iEquityCurve[i];
@@ -127,6 +127,7 @@ PortfolioAnalytics = (function(self) {
   * also called the portfolio underwater equity curve.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Drawdown_(economics)">https://en.wikipedia.org/wiki/Drawdown_(economics)</a>
+  * @see <a href="http://papers.ssrn.com/sol3/papers.cfm?abstract_id=223323">Portfolio Optimization with Drawdown Constraints, Chekhlov et al.</a>
   * 
   * @param {Array.<number>} iEquityCurve the portfolio equity curve.
   * @return {Array.<number>} the values of the computed drawdown function.
@@ -140,7 +141,7 @@ PortfolioAnalytics = (function(self) {
     var highWaterMark = -Infinity;
     
     // Input checks
-    PortfolioAnalytics.assertArray(iEquityCurve);
+    self.assertArray_(iEquityCurve);
     
     // Other initialisations
     var ddVector = new Array(iEquityCurve.length);
@@ -148,7 +149,7 @@ PortfolioAnalytics = (function(self) {
     // Loop over all the values to compute the drawdown vector
     for (var i=0; i<iEquityCurve.length; ++i) {
       // Check that the equity curve value is a positive number, as this could not be done before
-      self.assertPositiveNumber(iEquityCurve[i]);
+      self.assertPositiveNumber_(iEquityCurve[i]);
       
       if (iEquityCurve[i] > highWaterMark) {
         highWaterMark = iEquityCurve[i];
@@ -193,8 +194,8 @@ PortfolioAnalytics = (function(self) {
   */
   function topDrawdowns(iEquityCurve, iNbTopDrawdowns) {
     // Input checks
-    self.assertArray(iEquityCurve);
-    self.assertPositiveInteger(iNbTopDrawdowns);
+    self.assertArray_(iEquityCurve);
+    self.assertPositiveInteger_(iNbTopDrawdowns);
     
 	// If no drawdowns are required, returns
 	if (iNbTopDrawdowns == 0) {
@@ -284,13 +285,13 @@ PortfolioAnalytics = (function(self) {
     return topDrawdowns.slice(0, Math.min(iNbTopDrawdowns, topDrawdowns.length));
   }
   
-/* Start Not to be used as is in Google Spreadsheet */
+/* Start Not to be used as is in Google Sheets */
    
    return self;
   
 })(PortfolioAnalytics || {});
 
-/* End Not to be used as is in Google Spreadsheet */
+/* End Not to be used as is in Google Sheets */
 ;/**
  * @file Functions related to types.
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
@@ -302,29 +303,29 @@ var PortfolioAnalytics = PortfolioAnalytics || {};
 
 PortfolioAnalytics = (function(self) {
   /* Start Wrapper public methods */
-  self.assertArray = function(iArray) { return assertArray(iArray); }
-  self.assertPositiveNumber = function(iNumber) { return assertPositiveNumber(iNumber); }
-  self.assertPositiveInteger = function(iNumber) { return assertPositiveInteger(iNumber); } 
+  self.assertArray_ = function(iArray) { return assertArray_(iArray); }
+  self.assertPositiveNumber_ = function(iNumber) { return assertPositiveNumber_(iNumber); }
+  self.assertPositiveInteger_ = function(iNumber) { return assertPositiveInteger_(iNumber); } 
   /* End Wrapper public methods */
-    
+  
 /* End Not to be used as is in Google Sheets */  
   
 	/**
-	* @function assertArray
+	* @function assertArray_
 	*
 	* @description Throws an error if the input parameter is not an array.
 	* 
 	* @param {iArray} iArray input parameter.
 	*
 	* @example
-	* assertArray([]); 
+	* assertArray_([]); 
 	* //
 	*
 	* @example
-	* assertArray(1); 
+	* assertArray_(1); 
 	* // Error("input must be an array")
 	*/
-	function assertArray(iArray) {
+	function assertArray_(iArray) {
 	  if (!arguments.length || !Array.isArray(iArray)) {
 		throw new Error("input must be an array");
 	  }
@@ -332,24 +333,24 @@ PortfolioAnalytics = (function(self) {
 	 
 
 	/**
-	* @function assertPositiveNumber
+	* @function assertPositiveNumber_
 	*
 	* @description Throws an error if the input parameter is not a positive (finite) number.
 	* 
 	* @param {iNumber} iNumber input parameter.
 	*
 	* @example
-	* assertPositiveNumber(-2.3); 
+	* assertPositiveNumber_(-2.3); 
 	* // Error("input must be a positive number")
 	*
 	* @example
-	* assertPositiveNumber(1);
+	* assertPositiveNumber_(1);
 	*
 	* @example
-	* assertPositiveNumber(NaN);
+	* assertPositiveNumber_(NaN);
 	* // Error("input must be a positive number")
 	*/
-	function assertPositiveNumber(iNumber) {
+	function assertPositiveNumber_(iNumber) {
 	  if (!arguments.length || 
 	      !(typeof iNumber === 'number') || 
 		  isNaN(iNumber) || 
@@ -362,27 +363,27 @@ PortfolioAnalytics = (function(self) {
 
 
 	/**
-	* @function assertPositiveInteger
+	* @function assertPositiveInteger_
 	*
 	* @description Throws an error if the input parameter is not a positive integer.
 	* 
 	* @param {iNumber} iNumber input parameter.
 	*
 	* @example
-	* assertPositiveInteger(-2.3); 
+	* assertPositiveInteger_(-2.3); 
 	* // Error("input must be a positive integer")
 	*
 	* @example
-	* assertPositiveInteger(1);
+	* assertPositiveInteger_(1);
 	*
 	* @example
-	* assertPositiveInteger(NaN);
+	* assertPositiveInteger_(NaN);
 	* // Error("input must be a positive integer")
 	*/
-	function assertPositiveInteger(iNumber) {
+	function assertPositiveInteger_(iNumber) {
 	  // A positive integer is a positive number...
 	  try {
-		assertPositiveNumber(iNumber);
+		assertPositiveNumber_(iNumber);
 	  }
 	  catch (e) {
 		throw new Error("input must be a positive integer");

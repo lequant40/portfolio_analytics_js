@@ -28,18 +28,18 @@
   */
   function maxDrawdown(iEquityCurve) {
     // Input checks
-    assertArray(iEquityCurve);
+    assertArray_(iEquityCurve);
     
     // Compute the maximum drawdown and its associated duration
-	var maxDd_ = maxDrawdown_(iEquityCurve, 0, iEquityCurve.length-1);
+    var maxDd_ = maxDrawdown_(iEquityCurve, 0, iEquityCurve.length-1);
     
     // Return the maximum drawdown
-	if (maxDd_[0] == -Infinity) {
-		return 0.0;
-	}
-	else {
-		return maxDd_[0];
-	}
+    if (maxDd_[0] == -Infinity) {
+      return 0.0;
+    }
+    else {
+      return maxDd_[0];
+    }
   }
   
   
@@ -85,7 +85,7 @@
     // Loop over all the values to compute the maximum drawdown
     for (var i=iIdxStart; i<iIdxEnd+1; ++i) {
       // Check that the equity curve value is a positive number, as this could not be done before
-      assertPositiveNumber(iEquityCurve[i]);
+      assertPositiveNumber_(iEquityCurve[i]);
       
       if (iEquityCurve[i] > highWaterMark) {
         highWaterMark = iEquityCurve[i];
@@ -113,21 +113,21 @@
   * also called the portfolio underwater equity curve.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Drawdown_(economics)">https://en.wikipedia.org/wiki/Drawdown_(economics)</a>
-  * @see <a href="http://papers.ssrn.com/sol3/papers.cfm?abstract_id=223323">Portfolio Optimization with Drawdown Constraints, Chekhlov et al.</a>
+  * @see <a href="http://papers.ssrn.com/sol3/papers.cfm?abstract_id=223323">Portfolio Optimization with Drawdown Constraints, Chekhlov et al., 2000</a>
   * 
   * @param {Array.<number>} iEquityCurve the portfolio equity curve.
   * @return {Array.<number>} the values of the computed drawdown function.
   *
   * @example
-  * drawdownFunction([1, 2, 1], 0, 2); 
-  * // [0.5, 1.0, 2.0], i.e. 50% drawdown, starting at index 1 and ending at index 2
+  * drawdownFunction([1, 2, 1]); 
+  * // [0.0, 0.0, 0.5], i.e. no drawdowns at indexes 0/1, 50% drawdown at index 2  
   */
   function drawdownFunction(iEquityCurve) {
     // Initialisations
     var highWaterMark = -Infinity;
     
     // Input checks
-    assertArray(iEquityCurve);
+    assertArray_(iEquityCurve);
     
     // Other initialisations
     var ddVector = new Array(iEquityCurve.length);
@@ -135,7 +135,7 @@
     // Loop over all the values to compute the drawdown vector
     for (var i=0; i<iEquityCurve.length; ++i) {
       // Check that the equity curve value is a positive number, as this could not be done before
-      assertPositiveNumber(iEquityCurve[i]);
+      assertPositiveNumber_(iEquityCurve[i]);
       
       if (iEquityCurve[i] > highWaterMark) {
         highWaterMark = iEquityCurve[i];
@@ -172,7 +172,7 @@
   *
   * @example
   * topDrawdowns([1, 2, 1], 1);
-  * // [[0.5, 1.0, 2.0]];
+  * // [[0.5, 1.0, 2.0]], i.e. top 1 drawdown is 50%, starting at index 1 and ending at index 2
   *
   * @example
   * topDrawdowns([1,2, 1], 1)[0][0] == maxDrawdown([1, 2, 1]); 
@@ -180,8 +180,8 @@
   */
   function topDrawdowns(iEquityCurve, iNbTopDrawdowns) {
     // Input checks
-    assertArray(iEquityCurve);
-    assertPositiveInteger(iNbTopDrawdowns);
+    assertArray_(iEquityCurve);
+    assertPositiveInteger_(iNbTopDrawdowns);
     
 	// If no drawdowns are required, returns
 	if (iNbTopDrawdowns == 0) {

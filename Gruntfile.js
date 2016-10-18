@@ -35,6 +35,7 @@ module.exports = function(grunt) {
 		},
         files: [
 		  {src: 'lib/drawdowns.js', dest: 'lib/drawdowns_dist.js'},
+		  {src: 'lib/types.js', dest: 'lib/types_dist.js'},
 		]
       },
     },
@@ -48,7 +49,7 @@ module.exports = function(grunt) {
 	    dest: 'dist/portfolio_analytics.dev.js',
 	  },
 	  portfolio_analytics_dist: {
-	    src: ['lib/drawdowns_dist.js', 'lib/types.js'],
+	    src: ['lib/drawdowns_dist.js', 'lib/types_dist.js'],
 	    dest: 'dist/portfolio_analytics.dist.js',
 	  },
 	},
@@ -70,17 +71,18 @@ module.exports = function(grunt) {
     },
 	
 	qunit: { 
-      all: ['test/**/*.html']
+      dev: ['test/**/*_dev.html'],
+	  dist: ['test/**/*_dist.html']
     }
 
   });
 
   //
   grunt.registerTask('test', 'Tests the app.', function() {
-	// Minify the app in dev mode and run unit tests
+	// Minify the app in dev mode and run all unit tests
 	grunt.task.run('concat:portfolio_analytics_dev');
 	grunt.task.run('uglify:portfolio_analytics_dev');
-	grunt.task.run('qunit');
+	grunt.task.run('qunit:dev');
   });
 
   //
@@ -90,13 +92,10 @@ module.exports = function(grunt) {
 	grunt.task.run('strip_code:portfolio_analytics_dist');
 	grunt.task.run('uglify:portfolio_analytics_dist');
 	
+	// Run the non-dev unit tests
+	grunt.task.run('qunit:dist');
+	
     // And generate the Google Spreadsheet version
-	grunt.task.run('strip_code:portfolio_analytics_gs');
-  });
-  
-  //
-  grunt.registerTask('deliver_gs', 'Builds the Google Sheets app version.', function() {
-    // Generate the Google Sheets version
 	grunt.task.run('strip_code:portfolio_analytics_gs');
   });
 };
