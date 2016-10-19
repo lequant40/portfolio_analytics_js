@@ -303,9 +303,9 @@ var PortfolioAnalytics = PortfolioAnalytics || {};
 
 PortfolioAnalytics = (function(self) {
   /* Start Wrapper public methods */
-  self.assertArray_ = function(iArray) { return assertArray_(iArray); }
-  self.assertPositiveNumber_ = function(iNumber) { return assertPositiveNumber_(iNumber); }
-  self.assertPositiveInteger_ = function(iNumber) { return assertPositiveInteger_(iNumber); } 
+  self.assertArray_ = function(iX) { return assertArray_(iX); }
+  self.assertPositiveNumber_ = function(iX) { return assertPositiveNumber_(iX); }
+  self.assertPositiveInteger_ = function(iX) { return assertPositiveInteger_(iX); } 
   /* End Wrapper public methods */
   
 /* End Not to be used as is in Google Sheets */  
@@ -313,9 +313,10 @@ PortfolioAnalytics = (function(self) {
 	/**
 	* @function assertArray_
 	*
-	* @description Throws an error if the input parameter is not an array.
+	* @description Throws an error if the input parameter is not an array 
+	* (or a typed array).
 	* 
-	* @param {iArray} iArray input parameter.
+	* @param {Array.<Object>} iX input parameter.
 	*
 	* @example
 	* assertArray_([]); 
@@ -325,8 +326,8 @@ PortfolioAnalytics = (function(self) {
 	* assertArray_(1); 
 	* // Error("input must be an array")
 	*/
-	function assertArray_(iArray) {
-	  if (!arguments.length || !Array.isArray(iArray)) {
+	function assertArray_(iX) {
+	  if (Object.prototype.toString.call(iX).indexOf("Array") == -1) {
 		throw new Error("input must be an array");
 	  }
 	}
@@ -337,7 +338,7 @@ PortfolioAnalytics = (function(self) {
 	*
 	* @description Throws an error if the input parameter is not a positive (finite) number.
 	* 
-	* @param {iNumber} iNumber input parameter.
+	* @param {number} iNumber input parameter.
 	*
 	* @example
 	* assertPositiveNumber_(-2.3); 
@@ -350,13 +351,12 @@ PortfolioAnalytics = (function(self) {
 	* assertPositiveNumber_(NaN);
 	* // Error("input must be a positive number")
 	*/
-	function assertPositiveNumber_(iNumber) {
-	  if (!arguments.length || 
-	      !(typeof iNumber === 'number') || 
-		  isNaN(iNumber) || 
-		  iNumber === Infinity ||
-          iNumber === -Infinity ||
-		  iNumber < 0.0 ) {
+	function assertPositiveNumber_(iX) {
+	  if (Object.prototype.toString.call(iX)!= "[object Number]" || 
+		  isNaN(iX) || 
+		  iX === Infinity ||
+          iX === -Infinity ||
+		  iX < 0.0 ) {
 		throw new Error("input must be a positive number");
 	  }
 	}
@@ -367,7 +367,7 @@ PortfolioAnalytics = (function(self) {
 	*
 	* @description Throws an error if the input parameter is not a positive integer.
 	* 
-	* @param {iNumber} iNumber input parameter.
+	* @param {number} iX input parameter.
 	*
 	* @example
 	* assertPositiveInteger_(-2.3); 
@@ -380,17 +380,17 @@ PortfolioAnalytics = (function(self) {
 	* assertPositiveInteger_(NaN);
 	* // Error("input must be a positive integer")
 	*/
-	function assertPositiveInteger_(iNumber) {
+	function assertPositiveInteger_(iX) {
 	  // A positive integer is a positive number...
 	  try {
-		assertPositiveNumber_(iNumber);
+		assertPositiveNumber_(iX);
 	  }
 	  catch (e) {
 		throw new Error("input must be a positive integer");
 	  }
 
 	  // ... as well as an integer
-	  if (Math.floor(iNumber) !== iNumber) {
+	  if (Math.floor(iX) !== iX) {
 		throw new Error("input must be a positive integer");
 	  }
 	}

@@ -7,9 +7,10 @@
 	/**
 	* @function assertArray_
 	*
-	* @description Throws an error if the input parameter is not an array.
+	* @description Throws an error if the input parameter is not an array 
+	* (or a typed array).
 	* 
-	* @param {iArray} iArray input parameter.
+	* @param {Array.<Object>} iX input parameter.
 	*
 	* @example
 	* assertArray_([]); 
@@ -19,8 +20,8 @@
 	* assertArray_(1); 
 	* // Error("input must be an array")
 	*/
-	function assertArray_(iArray) {
-	  if (!arguments.length || !Array.isArray(iArray)) {
+	function assertArray_(iX) {
+	  if (Object.prototype.toString.call(iX).indexOf("Array") == -1) {
 		throw new Error("input must be an array");
 	  }
 	}
@@ -31,7 +32,7 @@
 	*
 	* @description Throws an error if the input parameter is not a positive (finite) number.
 	* 
-	* @param {iNumber} iNumber input parameter.
+	* @param {number} iNumber input parameter.
 	*
 	* @example
 	* assertPositiveNumber_(-2.3); 
@@ -44,13 +45,12 @@
 	* assertPositiveNumber_(NaN);
 	* // Error("input must be a positive number")
 	*/
-	function assertPositiveNumber_(iNumber) {
-	  if (!arguments.length || 
-	      !(typeof iNumber === 'number') || 
-		  isNaN(iNumber) || 
-		  iNumber === Infinity ||
-          iNumber === -Infinity ||
-		  iNumber < 0.0 ) {
+	function assertPositiveNumber_(iX) {
+	  if (Object.prototype.toString.call(iX)!= "[object Number]" || 
+		  isNaN(iX) || 
+		  iX === Infinity ||
+          iX === -Infinity ||
+		  iX < 0.0 ) {
 		throw new Error("input must be a positive number");
 	  }
 	}
@@ -61,7 +61,7 @@
 	*
 	* @description Throws an error if the input parameter is not a positive integer.
 	* 
-	* @param {iNumber} iNumber input parameter.
+	* @param {number} iX input parameter.
 	*
 	* @example
 	* assertPositiveInteger_(-2.3); 
@@ -74,17 +74,17 @@
 	* assertPositiveInteger_(NaN);
 	* // Error("input must be a positive integer")
 	*/
-	function assertPositiveInteger_(iNumber) {
+	function assertPositiveInteger_(iX) {
 	  // A positive integer is a positive number...
 	  try {
-		assertPositiveNumber_(iNumber);
+		assertPositiveNumber_(iX);
 	  }
 	  catch (e) {
 		throw new Error("input must be a positive integer");
 	  }
 
 	  // ... as well as an integer
-	  if (Math.floor(iNumber) !== iNumber) {
+	  if (Math.floor(iX) !== iX) {
 		throw new Error("input must be a positive integer");
 	  }
 	}

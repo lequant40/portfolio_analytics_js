@@ -16,6 +16,8 @@ QUnit.test('Max drawdown incorrect input arguments', function(assert) {
     "No input arguments"
   );
   
+  PortfolioAnalytics.maxDrawdown(new Float64Array([1,2]));
+  
   assert.throws(function() {
       PortfolioAnalytics.maxDrawdown([-100]);
     },
