@@ -226,5 +226,36 @@ QUnit.test('Ulcer index computation', function(assert) {
 	
 	assert.equal(PortfolioAnalytics.ulcerIndex(testDataUlcerIndex), 
                  0.16538498426084833, 
-                'Ulcer Index computation with Peter G. Martin example');
+                'Ulcer Index computation with Peter G. Martin example');			
+				
+});
+
+
+QUnit.test('Pain index incorrect input arguments', function(assert) {   
+  assert.throws(function() {
+      PortfolioAnalytics.painIndex();
+    },
+    new Error("input must be an array"),
+    "No input arguments"
+  );
+   
+  assert.throws(function() {
+      PortfolioAnalytics.painIndex([-100]);
+    },
+    new Error ("input must be a positive number"),
+    "Negative numeric array input argument"
+  );
+  
+  // Other tests are delegated to the unit tests of types.js
+});
+
+
+QUnit.test('Pain index computation', function(assert) {   
+	assert.equal(PortfolioAnalytics.painIndex([1, 2, 1]), 
+                 0.16666666666666666, 
+                'Simple pain index #1');				
+
+	assert.equal(PortfolioAnalytics.painIndex([100, 50, 25, 12.5]), 
+                 0.53125, 
+                'Simple pain index #2');				
 });

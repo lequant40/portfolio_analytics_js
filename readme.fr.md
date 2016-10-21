@@ -53,6 +53,12 @@ PortfolioAnalytics.drawdownFunction([1, 2, 1]);
 
 PortfolioAnalytics.topDrawdowns([1, 2, 1], 1); 
 // == [[0.5, 1.0, 2.0]] - les 'n' pertes maximales (second largest drawdown, etc.) avec leurs indexes de début/fin
+
+PortfolioAnalytics.ulcerIndex([1, 2, 1]);
+// == ~0.289 - l'Ulcer Index
+
+PortfolioAnalytics.painIndex([1, 2, 1]);
+// == ~0.167- le Pain Index, qui correspond aussi à la valeur moyenne de la fonction de pertes
 ```
 
 

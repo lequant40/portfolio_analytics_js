@@ -57,6 +57,12 @@ PortfolioAnalytics.drawdownFunction([1, 2, 1]);
 
 PortfolioAnalytics.topDrawdowns([1, 2, 1], 1); 
 // == [[0.5, 1.0, 2.0]] - the top 'n' drawdowns (second largest drawdown, etc.) with their start/end indexes
+
+PortfolioAnalytics.ulcerIndex([1, 2, 1]);
+// == ~0.289 - the Ulcer Index
+
+PortfolioAnalytics.painIndex([1, 2, 1]);
+// == ~0.167- the Pain Index, also corresponding to the average of the drawdown function
 ```
 
 

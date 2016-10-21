@@ -13,6 +13,7 @@ PortfolioAnalytics = (function(self) {
   self.drawdownFunction = function(iEquityCurve) { return drawdownFunction(iEquityCurve); }
   self.topDrawdowns = function(iEquityCurve, iNbTopDrawdowns) { return topDrawdowns(iEquityCurve, iNbTopDrawdowns); } 
   self.ulcerIndex = function(iEquityCurve) { return ulcerIndex(iEquityCurve); }
+  self.painIndex = function(iEquityCurve) { return painIndex(iEquityCurve); }
   /* End Wrapper public methods */
   
   
@@ -299,7 +300,7 @@ PortfolioAnalytics = (function(self) {
   *
   * @example
   * ulcerIndex([1, 2, 1]);
-  * // 
+  * // ~0.289
   */
   function ulcerIndex(iEquityCurve) {
     // Input checks
@@ -319,6 +320,43 @@ PortfolioAnalytics = (function(self) {
     return uI;
   }
 
+
+  /**
+  * @function painIndex
+  *
+  * @description Compute the pain index associated to a portfolio equity curve.
+  *
+  * @see <a href="http://www.styleadvisor.com/content/pain-index">Pain Index and Pain Ratio, White Paper, Zephyr Associates</a>
+  *
+  * The pain index also corresponds to the average of the values of the drawdown function.
+  *
+  * @see <a href="http://papers.ssrn.com/sol3/papers.cfm?abstract_id=223323">Portfolio Optimization with Drawdown Constraints, Chekhlov et al., 2000</a>
+  *
+  * @param {Array.<number>} iEquityCurve the portfolio equity curve.
+  * @return {number} the pain index.
+  *
+  * @example
+  * painIndex([1, 2, 1]);
+  * // ~0.167
+  */
+  function painIndex(iEquityCurve) {
+    // Input checks
+    self.assertArray_(iEquityCurve);
+    
+    // Compute the drawdown function
+    var ddFunc = drawdownFunction(iEquityCurve);
+    
+    // Compute the sum of this function
+    var sum = 0.0;
+    for (var i=0; i<ddFunc.length; ++i) {
+      sum += ddFunc[i];
+    }
+    
+    // Compute and return the pain index
+    var pI = sum/ddFunc.length;
+    return pI;
+  }
+  
   
 /* Start Not to be used as is in Google Sheets */
    
