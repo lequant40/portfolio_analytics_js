@@ -12,6 +12,7 @@ PortfolioAnalytics = (function(self) {
   self.maxDrawdown = function(iEquityCurve) { return maxDrawdown(iEquityCurve); }
   self.drawdownFunction = function(iEquityCurve) { return drawdownFunction(iEquityCurve); }
   self.topDrawdowns = function(iEquityCurve, iNbTopDrawdowns) { return topDrawdowns(iEquityCurve, iNbTopDrawdowns); } 
+  self.ulcerIndex = function(iEquityCurve) { return ulcerIndex(iEquityCurve); }
   /* End Wrapper public methods */
   
   
@@ -29,7 +30,7 @@ PortfolioAnalytics = (function(self) {
   * @see <a href="https://en.wikipedia.org/wiki/Drawdown_(economics)">https://en.wikipedia.org/wiki/Drawdown_(economics)</a>
   * 
   * @param {Array.<number>} iEquityCurve the portfolio equity curve.
-  * @return {number} the computed maximum drawdown.
+  * @return {number} the maximum drawdown.
   *
   * @example
   * maxDrawdown([1, 2, 1]); 
@@ -74,7 +75,7 @@ PortfolioAnalytics = (function(self) {
   * @param {Array.<number>} iEquityCurve the portfolio equity curve.
   * @param {number} iIdxStart the iEquityCurve array index from which to compute the maximum drawdown.
   * @param {number} iIdxEnd the iEquityCurve index until which to compute the maximum drawdown.
-  * @return {Array.<number>} in this order, the computed maximum drawdown and
+  * @return {Array.<number>} in this order, the maximum drawdown and
   * the indexes of the start/end of the maximum drawdown phase.
   *
   * @example
@@ -133,7 +134,7 @@ PortfolioAnalytics = (function(self) {
   * @see <a href="http://papers.ssrn.com/sol3/papers.cfm?abstract_id=223323">Portfolio Optimization with Drawdown Constraints, Chekhlov et al., 2000</a>
   * 
   * @param {Array.<number>} iEquityCurve the portfolio equity curve.
-  * @return {Array.<number>} the values of the computed drawdown function.
+  * @return {Array.<number>} the values of the drawdown function.
   *
   * @example
   * drawdownFunction([1, 2, 1]); 
@@ -185,7 +186,7 @@ PortfolioAnalytics = (function(self) {
   *
   * @param {Array.<number>} iEquityCurve the portfolio equity curve.
   * @param {<number>} iNbTopDrawdowns the (maximum) number of top drawdown to compute.
-  * @return {Array.<Array.<number>>} the computed top drawdowns.
+  * @return {Array.<Array.<number>>} the top drawdowns.
   *
   * @example
   * topDrawdowns([1, 2, 1], 1);
@@ -287,6 +288,40 @@ PortfolioAnalytics = (function(self) {
     // Return (at most) the iNbTopDrawdowns top drawdowns
     return topDrawdowns.slice(0, Math.min(iNbTopDrawdowns, topDrawdowns.length));
   }
+  
+  
+  /**
+  * @function ulcerIndex
+  *
+  * @description Compute the ulcer index associated to a portfolio equity curve.
+  *
+  * @see <a href="http://www.tangotools.com/ui/ui.htm">Ulcer Index, An Alternative Approach to the Measurement of Investment Risk & Risk-Adjusted Performance</a>
+  *
+  * @param {Array.<number>} iEquityCurve the portfolio equity curve.
+  * @return {number} the ulcer index.
+  *
+  * @example
+  * ulcerIndex([1, 2, 1]);
+  * // 
+  */
+  function ulcerIndex(iEquityCurve) {
+    // Input checks
+    self.assertArray_(iEquityCurve);
+    
+    // Compute the drawdown function
+    var ddFunc = drawdownFunction(iEquityCurve);
+    
+    // Compute the sum of squares of this function
+    var sumSquares = 0.0;
+    for (var i=0; i<ddFunc.length; ++i) {
+      sumSquares += ddFunc[i] * ddFunc[i];
+    }
+    
+    // Compute and return the ulcer index
+    var uI = Math.sqrt(sumSquares/ddFunc.length);
+    return uI;
+  }
+
   
 /* Start Not to be used as is in Google Sheets */
    

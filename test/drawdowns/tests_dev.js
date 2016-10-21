@@ -1,9 +1,8 @@
 // ------------------------------------------------------------
 QUnit.module('Drawdowns internal module', {
   before: function() {
-    this.complexEquityCurve = [60, 40, 80, 140, 100, 90, 110, 70, 100, 130, 110, 120, 90, 150, 120, 130];
-	this.BaconEquityCurve = [100, 100.3, 102.9078, 104.0397858, 102.9993879, 104.5443788, 107.1579882, 108.872516, 116.1669746, 114.540637, 119.1222625, 118.5266511, 
-           128.1273099, 133.2524023, 128.3220634, 120.4944175, 122.5428226, 116.5382243, 113.9743834, 121.9525902, 129.0258404, 120.6391608, 123.5345007, 122.9168282, 121.8105767];
+    // Coming from "Ambiguity in Calculating and Interpreting Maximum Drawdown, Research Note, Andreas Steiner Consulting GmbH, December 2010"
+	this.complexEquityCurve = [60, 40, 80, 140, 100, 90, 110, 70, 100, 130, 110, 120, 90, 150, 120, 130];
   }
 });
 
