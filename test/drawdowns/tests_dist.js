@@ -259,3 +259,43 @@ QUnit.test('Pain index computation', function(assert) {
                  0.53125, 
                 'Simple pain index #2');				
 });
+
+
+QUnit.test('Conditional drawdown incorrect input arguments', function(assert) {   
+  assert.throws(function() {
+      PortfolioAnalytics.conditionalDrawdown();
+    },
+    new Error("input must be an array"),
+    "No input arguments"
+  );
+   
+  assert.throws(function() {
+      PortfolioAnalytics.conditionalDrawdown([-100]);
+    },
+    new Error ("input(s) must be a number"),
+    "Negative numeric array input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.conditionalDrawdown([-100], 1);
+    },
+    new Error ("input must be a positive number"),
+    "Negative numeric array input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.conditionalDrawdown([100], -0.01);
+    },
+    new Error ("input must be bounded between 0 and 1"),
+    "Negative numeric array input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.conditionalDrawdown([100], 1.01);
+    },
+    new Error ("input must be bounded between 0 and 1"),
+    "Negative numeric array input argument"
+  );
+  
+  // Other tests are delegated to the unit tests of types.js
+});

@@ -14,8 +14,9 @@ PortfolioAnalytics = (function(self) {
   self.topDrawdowns = function(iEquityCurve, iNbTopDrawdowns) { return topDrawdowns(iEquityCurve, iNbTopDrawdowns); } 
   self.ulcerIndex = function(iEquityCurve) { return ulcerIndex(iEquityCurve); }
   self.painIndex = function(iEquityCurve) { return painIndex(iEquityCurve); }
+  self.conditionalDrawdown = function(iEquityCurve, iAlpha) { return conditionalDrawdown(iEquityCurve, iAlpha); }
   /* End Wrapper public methods */
-  
+
   
   /* Start Wrapper private methods - Unit tests usage only */
   self.maxDrawdown_ = function(iEquityCurve, iIdxStart, iIdxEnd) { return maxDrawdown_(iEquityCurve, iIdxStart, iIdxEnd); }
@@ -361,6 +362,65 @@ PortfolioAnalytics = (function(self) {
   }
   
   
+  /**
+  * @function conditionalDrawdown
+  *
+  * @description Compute the conditional drawdown of a portfolio equity curve.
+  *
+  * @see <a href="http://www.worldscientific.com/doi/abs/10.1142/S0219024905002767">Drawdown Measure in Portfolio Optimization, Chekhlov et al., Int. J. Theor. Appl. Finan. 08, 13 (2005)</a>
+  *
+  * @param {Array.<number>} iEquityCurve the portfolio equity curve.
+  * @param {Array.<number>} iAlpha the tolerance parameter.
+  * @return {number} the iAlpha-conditional drawdown.
+  *
+  * @example
+  * conditionalDrawdown([100, 90, 80]);
+  * // ~XXX
+  */
+  function conditionalDrawdown(iEquityCurve, iAlpha) {
+    // Input checks
+    self.assertArray_(iEquityCurve);
+    self.assertBoundedNumber_(iAlpha, 0, 1);
+   
+    // Compute the drawdown function
+    var ddFunc = drawdownFunction(iEquityCurve);
+    //ddFunc = [1,2,3,4,5,6,7,8];
+    //alpha = 0.75;
+  
+    // Sort the drawdown function from lowest to highest values
+    ddFunc.sort(function(a, b) { return a - b;});
+  
+    // If iAlpha = 1 (limit case), return the maximum drawdown
+    if (alpha == 1.0) {
+      return ddFunc[ddFunc.length-1];
+    }
+    
+    // Otherwise, find the drawdown associated to pi^{-1}(iAlpha), as well as its percentile
+	// C.f. (3.8) of the reference
+    var idxAlphaDd = 1; 
+    while (alpha > idxAlphaDd/ddFunc.length) {
+      ++idxAlphaDd;
+    }
+    var alphaDd = ddFunc[idxAlphaDd-1];
+    var pctileAlphaDd = idxAlphaDd/ddFunc.length;
+
+    // Compute qnd return the conditional drawdown using Theorem 3.1 of the reference
+	  // Compute the integral between iAlpha and the iAlpha percentile
+    var cdd1 = (pctileAlphaDd - alpha) * alphaDd;
+  
+      // Compute the remaining part of the integral between iAlpha percentile and one
+	var cdd2 = 0.0;
+    for (var i=idxAlphaDd; i<ddFunc.length; ++i) {
+      cdd2 += ddFunc[i];
+    }
+    cdd2 /= ddFunc.length;
+    
+      // Compute and return the average value of the integral above
+	var cdd = (cdd1 + cdd2) / (1 - alpha);
+    return cdd;
+}
+
+  
 /* Start Not to be used as is in Google Sheets */
    
    return self;
@@ -380,7 +440,9 @@ var PortfolioAnalytics = PortfolioAnalytics || {};
 PortfolioAnalytics = (function(self) {
   /* Start Wrapper public methods */
   self.assertArray_ = function(iX) { return assertArray_(iX); }
+  self.assertNumber_ = function(iX) { return assertNumber_(iX); }
   self.assertPositiveNumber_ = function(iX) { return assertPositiveNumber_(iX); }
+  self.assertBoundedNumber_ = function(iX, iLowerBound, iUpperBound) { return assertBoundedNumber_(iX, iLowerBound, iUpperBound); } 
   self.assertPositiveInteger_ = function(iX) { return assertPositiveInteger_(iX); } 
   /* End Wrapper public methods */
   
@@ -410,34 +472,106 @@ PortfolioAnalytics = (function(self) {
 	 
 
 	/**
+	* @function assertNumber_
+	*
+	* @description Throws an error if the input parameter is not a (finite) number.
+	* 
+	* @param {number} iX input parameter.
+	*
+	* @example
+	* assertNumber_('1'); 
+	* // Error("input must be a number")
+	*
+	* @example
+	* assertNumber_(1);
+	*
+	* @example
+	* assertNumber_(NaN);
+	* // Error("input must be a number")
+	*/
+	function assertNumber_(iX) {
+	  if (Object.prototype.toString.call(iX)!= "[object Number]" || 
+		  isNaN(iX) || 
+		  iX === Infinity ||
+          iX === -Infinity){
+		throw new Error("input must be a number");
+	  }
+	}
+	
+	
+	 /**
 	* @function assertPositiveNumber_
 	*
 	* @description Throws an error if the input parameter is not a positive (finite) number.
 	* 
-	* @param {number} iNumber input parameter.
+	* @param {number} iX input parameter.
 	*
 	* @example
 	* assertPositiveNumber_(-2.3); 
 	* // Error("input must be a positive number")
 	*
 	* @example
-	* assertPositiveNumber_(1);
+	* assertPositiveNumber_(1.1);
 	*
 	* @example
 	* assertPositiveNumber_(NaN);
 	* // Error("input must be a positive number")
 	*/
 	function assertPositiveNumber_(iX) {
-	  if (Object.prototype.toString.call(iX)!= "[object Number]" || 
-		  isNaN(iX) || 
-		  iX === Infinity ||
-          iX === -Infinity ||
-		  iX < 0.0 ) {
+	  // A positive number is a number...
+	  try {
+		assertNumber_(iX);
+	  }
+	  catch (e) {
 		throw new Error("input must be a positive number");
+	  }
+	  
+	  // ... as well as positive
+	  if (iX < 0.0 ) {
+	    throw new Error("input must be a positive number");
 	  }
 	}
 
 
+	/**
+	* @function assertBoundedNumber_
+	*
+	* @description Throws an error if the input parameter is not a (finite) number
+	* greater than a (finite)lower bound and lower than a (finite) upper bound.
+	* 
+	* @param {number} iX input parameter.
+	* @param {number} iLowerBound the lower bound.
+	* @param {number} iUpperBound the upper bound.
+	*
+	* @example
+	* assertBoundedNumber_(2, 0, 1); 
+	* // Error("input must be bounded")
+	*
+	* @example
+	* assertBoundedNumber_(1, 1, 1);
+	*
+	* @example
+	* assertBoundedNumber_(NaN, 0, 1);
+	* // Error("input(s) must be a number")
+	*/
+	function assertBoundedNumber_(iX, iLowerBound, iUpperBound) {
+	  // The bounds and the input must be numbers...
+	  try {
+        assertNumber_(iX);
+	    assertNumber_(iLowerBound);
+		assertNumber_(iUpperBound);
+	  }
+	  catch (e) {
+		throw new Error("input(s) must be a number");
+	  }
+	  
+	  // The input parameter must be between the input bounds
+	  if (iX < iLowerBound || iX > iUpperBound) {
+	    throw new Error("input must be bounded between " + iLowerBound + " and " + iUpperBound);
+	  }
+	}
+	
+	
 	/**
 	* @function assertPositiveInteger_
 	*

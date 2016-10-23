@@ -27,6 +27,52 @@ QUnit.test('Array', function(assert) {
 });
 
 
+QUnit.test('Number', function(assert) {    
+  assert.throws(function() {
+      PortfolioAnalytics.assertNumber_();
+    },
+    new Error("input must be a number"),
+    "No input argument"
+  );
+ 
+  assert.throws(function() {
+      PortfolioAnalytics.assertNumber_(NaN);
+    },
+    new Error("input must be a number"),
+    "NaN input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertNumber_(Infinity);
+    },
+    new Error("input must be a number"),
+    "Infinity input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertNumber_(-Infinity);
+    },
+    new Error("input must be a number"),
+    "-Infinity input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertNumber_('1');
+    },
+    new Error("input must be a number"),
+    "String input argument"
+  );
+  
+ 
+  PortfolioAnalytics.assertNumber_(1);
+  assert.ok(true, "One number input argument");
+  
+  PortfolioAnalytics.assertNumber_(1.1);
+  assert.ok(true, "One dot one number input argument");
+
+});
+
+
 QUnit.test('Positive number', function(assert) {    
   assert.throws(function() {
       PortfolioAnalytics.assertPositiveNumber_();
@@ -76,6 +122,83 @@ QUnit.test('Positive number', function(assert) {
   
   PortfolioAnalytics.assertPositiveNumber_(1.2);
   assert.ok(true, "Positive number input argument");
+});
+
+
+QUnit.test('Bounded number', function(assert) {    
+  assert.throws(function() {
+      PortfolioAnalytics.assertBoundedNumber_();
+    },
+    new Error("input(s) must be a number"),
+    "No input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertBoundedNumber_(-2.3);
+    },
+    new Error("input(s) must be a number"),
+    "Negative number input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertBoundedNumber_(NaN);
+    },
+    new Error("input(s) must be a number"),
+    "NaN input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertBoundedNumber_(Infinity);
+    },
+    new Error("input(s) must be a number"),
+    "Infinity input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertBoundedNumber_(-Infinity);
+    },
+    new Error("input(s) must be a number"),
+    "-Infinity input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertBoundedNumber_('1');
+    },
+    new Error("input(s) must be a number"),
+    "String input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertBoundedNumber_(1, NaN, 1);
+    },
+    new Error("input(s) must be a number"),
+    "NaN lower boundary argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertBoundedNumber_(1, 0, NaN);
+    },
+    new Error("input(s) must be a number"),
+    "NaN upper boundary argument"
+  );
+  
+  
+  PortfolioAnalytics.assertBoundedNumber_(0, 0, 0);
+  assert.ok(true, "Zero numbers input arguments");
+  
+  PortfolioAnalytics.assertBoundedNumber_(1.2, 0, 2);
+  assert.ok(true, "Positive numbers input arguments");
+  
+  PortfolioAnalytics.assertBoundedNumber_(-1.2, -2, 0);
+  assert.ok(true, "Negative numbers input arguments");
+  
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertBoundedNumber_(1.1, 0, 1);
+    },
+    new Error("input must be bounded between 0 and 1"),
+    "Not bounded input argument"
+  );
 });
 
 
