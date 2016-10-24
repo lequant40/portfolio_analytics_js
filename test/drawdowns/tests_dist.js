@@ -251,13 +251,25 @@ QUnit.test('Pain index incorrect input arguments', function(assert) {
 
 
 QUnit.test('Pain index computation', function(assert) {   
-	assert.equal(PortfolioAnalytics.painIndex([1, 2, 1]), 
-                 0.16666666666666666, 
-                'Simple pain index #1');				
+  assert.equal(PortfolioAnalytics.painIndex([1, 2, 1]), 
+               0.16666666666666666, 
+              'Simple pain index #1');				
 
-	assert.equal(PortfolioAnalytics.painIndex([100, 50, 25, 12.5]), 
-                 0.53125, 
-                'Simple pain index #2');				
+  assert.equal(PortfolioAnalytics.painIndex([100, 50, 25, 12.5]), 
+               0.53125, 
+              'Simple pain index #2');				
+
+				
+  var aTestData = [100, 50, 25, 12.5];
+  var aDdFunc = PortfolioAnalytics.drawdownFunction(aTestData);
+  var aAvgDdFunc = 0.0;
+  for (var i=0; i<aTestData.length; ++i) {
+    aAvgDdFunc += aDdFunc[i];
+  }
+  aAvgDdFunc /= aTestData.length;
+  assert.equal(PortfolioAnalytics.painIndex(aTestData), 
+               aAvgDdFunc, 
+              'Pain index equals to average of the drawdown function values');
 });
 
 
@@ -298,4 +310,37 @@ QUnit.test('Conditional drawdown incorrect input arguments', function(assert) {
   );
   
   // Other tests are delegated to the unit tests of types.js
+});
+
+
+QUnit.test('Conditional drawdown computation', function(assert) {   
+  assert.equal(PortfolioAnalytics.conditionalDrawdown([100, 110], 0.5), 
+                 0, 
+                'No conditional drawdown');
+				
+
+  var aTestData = [100, 90, 80, 70, 60, 50, 40, 30, 20];
+  
+  // C.f. reference Example 3.1
+  assert.equal(PortfolioAnalytics.conditionalDrawdown(aTestData, 0.7), 
+                 0.725, 
+                'Simple conditional drawdown #1');
+  
+  // C.f. reference Example 3.2
+  assert.equal(PortfolioAnalytics.conditionalDrawdown(aTestData, 1), 
+               PortfolioAnalytics.maxDrawdown(aTestData), 
+               '1-conditional drawdown equals to maximum drawdown');
+			   
+  // C.f. reference Example 3.2
+  var aDdFunc = PortfolioAnalytics.drawdownFunction(aTestData);
+  var aAvgDdFunc = (aDdFunc[1] + aDdFunc[2]) + (aDdFunc[3] + aDdFunc[4]) + (aDdFunc[5] + aDdFunc[6]) + (aDdFunc[7] + aDdFunc[8])
+  aAvgDdFunc /= (aTestData.length-1);
+  assert.equal(PortfolioAnalytics.conditionalDrawdown(aTestData, 0), 
+               aAvgDdFunc, 
+               '0-conditional drawdown equals to average of the drawdown function values minus the first one');
+
+			   
+  assert.equal(PortfolioAnalytics.conditionalDrawdown([100, 90, 80], 0.5), 
+                 0.2, 
+                'Simple conditional drawdown #2');
 });

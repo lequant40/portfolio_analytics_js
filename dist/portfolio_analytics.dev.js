@@ -382,23 +382,23 @@ PortfolioAnalytics = (function(self) {
     self.assertArray_(iEquityCurve);
     self.assertBoundedNumber_(iAlpha, 0, 1);
    
-    // Compute the drawdown function
-    var ddFunc = drawdownFunction(iEquityCurve);
-    //ddFunc = [1,2,3,4,5,6,7,8];
-    //alpha = 0.75;
-  
+    // Compute the drawdown function and
+	// remove the first element, always equals to 0
+	// C.f. definition 3.1
+    var ddFunc = drawdownFunction(iEquityCurve).slice(1);
+	
     // Sort the drawdown function from lowest to highest values
     ddFunc.sort(function(a, b) { return a - b;});
   
     // If iAlpha = 1 (limit case), return the maximum drawdown
-    if (alpha == 1.0) {
+    if (iAlpha == 1.0) {
       return ddFunc[ddFunc.length-1];
     }
     
     // Otherwise, find the drawdown associated to pi^{-1}(iAlpha), as well as its percentile
 	// C.f. (3.8) of the reference
     var idxAlphaDd = 1; 
-    while (alpha > idxAlphaDd/ddFunc.length) {
+    while (iAlpha > idxAlphaDd/ddFunc.length) {
       ++idxAlphaDd;
     }
     var alphaDd = ddFunc[idxAlphaDd-1];
@@ -406,7 +406,7 @@ PortfolioAnalytics = (function(self) {
 
     // Compute qnd return the conditional drawdown using Theorem 3.1 of the reference
 	  // Compute the integral between iAlpha and the iAlpha percentile
-    var cdd1 = (pctileAlphaDd - alpha) * alphaDd;
+    var cdd1 = (pctileAlphaDd - iAlpha) * alphaDd;
   
       // Compute the remaining part of the integral between iAlpha percentile and one
 	var cdd2 = 0.0;
@@ -416,7 +416,7 @@ PortfolioAnalytics = (function(self) {
     cdd2 /= ddFunc.length;
     
       // Compute and return the average value of the integral above
-	var cdd = (cdd1 + cdd2) / (1 - alpha);
+	var cdd = (cdd1 + cdd2) / (1 - iAlpha);
     return cdd;
 }
 

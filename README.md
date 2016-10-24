@@ -63,6 +63,9 @@ PortfolioAnalytics.ulcerIndex([1, 2, 1]);
 
 PortfolioAnalytics.painIndex([1, 2, 1]);
 // == ~0.167- the Pain Index, also corresponding to the average of the drawdown function
+
+PortfolioAnalytics.conditionalDrawdown([100, 90, 80], 0.5);
+// == 0.2 - the conditional drawdown at alpha level 0.5
 ```
 
 

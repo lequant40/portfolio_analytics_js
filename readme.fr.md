@@ -59,6 +59,10 @@ PortfolioAnalytics.ulcerIndex([1, 2, 1]);
 
 PortfolioAnalytics.painIndex([1, 2, 1]);
 // == ~0.167- le Pain Index, qui correspond aussi à la valeur moyenne de la fonction de pertes
+
+PortfolioAnalytics.conditionalDrawdown([100, 90, 80], 0.5);
+// == 0.2 - la perte conditionelle (conditional drawdown) au niveau alpha 0.5
+  
 ```
 
 
