@@ -1,6 +1,6 @@
 | [French version](readme.fr.md)
 
-# PortfolioAnalytics v0.0.1 ([Changelog](changelog.md))
+# PortfolioAnalytics v0.0.2 ([Changelog](changelog.md))
 
 [![Travis Build Status](https://travis-ci.org/lequant40/portfolio_analytics_js.svg?style=flat)](https://travis-ci.org/lequant40/portfolio_analytics_js)
 
