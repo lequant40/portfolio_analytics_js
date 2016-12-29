@@ -305,7 +305,7 @@
   *
   * @see <a href="http://www.styleadvisor.com/content/pain-index">Pain Index and Pain Ratio, White Paper, Zephyr Associates</a>
   *
-  * The pain index also corresponds to the average of the values of the drawdown function.
+  * The pain index also corresponds to the average of the values of the drawdown function minus the first one.
   *
   * @see <a href="http://papers.ssrn.com/sol3/papers.cfm?abstract_id=223323">Portfolio Optimization with Drawdown Constraints, Chekhlov et al., 2000</a>
   *
