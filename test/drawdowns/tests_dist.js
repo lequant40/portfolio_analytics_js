@@ -16,14 +16,21 @@ QUnit.test('Max drawdown incorrect input arguments', function(assert) {
   assert.throws(function() {
       PortfolioAnalytics.maxDrawdown();
     },
-    new Error("input must be an array"),
+    new Error("input must be an array of positive numbers"),
     "No input arguments"
   );
    
   assert.throws(function() {
       PortfolioAnalytics.maxDrawdown([-100]);
     },
-    new Error ("input must be a positive number"),
+    new Error ("input must be an array of positive numbers"),
+    "Negative numeric array input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.maxDrawdown([]);
+    },
+    new Error ("input must be an array of positive numbers"),
     "Negative numeric array input argument"
   );
   
@@ -34,8 +41,7 @@ QUnit.test('Max drawdown incorrect input arguments', function(assert) {
 QUnit.test('Max drawdown computation', function(assert) {    
   assert.equal(PortfolioAnalytics.maxDrawdown([100]), 0, 'No max drawdown #1');
   assert.equal(PortfolioAnalytics.maxDrawdown([100, 110]), 0, 'No max drawdown #2');
-  assert.equal(PortfolioAnalytics.maxDrawdown([]), 0, 'No max drawdown #3');
-  
+
   assert.equal(PortfolioAnalytics.maxDrawdown([100, 90]), 0.1, 'Simple max drawdown #1');
   assert.equal(PortfolioAnalytics.maxDrawdown([100, 90, 80]), 0.2, 'Simple max drawdown #2');
   
@@ -53,14 +59,14 @@ QUnit.test('Drawdown function incorrect input arguments', function(assert) {
   assert.throws(function() {
       PortfolioAnalytics.drawdownFunction();
     },
-    new Error("input must be an array"),
+    new Error("input must be an array of positive numbers"),
     "No input arguments"
   );
   
   assert.throws(function() {
       PortfolioAnalytics.drawdownFunction([-100]);
     },
-    new Error ("input must be a positive number"),
+    new Error ("input must be an array of positive numbers"),
     "Negative numeric array input argument"
   );
   
@@ -106,20 +112,17 @@ QUnit.test('Top drawdowns incorrect input arguments', function(assert) {
   assert.throws(function() {
       PortfolioAnalytics.topDrawdowns();
     },
-    new Error("input must be an array"),
+    new Error("input must be an array of positive numbers"),
     "No input arguments"
   );
   
   assert.throws(function() {
       PortfolioAnalytics.topDrawdowns([-100.01], 1);
     },
-    new Error ("input must be a positive number"),
+    new Error ("input must be an array of positive numbers"),
     "Negative numeric array input argument"
   );
-  
-  // Other tests are delegated to the unit tests of types.js
-
-  
+   
   assert.throws(function() {
       PortfolioAnalytics.topDrawdowns([1]);
     },
@@ -133,6 +136,15 @@ QUnit.test('Top drawdowns incorrect input arguments', function(assert) {
     new Error("input must be a positive integer"),
     "No integer top drawdowns argument"
   );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.topDrawdowns([], 1);
+    },
+    new Error("input must be an array of positive numbers"),
+    "No integer top drawdowns argument"
+  );
+  
+  // Other tests are delegated to the unit tests of types.js
 });
 
 
@@ -141,10 +153,8 @@ QUnit.test('Top drawdowns computation', function(assert) {
                                                    [[0.5, 1, 2]], 'Simple top drawdown #1');
   assert.deepEqual(PortfolioAnalytics.topDrawdowns([1, 2, 1], 2), 
                                                    [[0.5, 1, 2]], 'Simple top drawdown #2');
-  assert.deepEqual(PortfolioAnalytics.topDrawdowns([], 1), 
-                                                   [], 'Simple top drawdown #3');
   assert.deepEqual(PortfolioAnalytics.topDrawdowns([1, 2, 1], 0), 
-                                                   [], 'Simple top drawdown #4');
+                                                   [], 'Simple top drawdown #3');
 												   
   assert.deepEqual(PortfolioAnalytics.topDrawdowns([100, 150, 75, 150, 75], 2), 
                                                    [[0.5, 1, 2], [0.5, 3, 4]],
@@ -205,14 +215,14 @@ QUnit.test('Ulcer index incorrect input arguments', function(assert) {
   assert.throws(function() {
       PortfolioAnalytics.ulcerIndex();
     },
-    new Error("input must be an array"),
+    new Error("input must be an array of positive numbers"),
     "No input arguments"
   );
    
   assert.throws(function() {
       PortfolioAnalytics.ulcerIndex([-100]);
     },
-    new Error ("input must be a positive number"),
+    new Error ("input must be an array of positive numbers"),
     "Negative numeric array input argument"
   );
   
@@ -235,14 +245,14 @@ QUnit.test('Pain index incorrect input arguments', function(assert) {
   assert.throws(function() {
       PortfolioAnalytics.painIndex();
     },
-    new Error("input must be an array"),
+    new Error("input must be an array of positive numbers"),
     "No input arguments"
   );
    
   assert.throws(function() {
       PortfolioAnalytics.painIndex([-100]);
     },
-    new Error ("input must be a positive number"),
+    new Error ("input must be an array of positive numbers"),
     "Negative numeric array input argument"
   );
   
@@ -277,21 +287,21 @@ QUnit.test('Conditional drawdown incorrect input arguments', function(assert) {
   assert.throws(function() {
       PortfolioAnalytics.conditionalDrawdown();
     },
-    new Error("input must be an array"),
+    new Error("input must be bounded between 0 and 1"),
     "No input arguments"
   );
    
   assert.throws(function() {
       PortfolioAnalytics.conditionalDrawdown([-100]);
     },
-    new Error ("input(s) must be a number"),
+    new Error ("input must be bounded between 0 and 1"),
     "Negative numeric array input argument"
   );
   
   assert.throws(function() {
       PortfolioAnalytics.conditionalDrawdown([-100], 1);
     },
-    new Error ("input must be a positive number"),
+    new Error ("input must be an array of positive numbers"),
     "Negative numeric array input argument"
   );
   

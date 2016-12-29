@@ -45,8 +45,8 @@ PortfolioAnalytics = (function(self) {
   */
   function maxDrawdown(iEquityCurve) {
     // Input checks
-    self.assertArray_(iEquityCurve);
-    
+    self.assertPositiveArray_(iEquityCurve);
+
     // Compute the maximum drawdown and its associated duration
     var maxDd_ = maxDrawdown_(iEquityCurve, 0, iEquityCurve.length-1);
     
@@ -100,10 +100,7 @@ PortfolioAnalytics = (function(self) {
     // Internal function => no specific checks on the input arguments
     
     // Loop over all the values to compute the maximum drawdown
-    for (var i=iIdxStart; i<iIdxEnd+1; ++i) {
-      // Check that the equity curve value is a positive number, as this could not be done before
-      self.assertPositiveNumber_(iEquityCurve[i]);
-      
+    for (var i=iIdxStart; i<iIdxEnd+1; ++i) {     
       if (iEquityCurve[i] > highWaterMark) {
         highWaterMark = iEquityCurve[i];
         idxHighWaterMark = i;
@@ -144,16 +141,13 @@ PortfolioAnalytics = (function(self) {
     var highWaterMark = -Infinity;
     
     // Input checks
-    self.assertArray_(iEquityCurve);
+    self.assertPositiveArray_(iEquityCurve);
     
     // Other initialisations
     var ddVector = new Array(iEquityCurve.length);
     
     // Loop over all the values to compute the drawdown vector
     for (var i=0; i<iEquityCurve.length; ++i) {
-      // Check that the equity curve value is a positive number, as this could not be done before
-      self.assertPositiveNumber_(iEquityCurve[i]);
-      
       if (iEquityCurve[i] > highWaterMark) {
         highWaterMark = iEquityCurve[i];
       }
@@ -197,7 +191,7 @@ PortfolioAnalytics = (function(self) {
   */
   function topDrawdowns(iEquityCurve, iNbTopDrawdowns) {
     // Input checks
-    self.assertArray_(iEquityCurve);
+    self.assertPositiveArray_(iEquityCurve);
     self.assertPositiveInteger_(iNbTopDrawdowns);
     
 	// If no drawdowns are required, returns
@@ -304,9 +298,8 @@ PortfolioAnalytics = (function(self) {
   * // ~0.289
   */
   function ulcerIndex(iEquityCurve) {
-    // Input checks
-    self.assertArray_(iEquityCurve);
-    
+    // No need for input checks, as done in function below
+
     // Compute the drawdown function
     var ddFunc = drawdownFunction(iEquityCurve);
     
@@ -341,8 +334,7 @@ PortfolioAnalytics = (function(self) {
   * // ~0.167
   */
   function painIndex(iEquityCurve) {
-    // Input checks
-    self.assertArray_(iEquityCurve);
+    // No need for input checks, as done in function below
     
     // Compute the drawdown function
     var ddFunc = drawdownFunction(iEquityCurve);
@@ -376,7 +368,10 @@ PortfolioAnalytics = (function(self) {
   */
   function conditionalDrawdown(iEquityCurve, iAlpha) {
     // Input checks
-    self.assertArray_(iEquityCurve);
+    // No need to check for array positivity, as done in function below
+	if (iAlpha === undefined) {
+	  iAlpha = -1;
+	}
     self.assertBoundedNumber_(iAlpha, 0, 1);
    
     // Compute the drawdown function and
@@ -415,7 +410,7 @@ PortfolioAnalytics = (function(self) {
       // Compute and return the average value of the integral above
 	var cdd = (cdd1 + cdd2) / (1 - iAlpha);
     return cdd;
-}
+  }
 
   
 /* Start Not to be used as is in Google Sheets */
@@ -437,10 +432,13 @@ var PortfolioAnalytics = PortfolioAnalytics || {};
 PortfolioAnalytics = (function(self) {
   /* Start Wrapper public methods */
   self.assertArray_ = function(iX) { return assertArray_(iX); }
+  self.assertPositiveArray_ = function(iX) { return assertPositiveArray_(iX); }
   self.assertNumber_ = function(iX) { return assertNumber_(iX); }
   self.assertPositiveNumber_ = function(iX) { return assertPositiveNumber_(iX); }
   self.assertBoundedNumber_ = function(iX, iLowerBound, iUpperBound) { return assertBoundedNumber_(iX, iLowerBound, iUpperBound); } 
-  self.assertPositiveInteger_ = function(iX) { return assertPositiveInteger_(iX); } 
+  self.assertPositiveInteger_ = function(iX) { return assertPositiveInteger_(iX); }
+  self.assertString_ = function(iX) { return assertString_(iX); }
+  self.assertStringEnumeration_ = function(iX, iAllowedValues) { return assertStringEnumeration_(iX, iAllowedValues); }
   /* End Wrapper public methods */
   
 /* End Not to be used as is in Google Sheets */  
@@ -466,7 +464,52 @@ PortfolioAnalytics = (function(self) {
 		throw new Error("input must be an array");
 	  }
 	}
+
+
+	/**
+	* @function assertPositiveArray_
+	*
+	* @description Throws an error if the input parameter is not an array of positive numbers 
+	* (or a typed array).
+	* 
+	* @param {Array.<Object>} iX input parameter.
+	*
+	* @example
+	* assertPositiveArray_([]); 
+	* //
+	*
+	* @example
+	* assertPositiveArray_(1); 
+	* // Error("input must be an array of positive numbers")
+	*
+    * assertPositiveArray_([-1]); 
+	* // Error("input must be an array of positive numbers")
+	*/
+	function assertPositiveArray_(iX) {
+	  // A positive array is an array...
+	  try {
+		assertArray_(iX);
+	  }
+	  catch (e) {
+		throw new Error("input must be an array of positive numbers");
+	  }
+
+     // ... non empty...
+	 if (iX.length == 0) {
+	   throw new Error("input must be an array of positive numbers");
+	 }
 	 
+     // ... and made of positive numbers
+     for (var i=0; i<iX.length; ++i) {
+  	   try {
+         self.assertPositiveNumber_(iX[i]);
+	   }
+       catch (e) {
+         throw new Error("input must be an array of positive numbers");
+        }
+	  }
+	}
+
 
 	/**
 	* @function assertNumber_
@@ -494,8 +537,8 @@ PortfolioAnalytics = (function(self) {
 		throw new Error("input must be a number");
 	  }
 	}
-	
-	
+
+
 	 /**
 	* @function assertPositiveNumber_
 	*
@@ -601,6 +644,185 @@ PortfolioAnalytics = (function(self) {
 		throw new Error("input must be a positive integer");
 	  }
 	}
+
+
+	/**
+	* @function assertString_
+	*
+	* @description Throws an error if the input parameter is not a string.
+	* 
+	* @param {string} iX input parameter.
+	*
+	* @example
+	* assertString_(1); 
+	* // Error("input must be a string")
+	*
+	* @example
+	* assertEnumeration_("test"); 
+	*/
+	function assertString_(iX) {
+	  if (!(typeof iX === 'string' || iX instanceof String)) {
+		throw new Error("input must be a string");
+	  }
+	}
+
+	
+	/**
+	* @function assertStringEnumeration_
+	*
+	* @description Throws an error if the input parameter is not a string belonging to a set of string values.
+	* 
+	* @param {string} iX input parameter.
+	* @param {Array.<string>} iAllowedValues array listing the allowed values for the input parameter.
+	*
+	* @example
+	* assertStringEnumeration_(1, ["test", "test2"]); 
+	* // Error("input must be a string equals to any of test,test2")
+	*
+	* @example
+	* assertStringEnumeration_("test", ["test", "test2"]); 
+	*/
+	function assertStringEnumeration_(iX, iAllowedValues) {
+	  // Allowed values must be an array...
+	  try {
+        assertArray_(iAllowedValues);
+	  }
+	  catch (e) {
+		throw new Error("input must be an array of strings");
+	  }
+	    
+	  // ... of strings
+	  for (var i=0; i<iAllowedValues.length; ++i) {
+	    try {
+		  assertString_(iAllowedValues[i]);
+	    }
+	    catch (e) {
+		  throw new Error("input must be an array of strings");
+        }
+	  }
+	  
+	  // A string enumeration is a string...
+	  try {
+		assertString_(iX);
+	  }
+	  catch (e) {
+		throw new Error("input must be a string equals to any of " + iAllowedValues.toString());
+	  }
+
+	  // ... with predefinite values
+	  if (iAllowedValues.indexOf(iX) == -1) {
+		throw new Error("input must be a string equals to any of " + iAllowedValues.toString());
+	  }
+	}
+
+
+/* Start Not to be used as is in Google Sheets */
+   
+   return self;
+  
+})(PortfolioAnalytics || {});
+
+/* End Not to be used as is in Google Sheets */
+;/**
+ * @file Functions related to returns computation.
+ * @author Roman Rubsamen <roman.rubsamen@gmail.com>
+ */
+
+/* Start Not to be used as is in Google Sheets */
+ 
+var PortfolioAnalytics = PortfolioAnalytics || {};
+
+PortfolioAnalytics = (function(self) {
+  /* Start Wrapper public methods */
+  self.ror = function(iEquityCurve) { return ror(iEquityCurve); }
+  self.cagr = function(iEquityCurve, iPeriodicity) { return cagr(iEquityCurve, iPeriodicity); }
+  /* End Wrapper public methods */
+
+  
+/* End Not to be used as is in Google Sheets */  
+  
+  /**
+  * @function ror
+  *
+  * @description Compute the rate of return associated to a portfolio equity curve (i.e. the single period return).
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Rate_of_return">https://en.wikipedia.org/wiki/Rate_of_return</a>
+  * 
+  * @param {Array.<number>} iEquityCurve the portfolio equity curve.
+  * @return {number} the cumulative return.
+  *
+  * @example
+  * ror([1, 2, 1]); 
+  * // 0.0, i.e. 0% return
+  *
+  * @example
+  * ror([1, 2, 2]);
+  * // 1, i.e. 100% return
+  */
+  function ror(iEquityCurve) {
+    // Input checks
+    self.assertPositiveArray_(iEquityCurve);
+	
+    // Compute the single period return
+	var periodReturn = NaN;
+	if (iEquityCurve.length >= 2) { // In order to compute a proper RoR, at least 2 periods are required
+	  periodReturn = (iEquityCurve[iEquityCurve.length-1]-iEquityCurve[0])/iEquityCurve[0];
+	}
+    
+    // Return it
+    return periodReturn;
+  }
+
+  
+  /**
+  * @function cagr
+  *
+  * @description Compute the compound annual growth rate associated to a portfolio equity curve.
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Compound_annual_growth_rate">https://en.wikipedia.org/wiki/Compound_annual_growth_rate</a>
+  * 
+  * @param {Array.<number>} iEquityCurve the portfolio equity curve.
+  * @param {} iPeriodicity the periodicity associated with the portfolio equity curve: 'daily', 'weekly', 'monthly', 'quarterly', 'yearly'.
+  * @return {number} the annualized return.
+  *
+  * @example
+  * cagr([1, 1.1, 1.2], 'yearly');
+  * // 0.095, i.e. ~9.5% annualized return
+  */
+  function cagr(iEquityCurve, iPeriodicity) {
+    // Input checks
+    self.assertPositiveArray_(iEquityCurve);
+    self.assertStringEnumeration_(iPeriodicity, ["daily", "weekly", "monthly", "quarterly", "yearly"]);
+
+    // Extract the initial and the final equity curve values
+    var aInitialValue = iEquityCurve[0];
+    var aFinalValue = iEquityCurve[iEquityCurve.length-1];
+  
+    // Compute the number of invested years based on the equity curve length and periodicity
+    var nbInvestedYears = iEquityCurve.length-1;
+	if (iPeriodicity == "yearly") {
+      nbInvestedYears = nbInvestedYears / 1.0;
+    }
+	else if (iPeriodicity == "quarterly") {
+     nbInvestedYears = nbInvestedYears / 4.0;
+    } 
+	else if (iPeriodicity == "monthly") {
+      nbInvestedYears = nbInvestedYears / 12.0;
+    }
+    else if (iPeriodicity == "weekly") {
+      nbInvestedYears = nbInvestedYears / 52.0;
+    }
+    else if (iPeriodicity == "daily") {
+      nbInvestedYears = nbInvestedYears / 252.0;
+    }
+  
+    // Compute the CAGR
+    var valCagr = Math.pow(aFinalValue/aInitialValue, 1/nbInvestedYears) - 1;
+
+    // Return the computed value
+    return valCagr;
+  }
+
 
 /* Start Not to be used as is in Google Sheets */
    

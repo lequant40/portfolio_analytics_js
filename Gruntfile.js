@@ -23,6 +23,7 @@ module.exports = function(grunt) {
         files: [
 		  {src: 'lib/drawdowns.js', dest: 'dist/gs/drawdowns.js'},
 		  {src: 'lib/types.js', dest: 'dist/gs/types.js'},
+		  {src: 'lib/returns.js', dest: 'dist/gs/returns.js'},
 		]
       },
       portfolio_analytics_dist: {
@@ -35,6 +36,7 @@ module.exports = function(grunt) {
 		},
         files: [
 		  {src: 'lib/drawdowns.js', dest: 'lib/drawdowns_dist.js'},
+		  {src: 'lib/returns.js', dest: 'lib/returns_dist.js'},
 		  {src: 'lib/types.js', dest: 'lib/types_dist.js'},
 		]
       },
@@ -45,11 +47,11 @@ module.exports = function(grunt) {
 	    separator: ';',
     	},
 	  portfolio_analytics_dev: {
-	    src: ['lib/drawdowns.js', 'lib/types.js'],
+	    src: ['lib/drawdowns.js', 'lib/types.js', 'lib/returns.js'],
 	    dest: 'dist/portfolio_analytics.dev.js',
 	  },
 	  portfolio_analytics_dist: {
-	    src: ['lib/drawdowns_dist.js', 'lib/types_dist.js'],
+	    src: ['lib/drawdowns_dist.js', 'lib/types_dist.js', 'lib/returns_dist.js'],
 	    dest: 'dist/portfolio_analytics.dist.js',
 	  },
 	},

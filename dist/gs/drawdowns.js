@@ -28,8 +28,8 @@
   */
   function maxDrawdown(iEquityCurve) {
     // Input checks
-    assertArray_(iEquityCurve);
-    
+    assertPositiveArray_(iEquityCurve);
+
     // Compute the maximum drawdown and its associated duration
     var maxDd_ = maxDrawdown_(iEquityCurve, 0, iEquityCurve.length-1);
     
@@ -83,10 +83,7 @@
     // Internal function => no specific checks on the input arguments
     
     // Loop over all the values to compute the maximum drawdown
-    for (var i=iIdxStart; i<iIdxEnd+1; ++i) {
-      // Check that the equity curve value is a positive number, as this could not be done before
-      assertPositiveNumber_(iEquityCurve[i]);
-      
+    for (var i=iIdxStart; i<iIdxEnd+1; ++i) {     
       if (iEquityCurve[i] > highWaterMark) {
         highWaterMark = iEquityCurve[i];
         idxHighWaterMark = i;
@@ -127,16 +124,13 @@
     var highWaterMark = -Infinity;
     
     // Input checks
-    assertArray_(iEquityCurve);
+    assertPositiveArray_(iEquityCurve);
     
     // Other initialisations
     var ddVector = new Array(iEquityCurve.length);
     
     // Loop over all the values to compute the drawdown vector
     for (var i=0; i<iEquityCurve.length; ++i) {
-      // Check that the equity curve value is a positive number, as this could not be done before
-      assertPositiveNumber_(iEquityCurve[i]);
-      
       if (iEquityCurve[i] > highWaterMark) {
         highWaterMark = iEquityCurve[i];
       }
@@ -180,7 +174,7 @@
   */
   function topDrawdowns(iEquityCurve, iNbTopDrawdowns) {
     // Input checks
-    assertArray_(iEquityCurve);
+    assertPositiveArray_(iEquityCurve);
     assertPositiveInteger_(iNbTopDrawdowns);
     
 	// If no drawdowns are required, returns
@@ -287,9 +281,8 @@
   * // ~0.289
   */
   function ulcerIndex(iEquityCurve) {
-    // Input checks
-    assertArray_(iEquityCurve);
-    
+    // No need for input checks, as done in function below
+
     // Compute the drawdown function
     var ddFunc = drawdownFunction(iEquityCurve);
     
@@ -324,8 +317,7 @@
   * // ~0.167
   */
   function painIndex(iEquityCurve) {
-    // Input checks
-    assertArray_(iEquityCurve);
+    // No need for input checks, as done in function below
     
     // Compute the drawdown function
     var ddFunc = drawdownFunction(iEquityCurve);
@@ -359,7 +351,10 @@
   */
   function conditionalDrawdown(iEquityCurve, iAlpha) {
     // Input checks
-    assertArray_(iEquityCurve);
+    // No need to check for array positivity, as done in function below
+	if (iAlpha === undefined) {
+	  iAlpha = -1;
+	}
     assertBoundedNumber_(iAlpha, 0, 1);
    
     // Compute the drawdown function and
@@ -398,6 +393,6 @@
       // Compute and return the average value of the integral above
 	var cdd = (cdd1 + cdd2) / (1 - iAlpha);
     return cdd;
-}
+  }
 
   

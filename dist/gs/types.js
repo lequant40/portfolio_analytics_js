@@ -25,7 +25,52 @@
 		throw new Error("input must be an array");
 	  }
 	}
+
+
+	/**
+	* @function assertPositiveArray_
+	*
+	* @description Throws an error if the input parameter is not an array of positive numbers 
+	* (or a typed array).
+	* 
+	* @param {Array.<Object>} iX input parameter.
+	*
+	* @example
+	* assertPositiveArray_([]); 
+	* //
+	*
+	* @example
+	* assertPositiveArray_(1); 
+	* // Error("input must be an array of positive numbers")
+	*
+    * assertPositiveArray_([-1]); 
+	* // Error("input must be an array of positive numbers")
+	*/
+	function assertPositiveArray_(iX) {
+	  // A positive array is an array...
+	  try {
+		assertArray_(iX);
+	  }
+	  catch (e) {
+		throw new Error("input must be an array of positive numbers");
+	  }
+
+     // ... non empty...
+	 if (iX.length == 0) {
+	   throw new Error("input must be an array of positive numbers");
+	 }
 	 
+     // ... and made of positive numbers
+     for (var i=0; i<iX.length; ++i) {
+  	   try {
+         assertPositiveNumber_(iX[i]);
+	   }
+       catch (e) {
+         throw new Error("input must be an array of positive numbers");
+        }
+	  }
+	}
+
 
 	/**
 	* @function assertNumber_
@@ -53,8 +98,8 @@
 		throw new Error("input must be a number");
 	  }
 	}
-	
-	
+
+
 	 /**
 	* @function assertPositiveNumber_
 	*
@@ -160,4 +205,75 @@
 		throw new Error("input must be a positive integer");
 	  }
 	}
+
+
+	/**
+	* @function assertString_
+	*
+	* @description Throws an error if the input parameter is not a string.
+	* 
+	* @param {string} iX input parameter.
+	*
+	* @example
+	* assertString_(1); 
+	* // Error("input must be a string")
+	*
+	* @example
+	* assertEnumeration_("test"); 
+	*/
+	function assertString_(iX) {
+	  if (!(typeof iX === 'string' || iX instanceof String)) {
+		throw new Error("input must be a string");
+	  }
+	}
+
+	
+	/**
+	* @function assertStringEnumeration_
+	*
+	* @description Throws an error if the input parameter is not a string belonging to a set of string values.
+	* 
+	* @param {string} iX input parameter.
+	* @param {Array.<string>} iAllowedValues array listing the allowed values for the input parameter.
+	*
+	* @example
+	* assertStringEnumeration_(1, ["test", "test2"]); 
+	* // Error("input must be a string equals to any of test,test2")
+	*
+	* @example
+	* assertStringEnumeration_("test", ["test", "test2"]); 
+	*/
+	function assertStringEnumeration_(iX, iAllowedValues) {
+	  // Allowed values must be an array...
+	  try {
+        assertArray_(iAllowedValues);
+	  }
+	  catch (e) {
+		throw new Error("input must be an array of strings");
+	  }
+	    
+	  // ... of strings
+	  for (var i=0; i<iAllowedValues.length; ++i) {
+	    try {
+		  assertString_(iAllowedValues[i]);
+	    }
+	    catch (e) {
+		  throw new Error("input must be an array of strings");
+        }
+	  }
+	  
+	  // A string enumeration is a string...
+	  try {
+		assertString_(iX);
+	  }
+	  catch (e) {
+		throw new Error("input must be a string equals to any of " + iAllowedValues.toString());
+	  }
+
+	  // ... with predefinite values
+	  if (iAllowedValues.indexOf(iX) == -1) {
+		throw new Error("input must be a string equals to any of " + iAllowedValues.toString());
+	  }
+	}
+
 

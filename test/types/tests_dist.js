@@ -27,6 +27,41 @@ QUnit.test('Array', function(assert) {
 });
 
 
+QUnit.test('Positive Array', function(assert) {    
+  assert.throws(function() {
+      PortfolioAnalytics.assertPositiveArray_(1);
+    },
+    new Error("input must be an array of positive numbers"),
+    "No array input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertPositiveArray_();
+    },
+    new Error("input must be an array of positive numbers"),
+    "Empty array input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertPositiveArray_(['a']);
+    },
+    new Error("input must be an array of positive numbers"),
+    "String array input argument"
+  );
+   
+  assert.throws(function() {
+      PortfolioAnalytics.assertPositiveArray_([-100]);
+    },
+    new Error("input must be an array of positive numbers"),
+    "Negative input argument"
+  );
+  
+  
+  PortfolioAnalytics.assertPositiveArray_([100, 110]);
+  assert.ok(true, "Positive array input argument");
+});
+
+
 QUnit.test('Number', function(assert) {    
   assert.throws(function() {
       PortfolioAnalytics.assertNumber_();
@@ -261,3 +296,55 @@ QUnit.test('Positive integer', function(assert) {
 });
 
 
+QUnit.test('String', function(assert) {    
+  assert.throws(function() {
+      PortfolioAnalytics.assertString_();
+    },
+    new Error("input must be a string"),
+    "No input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertString_(1.1);
+    },
+    new Error("input must be a string"),
+    "Non string input argument"
+  );
+  
+  PortfolioAnalytics.assertString_("1");
+  assert.ok(true, "String input argument");
+});
+
+
+QUnit.test('String Enumeration', function(assert) {    
+  assert.throws(function() {
+      PortfolioAnalytics.assertStringEnumeration_();
+    },
+    new Error("input must be an array of strings"),
+    "No input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertStringEnumeration_("test", ["test", 1]);
+    },
+    new Error("input must be an array of strings"),
+    "No string array input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertStringEnumeration_(1, ["test"]);
+    },
+    new Error("input must be a string equals to any of test"),
+    "No string input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertStringEnumeration_("test", ["tes"]);
+    },
+    new Error("input must be a string equals to any of tes"),
+    "Not allowed string input argument"
+  );
+
+  PortfolioAnalytics.assertStringEnumeration_("test", ["tes", "test"]);
+  assert.ok(true, "String Enumeration input argument");
+});
