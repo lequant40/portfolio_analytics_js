@@ -28,7 +28,7 @@
 
 
 	/**
-	* @function assertPositiveArray_
+	* @function assertPositiveNumberArray_
 	*
 	* @description Throws an error if the input parameter is not an array of positive numbers 
 	* (or a typed array).
@@ -36,17 +36,17 @@
 	* @param {Array.<Object>} iX input parameter.
 	*
 	* @example
-	* assertPositiveArray_([]); 
+	* assertPositiveNumberArray_([]); 
 	* //
 	*
 	* @example
-	* assertPositiveArray_(1); 
+	* assertPositiveNumberArray_(1); 
 	* // Error("input must be an array of positive numbers")
 	*
-    * assertPositiveArray_([-1]); 
+    * assertPositiveNumberArray_([-1]); 
 	* // Error("input must be an array of positive numbers")
 	*/
-	function assertPositiveArray_(iX) {
+	function assertPositiveNumberArray_(iX) {
 	  // A positive array is an array...
 	  try {
 		assertArray_(iX);

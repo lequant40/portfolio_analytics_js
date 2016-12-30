@@ -27,37 +27,37 @@ QUnit.test('Array', function(assert) {
 });
 
 
-QUnit.test('Positive Array', function(assert) {    
+QUnit.test('Positive Number Array', function(assert) {    
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveArray_(1);
+      PortfolioAnalytics.assertPositiveNumberArray_(1);
     },
     new Error("input must be an array of positive numbers"),
     "No array input argument"
   );
   
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveArray_();
+      PortfolioAnalytics.assertPositiveNumberArray_();
     },
     new Error("input must be an array of positive numbers"),
     "Empty array input argument"
   );
 
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveArray_(['a']);
+      PortfolioAnalytics.assertPositiveNumberArray_(['a']);
     },
     new Error("input must be an array of positive numbers"),
     "String array input argument"
   );
    
   assert.throws(function() {
-      PortfolioAnalytics.assertPositiveArray_([-100]);
+      PortfolioAnalytics.assertPositiveNumberArray_([-100]);
     },
     new Error("input must be an array of positive numbers"),
     "Negative input argument"
   );
   
   
-  PortfolioAnalytics.assertPositiveArray_([100, 110]);
+  PortfolioAnalytics.assertPositiveNumberArray_([100, 110]);
   assert.ok(true, "Positive array input argument");
 });
 

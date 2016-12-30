@@ -45,7 +45,7 @@ PortfolioAnalytics = (function(self) {
   */
   function maxDrawdown(iEquityCurve) {
     // Input checks
-    self.assertPositiveArray_(iEquityCurve);
+    self.assertPositiveNumberArray_(iEquityCurve);
 
     // Compute the maximum drawdown and its associated duration
     var maxDd_ = maxDrawdown_(iEquityCurve, 0, iEquityCurve.length-1);
@@ -141,7 +141,7 @@ PortfolioAnalytics = (function(self) {
     var highWaterMark = -Infinity;
     
     // Input checks
-    self.assertPositiveArray_(iEquityCurve);
+    self.assertPositiveNumberArray_(iEquityCurve);
     
     // Other initialisations
     var ddVector = new Array(iEquityCurve.length);
@@ -191,7 +191,7 @@ PortfolioAnalytics = (function(self) {
   */
   function topDrawdowns(iEquityCurve, iNbTopDrawdowns) {
     // Input checks
-    self.assertPositiveArray_(iEquityCurve);
+    self.assertPositiveNumberArray_(iEquityCurve);
     self.assertPositiveInteger_(iNbTopDrawdowns);
     
 	// If no drawdowns are required, returns
@@ -432,7 +432,7 @@ var PortfolioAnalytics = PortfolioAnalytics || {};
 PortfolioAnalytics = (function(self) {
   /* Start Wrapper public methods */
   self.assertArray_ = function(iX) { return assertArray_(iX); }
-  self.assertPositiveArray_ = function(iX) { return assertPositiveArray_(iX); }
+  self.assertPositiveNumberArray_ = function(iX) { return assertPositiveNumberArray_(iX); }
   self.assertNumber_ = function(iX) { return assertNumber_(iX); }
   self.assertPositiveNumber_ = function(iX) { return assertPositiveNumber_(iX); }
   self.assertBoundedNumber_ = function(iX, iLowerBound, iUpperBound) { return assertBoundedNumber_(iX, iLowerBound, iUpperBound); } 
@@ -467,7 +467,7 @@ PortfolioAnalytics = (function(self) {
 
 
 	/**
-	* @function assertPositiveArray_
+	* @function assertPositiveNumberArray_
 	*
 	* @description Throws an error if the input parameter is not an array of positive numbers 
 	* (or a typed array).
@@ -475,17 +475,17 @@ PortfolioAnalytics = (function(self) {
 	* @param {Array.<Object>} iX input parameter.
 	*
 	* @example
-	* assertPositiveArray_([]); 
+	* assertPositiveNumberArray_([]); 
 	* //
 	*
 	* @example
-	* assertPositiveArray_(1); 
+	* assertPositiveNumberArray_(1); 
 	* // Error("input must be an array of positive numbers")
 	*
-    * assertPositiveArray_([-1]); 
+    * assertPositiveNumberArray_([-1]); 
 	* // Error("input must be an array of positive numbers")
 	*/
-	function assertPositiveArray_(iX) {
+	function assertPositiveNumberArray_(iX) {
 	  // A positive array is an array...
 	  try {
 		assertArray_(iX);
@@ -734,17 +734,19 @@ var PortfolioAnalytics = PortfolioAnalytics || {};
 
 PortfolioAnalytics = (function(self) {
   /* Start Wrapper public methods */
-  self.ror = function(iEquityCurve) { return ror(iEquityCurve); }
+  self.cumulativeReturn = function(iEquityCurve) { return cumulativeReturn(iEquityCurve); }
   self.cagr = function(iEquityCurve, iPeriodicity) { return cagr(iEquityCurve, iPeriodicity); }
+  self.arithmeticReturns = function(iEquityCurve) { return arithmeticReturns(iEquityCurve); }
+  self.gainToPainRatio = function(iEquityCurve) { return gainToPainRatio(iEquityCurve); }
   /* End Wrapper public methods */
 
   
 /* End Not to be used as is in Google Sheets */  
   
   /**
-  * @function ror
+  * @function cumulativeReturn
   *
-  * @description Compute the rate of return associated to a portfolio equity curve (i.e. the single period return).
+  * @description Compute the cumulative return associated to a portfolio equity curve.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Rate_of_return">https://en.wikipedia.org/wiki/Rate_of_return</a>
   * 
@@ -752,25 +754,25 @@ PortfolioAnalytics = (function(self) {
   * @return {number} the cumulative return.
   *
   * @example
-  * ror([1, 2, 1]); 
+  * cumulativeReturn([1, 2, 1]); 
   * // 0.0, i.e. 0% return
   *
   * @example
-  * ror([1, 2, 2]);
+  * cumulativeReturn([1, 2, 2]);
   * // 1, i.e. 100% return
   */
-  function ror(iEquityCurve) {
+  function cumulativeReturn(iEquityCurve) {
     // Input checks
-    self.assertPositiveArray_(iEquityCurve);
+    self.assertPositiveNumberArray_(iEquityCurve);
 	
-    // Compute the single period return
-	var periodReturn = NaN;
-	if (iEquityCurve.length >= 2) { // In order to compute a proper RoR, at least 2 periods are required
-	  periodReturn = (iEquityCurve[iEquityCurve.length-1]-iEquityCurve[0])/iEquityCurve[0];
+    // Compute the cumulative return
+	var cumRet = NaN;
+	if (iEquityCurve.length >= 2) { // In order to compute a proper cumulative return, at least 2 periods are required
+	  cumRet = (iEquityCurve[iEquityCurve.length-1]-iEquityCurve[0])/iEquityCurve[0];
 	}
     
     // Return it
-    return periodReturn;
+    return cumRet;
   }
 
   
@@ -791,7 +793,7 @@ PortfolioAnalytics = (function(self) {
   */
   function cagr(iEquityCurve, iPeriodicity) {
     // Input checks
-    self.assertPositiveArray_(iEquityCurve);
+    self.assertPositiveNumberArray_(iEquityCurve);
     self.assertStringEnumeration_(iPeriodicity, ["daily", "weekly", "monthly", "quarterly", "yearly"]);
 
     // Extract the initial and the final equity curve values
@@ -821,6 +823,87 @@ PortfolioAnalytics = (function(self) {
 
     // Return the computed value
     return valCagr;
+  }
+
+
+  /**
+  * @function arithmeticReturns
+  *
+  * @description Compute the arithmetic returns associated to a portfolio equity curve.
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Rate_of_return">https://en.wikipedia.org/wiki/Rate_of_return</a>
+  * 
+  * @param {Array.<number>} iEquityCurve the portfolio equity curve.
+  * @return {Array.<number>} the arithmetic returns corresponding to the values of the portfolio equity curve,
+  * with the convention that the first return is NaN.
+  *
+  * @example
+  * arithmeticReturns([1, 2, 1]); 
+  * // [NaN, 1.0, -0.5], i.e. 100% return and then -50% return
+  */
+  function arithmeticReturns(iEquityCurve) {
+    // Input checks
+    self.assertPositiveNumberArray_(iEquityCurve);
+	
+    // Compute the different arithmetic returns
+	var returns = new Array(iEquityCurve.length);
+	returns[0] = NaN;
+	for (var i=1; i<iEquityCurve.length; ++i) {
+	  returns[i] = (iEquityCurve[i]-iEquityCurve[i-1])/iEquityCurve[i-1];
+	}
+    
+    // Return them
+    return returns;
+  }
+
+
+  /**
+  * @function gainToPainRatio
+  *
+  * @description Compute the gain to pain ratio associated to a portfolio equity curve.
+  *
+  * @see <a href="http://onlinelibrary.wiley.com/doi/10.1002/9781119203469.app1/summary">Hedge Fund Market Wizards: How Winning Traders Win, Jack D. Schwager, Wiley, 2012</a>
+  * 
+  * @param {Array.<number>} iEquityCurve the portfolio equity curve.
+  * @return {number} the gain to pain ratio.
+  *
+  * @example
+  * gainToPainRatio([1, 2, 1]); 
+  * // 1.0 
+  *
+  * @example
+  * gainToPainRatio([1, 1.1, 1.4]); 
+  * // NaN
+  */
+  function gainToPainRatio(iEquityCurve) {
+    // No need for input checks, as done in function below
+	
+	// Compute the arithmetic returns of the portfolio
+	var returns = arithmeticReturns(iEquityCurve);
+	
+    // Loop over all the returns to compute their sum and
+	// the sum of the asolute values of the negative returns
+	var numerator = 0.0;
+	var denominator = 0.0;
+    
+    // Loop over all the values to compute the drawdown vector
+    for (var i=1; i<returns.length; ++i) {
+      numerator += returns[i];
+	  if (returns[i] < 0.0) {
+	    denominator += -returns[i];
+	  }
+    }
+    
+    // Compute and return the gain to pain ratio
+    var ratio = numerator;
+	if (denominator != 0.0) {
+	  ratio /= denominator;
+	}
+	else {
+	  ratio = NaN; // The gain to pain ratio is undefined in case there is no negative returns
+	}
+
+	return ratio;
   }
 
 

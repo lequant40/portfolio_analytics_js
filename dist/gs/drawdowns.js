@@ -28,7 +28,7 @@
   */
   function maxDrawdown(iEquityCurve) {
     // Input checks
-    assertPositiveArray_(iEquityCurve);
+    assertPositiveNumberArray_(iEquityCurve);
 
     // Compute the maximum drawdown and its associated duration
     var maxDd_ = maxDrawdown_(iEquityCurve, 0, iEquityCurve.length-1);
@@ -124,7 +124,7 @@
     var highWaterMark = -Infinity;
     
     // Input checks
-    assertPositiveArray_(iEquityCurve);
+    assertPositiveNumberArray_(iEquityCurve);
     
     // Other initialisations
     var ddVector = new Array(iEquityCurve.length);
@@ -174,7 +174,7 @@
   */
   function topDrawdowns(iEquityCurve, iNbTopDrawdowns) {
     // Input checks
-    assertPositiveArray_(iEquityCurve);
+    assertPositiveNumberArray_(iEquityCurve);
     assertPositiveInteger_(iNbTopDrawdowns);
     
 	// If no drawdowns are required, returns
@@ -305,7 +305,7 @@
   *
   * @see <a href="http://www.styleadvisor.com/content/pain-index">Pain Index and Pain Ratio, White Paper, Zephyr Associates</a>
   *
-  * The pain index also corresponds to the average of the values of the drawdown function minus the first one.
+  * The pain index also corresponds to the average of the values of the drawdown function.
   *
   * @see <a href="http://papers.ssrn.com/sol3/papers.cfm?abstract_id=223323">Portfolio Optimization with Drawdown Constraints, Chekhlov et al., 2000</a>
   *
