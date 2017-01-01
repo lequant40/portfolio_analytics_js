@@ -14,6 +14,7 @@ Après avoir cherché en vain mon bonheur sur Internet (codes incomplets, ou ave
 - Compatible avec les navigateurs supportant le ECMAScript 5 (i.e., développement front-end)
 - Compatible avec [Node.js](https://nodejs.org/) (i.e., développement back-end)
 - (Performances) Utilisation automatique des tableaux typés JavaScript
+- (Performances et précision) Utilisation interne de méthodes d'algèbre linéaire similaires à celles de LAPACK (somme, produit scalaire...)
 - Code testé et intégré de manière continue avec [Travis CI](https://travis-ci.org/)
 - Code documenté avec [JSDoc](http://usejsdoc.org/)
 

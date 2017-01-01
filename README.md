@@ -17,6 +17,7 @@ After several fruitless hours of Googling (incomplete codes, incorrect codes, un
 - Compatible with any browser supporting ECMAScript 5 (i.e., front-end development)
 - Compatible with [Node.js](https://nodejs.org/) (i.e., back-end development)
 - (Performances) Automatically uses JavaScript Typed Arrays
+- (Performances and accuracy) Internally uses LAPACK-inspired linear algebra methods (sum, dot product...)
 - Code continuously tested and integrated by [Travis CI](https://travis-ci.org/)
 - Code documented using [JSDoc](http://usejsdoc.org/)
 

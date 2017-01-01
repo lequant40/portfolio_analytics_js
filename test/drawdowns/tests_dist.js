@@ -291,14 +291,14 @@ QUnit.test('Conditional drawdown incorrect input arguments', function(assert) {
   assert.throws(function() {
       PortfolioAnalytics.conditionalDrawdown();
     },
-    new Error("input must be bounded between 0 and 1"),
+    new Error("input(s) must be a number"),
     "No input arguments"
   );
    
   assert.throws(function() {
       PortfolioAnalytics.conditionalDrawdown([-100]);
     },
-    new Error ("input must be bounded between 0 and 1"),
+    new Error ("input(s) must be a number"),
     "Negative numeric array input argument"
   );
   

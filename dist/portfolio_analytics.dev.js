@@ -307,14 +307,10 @@ PortfolioAnalytics = (function(self) {
     var ddFunc = drawdownFunction(equityCurve);
     
     // Compute the sum of squares of this function
-    var sumSquares = 0.0;
-    for (var i=0; i<ddFunc.length; ++i) {
-      sumSquares += ddFunc[i] * ddFunc[i];
-    }
+	var sumSquares = self.dot_(ddFunc, ddFunc);
     
     // Compute and return the ulcer index
-    var uI = Math.sqrt(sumSquares/ddFunc.length);
-    return uI;
+    return Math.sqrt(sumSquares/ddFunc.length);
   }
 
 
@@ -342,15 +338,8 @@ PortfolioAnalytics = (function(self) {
     // Compute the drawdown function
     var ddFunc = drawdownFunction(equityCurve);
     
-    // Compute the sum of this function
-    var sum = 0.0;
-    for (var i=0; i<ddFunc.length; ++i) {
-      sum += ddFunc[i];
-    }
-    
-    // Compute and return the pain index
-    var pI = sum/ddFunc.length;
-    return pI;
+    // Compute and return the mean of this function, which corresponds to the pain index
+	return self.mean_(ddFunc);
   }
   
   
@@ -372,9 +361,6 @@ PortfolioAnalytics = (function(self) {
   function conditionalDrawdown(equityCurve, alpha) {
     // Input checks
     // No need to check for array positivity, as done in function below
-	if (alpha === undefined) {
-	  alpha = -1;
-	}
     self.assertBoundedNumber_(alpha, 0, 1);
    
     // Compute the drawdown function and
@@ -403,12 +389,14 @@ PortfolioAnalytics = (function(self) {
 	  // Compute the integral between alpha and the alpha percentile
     var cdd1 = (pctileAlphaDd - alpha) * alphaDd;
   
-      // Compute the remaining part of the integral between alpha percentile and one
+      // Compute the remaining part of the integral between alpha percentile and one  
 	var cdd2 = 0.0;
-    for (var i=idxAlphaDd; i<ddFunc.length; ++i) {
-      cdd2 += ddFunc[i];
-    }
-    cdd2 /= ddFunc.length;
+    //for (var i=idxAlphaDd; i<ddFunc.length; ++i) {
+    //  cdd2 += ddFunc[i];
+    //}
+	if (idxAlphaDd < ddFunc.length) {
+	  cdd2 = self.sum_(ddFunc.slice(idxAlphaDd))/ddFunc.length;
+	}	
     
       // Compute and return the average value of the integral above
 	var cdd = (cdd1 + cdd2) / (1 - alpha);
@@ -817,7 +805,7 @@ PortfolioAnalytics = (function(self) {
     // Compute the cumulative return
 	var cumRet = NaN;
 	if (equityCurve.length >= 2) { // In order to compute a proper cumulative return, at least 2 periods are required
-	  cumRet = (equityCurve[equityCurve.length-1]-equityCurve[0])/equityCurve[0];
+	  cumRet = (equityCurve[equityCurve.length-1] - equityCurve[0])/equityCurve[0];
 	}
     
     // Return it
@@ -898,7 +886,7 @@ PortfolioAnalytics = (function(self) {
 	var returns = new equityCurve.constructor(equityCurve.length); // Inherit the array type from the input array
 	returns[0] = NaN;
 	for (var i=1; i<equityCurve.length; ++i) {
-	  returns[i] = (equityCurve[i]-equityCurve[i-1])/equityCurve[i-1];
+	  returns[i] = (equityCurve[i] - equityCurve[i-1])/equityCurve[i-1];
 	}
     
     // Return them
@@ -928,31 +916,25 @@ PortfolioAnalytics = (function(self) {
     // No need for input checks, as done in function below
 	
 	// Compute the arithmetic returns of the portfolio
-	var returns = arithmeticReturns(equityCurve);
+	var returns = arithmeticReturns(equityCurve).slice(1); // First value is NaN
 	
-    // Loop over all the returns to compute their sum and
-	// the sum of the asolute values of the negative returns
-	var numerator = 0.0;
-	var denominator = 0.0;
-    
-    // Loop over all the values to compute the drawdown vector
-    for (var i=1; i<returns.length; ++i) { // returns[0] is always equals to NaN
-      numerator += returns[i];
-	  if (returns[i] < 0.0) {
-	    denominator += -returns[i];
-	  }
-    }
-    
-    // Compute and return the gain to pain ratio
-    var ratio = numerator;
-	if (denominator != 0.0) {
-	  ratio /= denominator;
+	// If there is no usable returns, exit
+	if (returns.length == 0) {
+	  return NaN;
+	}
+	
+    // Else, compute the gain to pain ratio as the the sum of the returns divided by
+	// the sum of the absolute values of the negative returns
+	var numerator = self.mean_(returns);
+	var denominator = self.lpm_(returns, 1, 0.0);
+
+    // Return the gain to pain ratio
+    if (denominator == 0.0) {
+	  return NaN; // The gain to pain ratio is undefined in case there is no negative returns
 	}
 	else {
-	  ratio = NaN; // The gain to pain ratio is undefined in case there is no negative returns
+	  return numerator/denominator;
 	}
-
-	return ratio;
   }
 
 
@@ -974,12 +956,137 @@ var PortfolioAnalytics = PortfolioAnalytics || {};
 
 PortfolioAnalytics = (function(self) {
   /* Start Wrapper public methods */
+  self.hpm_ = function(x, n, t) { return hpm_(x, n, t); }
+  self.lpm_ = function(x, n, t) { return lpm_(x, n, t); }
+  self.mean_ = function(x) { return mean_(x); }
   self.percentile = function(x, p) { return percentile(x, p); }
   /* End Wrapper public methods */
 
   
 /* End Not to be used as is in Google Sheets */  
   
+  /**
+  * @function hpm_
+  *
+  * @descrption Compute the higher partial moment of the values of a numeric array.
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Moment_(mathematics)">https://en.wikipedia.org/wiki/Moment_(mathematics)</a>
+  * 
+  * @param {Array.<number>} x the input numeric array.
+  * @param {number} n the order of the higher partial moment.
+  * @param {number} t the threshold of the higher partial moment.
+  * @return {number} the higher partial moment of order n at threshold t of the values of the input array.
+  *
+  * @example
+  * hpm_([0.1,-0.2,0.3], 2, 0.0); 
+  * // X
+  */
+  function hpm_(x, n, t) {
+    // Input checks
+    self.assertNumberArray_(x);
+	self.assertPositiveInteger_(n);
+	
+    // Initialisations
+    nn = x.length;
+    dtemp = 0.0;
+
+	//
+    m = nn % 4;
+    if (m != 0) {
+      for (var i=0; i<m; i++) {
+		dtemp += Math.pow(Math.max(0, x[i]-t), n);
+      }
+    }
+    
+	//
+	if (nn < 4) {
+      return dtemp;
+    }
+    
+	//
+    for (var i=m; i<nn; i+=4) {
+      dtemp += ((Math.pow(Math.max(0, x[i]-t), n) + Math.pow(Math.max(0, x[i+1]-t), n)) + (Math.pow(Math.max(0, x[i+2]-t), n) + Math.pow(Math.max(0, x[i+3]-t), n)));
+    }
+	
+	//
+    return dtemp/n;
+  }
+
+
+  /**
+  * @function lpm_
+  *
+  * @descrption Compute the lower partial moment of the values of a numeric array.
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Moment_(mathematics)">https://en.wikipedia.org/wiki/Moment_(mathematics)</a>
+  * 
+  * @param {Array.<number>} x the input numeric array.
+  * @param {number} n the order of the lower partial moment.
+  * @param {number} t the threshold of the lower partial moment.
+  * @return {number} the lower partial moment of order n at threshold t of the values of the input array.
+  *
+  * @example
+  * lpm_([0.1,-0.2,0.3], 2, 0.0); 
+  * // X
+  */
+  function lpm_(x, n, t) {
+    // Input checks
+    self.assertNumberArray_(x);
+	self.assertPositiveInteger_(n);
+	
+    // Initialisations
+    nn = x.length;
+    dtemp = 0.0;
+
+	//
+    m = nn % 4;
+    if (m != 0) {
+      for (var i=0; i<m; i++) {
+		dtemp += Math.pow(Math.max(0, t-x[i]), n);
+      }
+    }
+    
+	//
+	if (nn < 4) {
+      return dtemp;
+    }
+    
+	//
+    for (var i=m; i<nn; i+=4) {
+      dtemp += ((Math.pow(Math.max(0, t-x[i]), n) + Math.pow(Math.max(0, t-x[i+1]), n)) + (Math.pow(Math.max(0, t-x[i+2]), n) + Math.pow(Math.max(0, t-x[i+3]), n)));
+    }
+	
+	//
+    return dtemp/nn;
+  }
+
+
+  /**
+  * @function mean_
+  *
+  * @descrption Compute the mean of the values of a numeric array.
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Mean">https://en.wikipedia.org/wiki/Mean</a>
+  * 
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the mean of the values of the input array.
+  *
+  * @example
+  * mean_([2,4]); 
+  * // 3
+  */
+  function mean_(x) {
+    // Input checks
+    self.assertNumberArray_(x);
+	
+    // Initialisations
+    nn = x.length;
+
+	//
+    return self.sum_(x)/nn;
+  }
+
+
   /**
   * @function percentile
   *
@@ -1018,6 +1125,126 @@ PortfolioAnalytics = (function(self) {
 	var lowerIdx = Math.floor(idx);
 	var upperIdx = lowerIdx + 1;
 	return sortedArray[lowerIdx] + (idx % 1) * (sortedArray[upperIdx] - sortedArray[lowerIdx]);
+  }
+  
+
+/* Start Not to be used as is in Google Sheets */
+   
+   return self;
+  
+})(PortfolioAnalytics || {});
+
+/* End Not to be used as is in Google Sheets */
+;/**
+ * @file Functions related to basic linear algebra computations.
+ * @author Roman Rubsamen <roman.rubsamen@gmail.com>
+ */
+
+/* Start Not to be used as is in Google Sheets */
+ 
+var PortfolioAnalytics = PortfolioAnalytics || {};
+
+PortfolioAnalytics = (function(self) {
+  /* Start Wrapper public methods */
+  self.sum_ = function(x) { return sum_(x); }
+  self.dot_ = function(x,y) { return dot_(x,y); }
+  /* End Wrapper public methods */
+
+  
+/* End Not to be used as is in Google Sheets */  
+  
+  /**
+  * @function sum_
+  *
+  * @descrption Compute the sum of the values of a numeric array using a LAPACK like algorithm.
+  *
+  * @see <a href="http://www.netlib.org/lapack/explore-html/de/da4/group__double__blas__level1.html">LAPACK</a>
+  * 
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the sum of the values of the input array.
+  *
+  * @example
+  * sum_([1,2,3,4]); 
+  * // 10
+  */
+  function sum_(x) {
+    // Input checks
+    self.assertNumberArray_(x);
+	
+    // Initialisations
+    nn = x.length;
+    dtemp = 0.0;
+
+	//
+    m = nn % 4;
+    if (m != 0) {
+      for (var i=0; i<m; i++) {
+        dtemp += x[i];
+      }
+    }
+	
+	//
+	if (nn < 4) {
+      return dtemp;
+    }
+    
+	//
+    for (var i=m; i<nn; i+=4) {
+      dtemp += ((x[i] + x[i+1]) + (x[i+2] + x[i+3]));
+    }
+	
+	//
+    return dtemp;
+  }
+  
+
+  /**
+  * @function dot_
+  *
+  * @descrption Compute the dot product of two numeric arrays using a LAPACK like algorithm.
+  *
+  * @see <a href="http://www.netlib.org/lapack/explore-html/de/da4/group__double__blas__level1.html">LAPACK</a>
+  * 
+  * @param {Array.<number>} x the input numeric array.
+  * @param {Array.<number>} y the input numeric array.
+  * @return {number} the dot product of the two input arrays.
+  *
+  * @example
+  * dot_([1,2,3,4], [1,1,1,1]); 
+  * // 10
+  */
+  function dot_(x,y) {
+    // Input checks
+    self.assertNumberArray_(x);
+	self.assertNumberArray_(y);
+	if (x.length != y.length) {
+	  throw new Error("input arrays must have the same length");
+	}
+	
+    // Initialisations
+    nn = x.length;
+    dtemp = 0.0;
+
+	//
+    m = nn % 4;
+    if (m != 0) {
+      for (var i=0; i<m; i++) {
+        dtemp += x[i]*y[i];
+      }
+    }
+    
+	//
+	if (nn < 4) {
+      return dtemp;
+    }
+    
+	//
+    for (var i=m; i<nn; i+=4) {
+      dtemp += ((x[i]*y[i] + x[i+1]*y[i+1]) + (x[i+2]*y[i+2] + x[i+3]*y[i+3]));
+    }
+	
+	//
+    return dtemp;
   }
   
 
