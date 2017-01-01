@@ -88,6 +88,10 @@ QUnit.test('Arithmetic returns computation', function(assert) {
   assert.deepEqual(PortfolioAnalytics.arithmeticReturns([100]), [NaN], 'Arithmetic returns #1');
   assert.deepEqual(PortfolioAnalytics.arithmeticReturns([100, 100]), [NaN, 0.0], 'Arithmetic returns #2');
   assert.deepEqual(PortfolioAnalytics.arithmeticReturns([100, 110, 100]), [NaN, 0.10, -0.09090909090909091], 'Arithmetic returns #3');
+  
+  assert.deepEqual(PortfolioAnalytics.arithmeticReturns(new Float64Array([100.0, 110.0, 100.0])),
+                   new Float64Array([NaN, 0.10, -0.09090909090909091]),
+				   'Arithmetic returns typed array');
 });
 
 

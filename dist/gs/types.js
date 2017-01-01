@@ -8,9 +8,9 @@
 	* @function assertArray_
 	*
 	* @description Throws an error if the input parameter is not an array 
-	* (or a typed array).
+	* or a typed array.
 	* 
-	* @param {Array.<Object>} iX input parameter.
+	* @param {Array.<Object>} x input parameter.
 	*
 	* @example
 	* assertArray_([]); 
@@ -20,9 +20,54 @@
 	* assertArray_(1); 
 	* // Error("input must be an array")
 	*/
-	function assertArray_(iX) {
-	  if (Object.prototype.toString.call(iX).indexOf("Array") == -1) {
+	function assertArray_(x) {
+	  if (Object.prototype.toString.call(x).indexOf("Array") == -1) {
 		throw new Error("input must be an array");
+	  }
+	}
+
+
+	/**
+	* @function assertNumberArray_
+	*
+	* @description Throws an error if the input parameter is not an array of numbers 
+	* (or a typed array).
+	* 
+	* @param {Array.<Object>} x input parameter.
+	*
+	* @example
+	* assertNumberArray_([]); 
+	* //
+	*
+	* @example
+	* assertNumberArray_(1); 
+	* // Error("input must be an array of numbers")
+	*
+    * assertNumberArray_([-1]); 
+	* // Error("input must be an array of numbers")
+	*/
+	function assertNumberArray_(x) {
+	  // A number array is an array...
+	  try {
+		assertArray_(x);
+	  }
+	  catch (e) {
+		throw new Error("input must be an array of numbers");
+	  }
+
+     // ... non empty...
+	 if (x.length == 0) {
+	   throw new Error("input must be an array of numbers");
+	 }
+	 
+     // ... and made of numbers
+     for (var i=0; i<x.length; ++i) {
+  	   try {
+         assertNumber_(x[i]);
+	   }
+       catch (e) {
+         throw new Error("input must be an array of numbers");
+        }
 	  }
 	}
 
@@ -33,7 +78,7 @@
 	* @description Throws an error if the input parameter is not an array of positive numbers 
 	* (or a typed array).
 	* 
-	* @param {Array.<Object>} iX input parameter.
+	* @param {Array.<Object>} x input parameter.
 	*
 	* @example
 	* assertPositiveNumberArray_([]); 
@@ -46,24 +91,24 @@
     * assertPositiveNumberArray_([-1]); 
 	* // Error("input must be an array of positive numbers")
 	*/
-	function assertPositiveNumberArray_(iX) {
+	function assertPositiveNumberArray_(x) {
 	  // A positive array is an array...
 	  try {
-		assertArray_(iX);
+		assertArray_(x);
 	  }
 	  catch (e) {
 		throw new Error("input must be an array of positive numbers");
 	  }
 
      // ... non empty...
-	 if (iX.length == 0) {
+	 if (x.length == 0) {
 	   throw new Error("input must be an array of positive numbers");
 	 }
 	 
      // ... and made of positive numbers
-     for (var i=0; i<iX.length; ++i) {
+     for (var i=0; i<x.length; ++i) {
   	   try {
-         assertPositiveNumber_(iX[i]);
+         assertPositiveNumber_(x[i]);
 	   }
        catch (e) {
          throw new Error("input must be an array of positive numbers");
@@ -77,7 +122,7 @@
 	*
 	* @description Throws an error if the input parameter is not a (finite) number.
 	* 
-	* @param {number} iX input parameter.
+	* @param {number} x input parameter.
 	*
 	* @example
 	* assertNumber_('1'); 
@@ -90,11 +135,11 @@
 	* assertNumber_(NaN);
 	* // Error("input must be a number")
 	*/
-	function assertNumber_(iX) {
-	  if (Object.prototype.toString.call(iX)!= "[object Number]" || 
-		  isNaN(iX) || 
-		  iX === Infinity ||
-          iX === -Infinity){
+	function assertNumber_(x) {
+	  if (Object.prototype.toString.call(x)!= "[object Number]" || 
+		  isNaN(x) || 
+		  x === Infinity ||
+          x === -Infinity){
 		throw new Error("input must be a number");
 	  }
 	}
@@ -105,7 +150,7 @@
 	*
 	* @description Throws an error if the input parameter is not a positive (finite) number.
 	* 
-	* @param {number} iX input parameter.
+	* @param {number} x input parameter.
 	*
 	* @example
 	* assertPositiveNumber_(-2.3); 
@@ -118,17 +163,17 @@
 	* assertPositiveNumber_(NaN);
 	* // Error("input must be a positive number")
 	*/
-	function assertPositiveNumber_(iX) {
+	function assertPositiveNumber_(x) {
 	  // A positive number is a number...
 	  try {
-		assertNumber_(iX);
+		assertNumber_(x);
 	  }
 	  catch (e) {
 		throw new Error("input must be a positive number");
 	  }
 	  
 	  // ... as well as positive
-	  if (iX < 0.0 ) {
+	  if (x < 0.0 ) {
 	    throw new Error("input must be a positive number");
 	  }
 	}
@@ -140,9 +185,9 @@
 	* @description Throws an error if the input parameter is not a (finite) number
 	* greater than a (finite)lower bound and lower than a (finite) upper bound.
 	* 
-	* @param {number} iX input parameter.
-	* @param {number} iLowerBound the lower bound.
-	* @param {number} iUpperBound the upper bound.
+	* @param {number} x input parameter.
+	* @param {number} lowerBound the lower bound.
+	* @param {number} upperBound the upper bound.
 	*
 	* @example
 	* assertBoundedNumber_(2, 0, 1); 
@@ -155,20 +200,20 @@
 	* assertBoundedNumber_(NaN, 0, 1);
 	* // Error("input(s) must be a number")
 	*/
-	function assertBoundedNumber_(iX, iLowerBound, iUpperBound) {
+	function assertBoundedNumber_(x, lowerBound, upperBound) {
 	  // The bounds and the input must be numbers...
 	  try {
-        assertNumber_(iX);
-	    assertNumber_(iLowerBound);
-		assertNumber_(iUpperBound);
+        assertNumber_(x);
+	    assertNumber_(lowerBound);
+		assertNumber_(upperBound);
 	  }
 	  catch (e) {
 		throw new Error("input(s) must be a number");
 	  }
 	  
 	  // The input parameter must be between the input bounds
-	  if (iX < iLowerBound || iX > iUpperBound) {
-	    throw new Error("input must be bounded between " + iLowerBound + " and " + iUpperBound);
+	  if (x < lowerBound || x > upperBound) {
+	    throw new Error("input must be bounded between " + lowerBound + " and " + upperBound);
 	  }
 	}
 	
@@ -178,7 +223,7 @@
 	*
 	* @description Throws an error if the input parameter is not a positive integer.
 	* 
-	* @param {number} iX input parameter.
+	* @param {number} x input parameter.
 	*
 	* @example
 	* assertPositiveInteger_(-2.3); 
@@ -191,17 +236,17 @@
 	* assertPositiveInteger_(NaN);
 	* // Error("input must be a positive integer")
 	*/
-	function assertPositiveInteger_(iX) {
+	function assertPositiveInteger_(x) {
 	  // A positive integer is a positive number...
 	  try {
-		assertPositiveNumber_(iX);
+		assertPositiveNumber_(x);
 	  }
 	  catch (e) {
 		throw new Error("input must be a positive integer");
 	  }
 
 	  // ... as well as an integer
-	  if (Math.floor(iX) !== iX) {
+	  if (Math.floor(x) !== x) {
 		throw new Error("input must be a positive integer");
 	  }
 	}
@@ -212,7 +257,7 @@
 	*
 	* @description Throws an error if the input parameter is not a string.
 	* 
-	* @param {string} iX input parameter.
+	* @param {string} x input parameter.
 	*
 	* @example
 	* assertString_(1); 
@@ -221,8 +266,8 @@
 	* @example
 	* assertEnumeration_("test"); 
 	*/
-	function assertString_(iX) {
-	  if (!(typeof iX === 'string' || iX instanceof String)) {
+	function assertString_(x) {
+	  if (!(typeof x === 'string' || x instanceof String)) {
 		throw new Error("input must be a string");
 	  }
 	}
@@ -233,8 +278,8 @@
 	*
 	* @description Throws an error if the input parameter is not a string belonging to a set of string values.
 	* 
-	* @param {string} iX input parameter.
-	* @param {Array.<string>} iAllowedValues array listing the allowed values for the input parameter.
+	* @param {string} x input parameter.
+	* @param {Array.<string>} allowedValues array listing the allowed values for the input parameter.
 	*
 	* @example
 	* assertStringEnumeration_(1, ["test", "test2"]); 
@@ -243,19 +288,19 @@
 	* @example
 	* assertStringEnumeration_("test", ["test", "test2"]); 
 	*/
-	function assertStringEnumeration_(iX, iAllowedValues) {
+	function assertStringEnumeration_(x, allowedValues) {
 	  // Allowed values must be an array...
 	  try {
-        assertArray_(iAllowedValues);
+        assertArray_(allowedValues);
 	  }
 	  catch (e) {
 		throw new Error("input must be an array of strings");
 	  }
 	    
 	  // ... of strings
-	  for (var i=0; i<iAllowedValues.length; ++i) {
+	  for (var i=0; i<allowedValues.length; ++i) {
 	    try {
-		  assertString_(iAllowedValues[i]);
+		  assertString_(allowedValues[i]);
 	    }
 	    catch (e) {
 		  throw new Error("input must be an array of strings");
@@ -264,15 +309,15 @@
 	  
 	  // A string enumeration is a string...
 	  try {
-		assertString_(iX);
+		assertString_(x);
 	  }
 	  catch (e) {
-		throw new Error("input must be a string equals to any of " + iAllowedValues.toString());
+		throw new Error("input must be a string equals to any of " + allowedValues.toString());
 	  }
 
 	  // ... with predefinite values
-	  if (iAllowedValues.indexOf(iX) == -1) {
-		throw new Error("input must be a string equals to any of " + iAllowedValues.toString());
+	  if (allowedValues.indexOf(x) == -1) {
+		throw new Error("input must be a string equals to any of " + allowedValues.toString());
 	  }
 	}
 

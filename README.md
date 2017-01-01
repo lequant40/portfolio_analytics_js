@@ -16,6 +16,7 @@ After several fruitless hours of Googling (incomplete codes, incorrect codes, un
 - Compatible with Google Sheets
 - Compatible with any browser supporting ECMAScript 5 (i.e., front-end development)
 - Compatible with [Node.js](https://nodejs.org/) (i.e., back-end development)
+- (Performances) Automatically uses JavaScript Typed Arrays
 - Code continuously tested and integrated by [Travis CI](https://travis-ci.org/)
 - Code documented using [JSDoc](http://usejsdoc.org/)
 
@@ -38,6 +39,12 @@ If you would like to use PortfolioAnalytics inside a browser you can download [i
 You then just need to include this code in an HTML page, e.g.:
 ```html
 	<script src="portfolio_analytics.dist.min.js" type="text/javascript"></script>
+```
+
+To be noted that if the browser is compatible with JavaScript Typed Arrays, you can provide such arrays in input to PortfolioAnalytics for better performances, e.g.:
+```html
+	PortfolioAnalytics.arithmeticReturns(new Float64Array([100.0, 109.75, 111.25]))
+	// Will output a Float64Array
 ```
 
 ### Usage with Node.js

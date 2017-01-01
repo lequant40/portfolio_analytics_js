@@ -81,7 +81,11 @@ QUnit.test('Drawdown function computation', function(assert) {
   assert.deepEqual(PortfolioAnalytics.drawdownFunction([100, 90, 90, 80, 100]), 
                                                        [0, 0.1, 0.1, 0.2, 0], 
                                                        'Simple drawdown function #2');
-  
+
+  assert.deepEqual(PortfolioAnalytics.drawdownFunction(new Float64Array([100, 90, 90, 80, 100])), 
+                                                       new Float64Array([0, 0.1, 0.1, 0.2, 0]), 
+                                                       'Simple drawdown function with typed array');
+													   
   assert.deepEqual(PortfolioAnalytics.drawdownFunction(this.complexEquityCurve, 0, this.complexEquityCurve.length-1), 
                                                        	[0,
                                                          0.3333333333333333,

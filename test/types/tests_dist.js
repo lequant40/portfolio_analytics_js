@@ -24,6 +24,37 @@ QUnit.test('Array', function(assert) {
 
   PortfolioAnalytics.assertArray_(['a']);
   assert.ok(true, "Non empty array input argument");  
+  
+  PortfolioAnalytics.assertArray_(new Float64Array(5));
+  assert.ok(true, "Typed array input argument");
+});
+
+
+QUnit.test('Number Array', function(assert) {    
+  assert.throws(function() {
+      PortfolioAnalytics.assertNumberArray_(1);
+    },
+    new Error("input must be an array of numbers"),
+    "No array input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertNumberArray_();
+    },
+    new Error("input must be an array of numbers"),
+    "Empty array input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertNumberArray_(['a']);
+    },
+    new Error("input must be an array of numbers"),
+    "String array input argument"
+  );
+ 
+  
+  PortfolioAnalytics.assertNumberArray_([-100, 110, 1.1]);
+  assert.ok(true, "Number array input argument");
 });
 
 

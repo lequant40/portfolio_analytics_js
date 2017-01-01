@@ -13,6 +13,7 @@ Après avoir cherché en vain mon bonheur sur Internet (codes incomplets, ou ave
 - Compatible avec Google Sheets
 - Compatible avec les navigateurs supportant le ECMAScript 5 (i.e., développement front-end)
 - Compatible avec [Node.js](https://nodejs.org/) (i.e., développement back-end)
+- (Performances) Utilisation automatique des tableaux typés JavaScript
 - Code testé et intégré de manière continue avec [Travis CI](https://travis-ci.org/)
 - Code documenté avec [JSDoc](http://usejsdoc.org/)
 
@@ -35,6 +36,12 @@ Il vous suffit ensuite d'inclure ce code dans une page HTML, par exemple :
 
 ```html
 	<script src="portfolio_analytics.dist.min.js" type="text/javascript"></script>
+```
+
+A noter que si le navigateur prend en charge les tableaux typés JavaScript, vous pouvez utiliser ces tableaux avec PortfolioAnalytics pour de meilleures performances, par exemple :
+```html
+	PortfolioAnalytics.arithmeticReturns(new Float64Array([100.0, 109.75, 111.25]))
+	// Le type de retour sera un Float64Array
 ```
 
 ### Utilisation avec Node.js
