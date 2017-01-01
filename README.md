@@ -27,6 +27,9 @@ After several fruitless hours of Googling (incomplete codes, incorrect codes, un
 If you would like to use PortfolioAnalytics in Google Sheets, you can either:
 
 - (Recommended) [Import the external Google Apps Script library](https://developers.google.com/apps-script/guide_libraries) with Script ID 1NXwj16pdgcJT-XG5LiWRJyRW604Dj26U4lqgGsJJfOKLum4y9grakXPI from your spreadsheet
+
+or:
+
 - Import the JavaScript files from the [dist/gs directory](https://github.com/lequant40/portfolio_analytics_js/tree/master/dist/gs) into your spreadsheet
 
 You can find examples of PortfolioAnalytics usage in Google Sheets (data retrieval from cells...) in [this spreadsheet](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing). 
