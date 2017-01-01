@@ -29,7 +29,7 @@
     // Compute the cumulative return
 	var cumRet = NaN;
 	if (equityCurve.length >= 2) { // In order to compute a proper cumulative return, at least 2 periods are required
-	  cumRet = (equityCurve[equityCurve.length-1]-equityCurve[0])/equityCurve[0];
+	  cumRet = (equityCurve[equityCurve.length-1] - equityCurve[0])/equityCurve[0];
 	}
     
     // Return it
@@ -110,7 +110,7 @@
 	var returns = new equityCurve.constructor(equityCurve.length); // Inherit the array type from the input array
 	returns[0] = NaN;
 	for (var i=1; i<equityCurve.length; ++i) {
-	  returns[i] = (equityCurve[i]-equityCurve[i-1])/equityCurve[i-1];
+	  returns[i] = (equityCurve[i] - equityCurve[i-1])/equityCurve[i-1];
 	}
     
     // Return them
@@ -140,31 +140,25 @@
     // No need for input checks, as done in function below
 	
 	// Compute the arithmetic returns of the portfolio
-	var returns = arithmeticReturns(equityCurve);
+	var returns = arithmeticReturns(equityCurve).slice(1); // First value is NaN
 	
-    // Loop over all the returns to compute their sum and
-	// the sum of the asolute values of the negative returns
-	var numerator = 0.0;
-	var denominator = 0.0;
-    
-    // Loop over all the values to compute the drawdown vector
-    for (var i=1; i<returns.length; ++i) { // returns[0] is always equals to NaN
-      numerator += returns[i];
-	  if (returns[i] < 0.0) {
-	    denominator += -returns[i];
-	  }
-    }
-    
-    // Compute and return the gain to pain ratio
-    var ratio = numerator;
-	if (denominator != 0.0) {
-	  ratio /= denominator;
+	// If there is no usable returns, exit
+	if (returns.length == 0) {
+	  return NaN;
+	}
+	
+    // Else, compute the gain to pain ratio as the the sum of the returns divided by
+	// the sum of the absolute values of the negative returns
+	var numerator = mean_(returns);
+	var denominator = lpm_(returns, 1, 0.0);
+
+    // Return the gain to pain ratio
+    if (denominator == 0.0) {
+	  return NaN; // The gain to pain ratio is undefined in case there is no negative returns
 	}
 	else {
-	  ratio = NaN; // The gain to pain ratio is undefined in case there is no negative returns
+	  return numerator/denominator;
 	}
-
-	return ratio;
   }
 
 

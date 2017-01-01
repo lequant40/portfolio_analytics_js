@@ -287,14 +287,10 @@
     var ddFunc = drawdownFunction(equityCurve);
     
     // Compute the sum of squares of this function
-    var sumSquares = 0.0;
-    for (var i=0; i<ddFunc.length; ++i) {
-      sumSquares += ddFunc[i] * ddFunc[i];
-    }
+	var sumSquares = dot_(ddFunc, ddFunc);
     
     // Compute and return the ulcer index
-    var uI = Math.sqrt(sumSquares/ddFunc.length);
-    return uI;
+    return Math.sqrt(sumSquares/ddFunc.length);
   }
 
 
@@ -322,15 +318,8 @@
     // Compute the drawdown function
     var ddFunc = drawdownFunction(equityCurve);
     
-    // Compute the sum of this function
-    var sum = 0.0;
-    for (var i=0; i<ddFunc.length; ++i) {
-      sum += ddFunc[i];
-    }
-    
-    // Compute and return the pain index
-    var pI = sum/ddFunc.length;
-    return pI;
+    // Compute and return the mean of this function, which corresponds to the pain index
+	return mean_(ddFunc);
   }
   
   
@@ -352,9 +341,6 @@
   function conditionalDrawdown(equityCurve, alpha) {
     // Input checks
     // No need to check for array positivity, as done in function below
-	if (alpha === undefined) {
-	  alpha = -1;
-	}
     assertBoundedNumber_(alpha, 0, 1);
    
     // Compute the drawdown function and
@@ -383,12 +369,14 @@
 	  // Compute the integral between alpha and the alpha percentile
     var cdd1 = (pctileAlphaDd - alpha) * alphaDd;
   
-      // Compute the remaining part of the integral between alpha percentile and one
+      // Compute the remaining part of the integral between alpha percentile and one  
 	var cdd2 = 0.0;
-    for (var i=idxAlphaDd; i<ddFunc.length; ++i) {
-      cdd2 += ddFunc[i];
-    }
-    cdd2 /= ddFunc.length;
+    //for (var i=idxAlphaDd; i<ddFunc.length; ++i) {
+    //  cdd2 += ddFunc[i];
+    //}
+	if (idxAlphaDd < ddFunc.length) {
+	  cdd2 = sum_(ddFunc.slice(idxAlphaDd))/ddFunc.length;
+	}	
     
       // Compute and return the average value of the integral above
 	var cdd = (cdd1 + cdd2) / (1 - alpha);
