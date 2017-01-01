@@ -23,6 +23,9 @@ Après avoir cherché en vain mon bonheur sur Internet (codes incomplets, ou ave
 Si vous souhaitez utiliser PortfolioAnalytics avec Google Sheets dans vos feuilles de calcul, vous pouvez soit :
 
 - (Solution recommandée) [Importer la bibliothèque externe](https://developers.google.com/apps-script/guide_libraries) de Script ID 1NXwj16pdgcJT-XG5LiWRJyRW604Dj26U4lqgGsJJfOKLum4y9grakXPI
+
+ou soit :
+
 - Importer les fichiers JavaScript contenus dans [le répertoire dist/gs](https://github.com/lequant40/portfolio_analytics_js/tree/master/dist/gs)
 
 Vous trouverez des exemples d'utilisation spécifiques à Google Sheets (récupération des données depuis une plage de cellules, etc.) dans [cette feuille de calcul](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing).
