@@ -7,7 +7,7 @@
   /**
   * @function sum_
   *
-  * @descrption Compute the sum of the values of a numeric array using a LAPACK like algorithm.
+  * @description Compute the sum of the values of a numeric array using a LAPACK like algorithm.
   *
   * @see <a href="http://www.netlib.org/lapack/explore-html/de/da4/group__double__blas__level1.html">LAPACK</a>
   * 
@@ -23,11 +23,11 @@
     assertNumberArray_(x);
 	
     // Initialisations
-    nn = x.length;
-    dtemp = 0.0;
+    var nn = x.length;
+    var dtemp = 0.0;
 
 	//
-    m = nn % 4;
+    var m = nn % 4;
     if (m != 0) {
       for (var i=0; i<m; i++) {
         dtemp += x[i];
@@ -48,11 +48,11 @@
     return dtemp;
   }
   
-
+  
   /**
   * @function dot_
   *
-  * @descrption Compute the dot product of two numeric arrays using a LAPACK like algorithm.
+  * @description Compute the dot product of two numeric arrays using a LAPACK like algorithm.
   *
   * @see <a href="http://www.netlib.org/lapack/explore-html/de/da4/group__double__blas__level1.html">LAPACK</a>
   * 
@@ -73,11 +73,11 @@
 	}
 	
     // Initialisations
-    nn = x.length;
-    dtemp = 0.0;
+    var nn = x.length;
+    var dtemp = 0.0;
 
 	//
-    m = nn % 4;
+    var m = nn % 4;
     if (m != 0) {
       for (var i=0; i<m; i++) {
         dtemp += x[i]*y[i];

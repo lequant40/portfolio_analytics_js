@@ -7,7 +7,7 @@
   /**
   * @function hpm_
   *
-  * @descrption Compute the higher partial moment of the values of a numeric array.
+  * @description Compute the higher partial moment of the values of a numeric array.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Moment_(mathematics)">https://en.wikipedia.org/wiki/Moment_(mathematics)</a>
   * 
@@ -39,7 +39,7 @@
     
 	//
 	if (nn < 4) {
-      return dtemp;
+      return dtemp/nn;
     }
     
 	//
@@ -48,14 +48,14 @@
     }
 	
 	//
-    return dtemp/n;
+    return dtemp/nn;
   }
 
 
   /**
   * @function lpm_
   *
-  * @descrption Compute the lower partial moment of the values of a numeric array.
+  * @description Compute the lower partial moment of the values of a numeric array.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Moment_(mathematics)">https://en.wikipedia.org/wiki/Moment_(mathematics)</a>
   * 
@@ -74,11 +74,11 @@
 	assertPositiveInteger_(n);
 	
     // Initialisations
-    nn = x.length;
-    dtemp = 0.0;
+    var nn = x.length;
+    var dtemp = 0.0;
 
 	//
-    m = nn % 4;
+    var m = nn % 4;
     if (m != 0) {
       for (var i=0; i<m; i++) {
 		dtemp += Math.pow(Math.max(0, t-x[i]), n);
@@ -87,7 +87,7 @@
     
 	//
 	if (nn < 4) {
-      return dtemp;
+      return dtemp/nn;
     }
     
 	//
@@ -103,7 +103,7 @@
   /**
   * @function mean_
   *
-  * @descrption Compute the mean of the values of a numeric array.
+  * @description Compute the mean of the values of a numeric array.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Mean">https://en.wikipedia.org/wiki/Mean</a>
   * 
@@ -119,51 +119,10 @@
     assertNumberArray_(x);
 	
     // Initialisations
-    nn = x.length;
+    var nn = x.length;
 
-	//
+	// Compute the mean using the standard one pass formula
     return sum_(x)/nn;
   }
 
-
-  /**
-  * @function percentile
-  *
-  * @descrption Compute the percentile value of a numeric array using the linear interpolation between closest tanks method with C = 1.
-  *
-  * @see <a href="https://en.wikpedia.org/wiki/Percentile">https://en.wikpedia.org/wiki/Percentile</a>
-  * 
-  * @param {Array.<number>} x the input numeric array.
-  * @param {number} p the p-th percentile of the input array to be computed, belonging to interval [0,1].
-  * @return {number} the p-th percentile value of the input array.
-  *
-  * @example
-  * percentile([1,2,3,4], 0.75); 
-  * // 3.25
-  */
-  function percentile(x, p) {
-    // Input checks
-    assertNumberArray_(x);
-	if (p === undefined) {
-	  p = -1;
-	}
-	assertBoundedNumber_(p, 0, 1);
-	
-    // Pre-process for the special case p=1 percentile value
-	if (p == 1.0) {
-	  return x[x.length-1];
-	}
-	
-	// Otherwise, sort a copy of the array
-	var sortedArray = x.slice().sort(function (a, b) { return a - b; });
-	
-	// Then compute the index of the p-th percentile
-	var idx = p*(sortedArray.length - 1);
-	
-	// Then compute and return the value of the p-th percentile
-	var lowerIdx = Math.floor(idx);
-	var upperIdx = lowerIdx + 1;
-	return sortedArray[lowerIdx] + (idx % 1) * (sortedArray[upperIdx] - sortedArray[lowerIdx]);
-  }
-  
 
