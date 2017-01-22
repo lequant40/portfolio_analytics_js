@@ -1,5 +1,9 @@
 // ------------------------------------------------------------
 QUnit.module('Statistics module', {
+  before: function() {
+	// Coming from "Practical Portfolio Performance Measurement and Attribution, 2nd Edition, Carl R. Bacon."
+	this.BaconReturns = [0.003, 0.026, 0.011, -0.01, 0.015, 0.025, 0.016, 0.067, -0.014, 0.04, -0.005, 0.081, 0.04, -0.037, -0.061, 0.017, -0.049, -0.022, 0.07, 0.058, -0.065, 0.024, -0.005, -0.009];
+  }
 });
 
 
@@ -57,7 +61,10 @@ QUnit.test('Lpm computation', function(assert) {
     testArrayNegative.push(-i);
 	testArrayPositive.push(i);
 	assert.equal(PortfolioAnalytics.lpm_(testArrayNegative, 1, 0.0), PortfolioAnalytics.mean_(testArrayPositive), 'Lpm 1 #' + i);
-  } 
+  }
+  
+  // Bacon Downside Potential
+  assert.equal(PortfolioAnalytics.lpm_(this.BaconReturns, 1, 0.005), 0.329/24 - 0.000000000000000004, 'Lpm Bacon');
 });
 
 
@@ -93,4 +100,8 @@ QUnit.test('Hpm computation', function(assert) {
 	testArrayPositive.push(i);
 	assert.equal(PortfolioAnalytics.hpm_(testArrayPositive, 1, 0.0), PortfolioAnalytics.mean_(testArrayPositive), 'Hpm 1 #' + i);
   } 
+  
+  // Bacon Upside Potential
+  assert.equal(PortfolioAnalytics.hpm_(this.BaconReturns, 1, 0.005), 0.425/24, 'Hpm Bacon');
+
 });

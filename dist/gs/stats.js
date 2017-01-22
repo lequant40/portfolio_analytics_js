@@ -17,8 +17,8 @@
   * @return {number} the higher partial moment of order n at threshold t of the values of the input array.
   *
   * @example
-  * hpm_([0.1,-0.2,0.3], 2, 0.0); 
-  * // X
+  * hpm_([0.1,-0.2,-0.3], 2, 0.0); 
+  * // 0.0167
   */
   function hpm_(x, n, t) {
     // Input checks
@@ -65,8 +65,8 @@
   * @return {number} the lower partial moment of order n at threshold t of the values of the input array.
   *
   * @example
-  * lpm_([0.1,-0.2,0.3], 2, 0.0); 
-  * // X
+  * lpm_([0.1,0.2,-0.3], 2, 0.0); 
+  * // 0.03
   */
   function lpm_(x, n, t) {
     // Input checks
