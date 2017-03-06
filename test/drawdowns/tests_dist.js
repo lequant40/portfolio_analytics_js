@@ -266,7 +266,7 @@ QUnit.test('Pain index incorrect input arguments', function(assert) {
 
 QUnit.test('Pain index computation', function(assert) {   
   assert.equal(PortfolioAnalytics.painIndex([1, 2, 1]), 
-               0.16666666666666669, 
+               0.16666666666666666, 
               'Simple pain index #1');				
 
   assert.equal(PortfolioAnalytics.painIndex([100, 50, 25, 12.5]), 

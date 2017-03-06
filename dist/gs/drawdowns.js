@@ -317,7 +317,7 @@
     
     // Compute the drawdown function
     var ddFunc = drawdownFunction(equityCurve);
-    
+	
     // Compute and return the mean of this function, which corresponds to the pain index
 	return mean_(ddFunc);
   }

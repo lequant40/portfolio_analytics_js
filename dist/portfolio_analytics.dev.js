@@ -337,7 +337,7 @@ PortfolioAnalytics = (function(self) {
     
     // Compute the drawdown function
     var ddFunc = drawdownFunction(equityCurve);
-    
+	
     // Compute and return the mean of this function, which corresponds to the pain index
 	return self.mean_(ddFunc);
   }
@@ -899,9 +899,9 @@ PortfolioAnalytics = (function(self) {
   *
   * @description Compute the (percent) value at risk of a portfolio equity curve.
   *
-  * @see <a href="http://onlinelibrary.wiley.com/doi/10.1111/1468-0300.00091/abstract">Expected Shortfall: A Natural Coherent Alternative to Value at Risk, CARLO ACERBI, DIRK TASCHEy, Economic Notes, Volume 31, Issue 2, Pages 379–388 (July 2002)</a>
+  * To be noted that by convention, this value is positive, so that in case there is no loss in the portfolio equity curve, the computed value is then negative.
   *
-  * TODO: Can be negative if no loss !!!
+  * @see <a href="http://onlinelibrary.wiley.com/doi/10.1111/1468-0300.00091/abstract">Expected Shortfall: A Natural Coherent Alternative to Value at Risk, CARLO ACERBI, DIRK TASCHEy, Economic Notes, Volume 31, Issue 2, Pages 379–388 (July 2002)</a>
   *
   * @param {Array.<number>} equityCurve the portfolio equity curve.
   * @param {number} alpha the percent confidence level belonging to interval [0,1].
@@ -987,30 +987,26 @@ PortfolioAnalytics = (function(self) {
     self.assertNumberArray_(x);
 	self.assertPositiveInteger_(n);
 	
-    // Initialisations
-    nn = x.length;
-    dtemp = 0.0;
+    // The HPM is the mean of the values max(0, x[i]-t)^n, i=0..length(x) - 1, so that code below is adapted from a mean computation
+	// Initialisations
+    var nn = x.length;
 
-	//
-    m = nn % 4;
-    if (m != 0) {
-      for (var i=0; i<m; i++) {
-		dtemp += Math.pow(Math.max(0, x[i]-t), n);
-      }
-    }
-    
-	//
-	if (nn < 4) {
-      return dtemp/nn;
-    }
-    
-	//
-    for (var i=m; i<nn; i+=4) {
-      dtemp += ((Math.pow(Math.max(0, x[i]-t), n) + Math.pow(Math.max(0, x[i+1]-t), n)) + (Math.pow(Math.max(0, x[i+2]-t), n) + Math.pow(Math.max(0, x[i+3]-t), n)));
-    }
+	// First pass of the mean computation
+	var tmpMean = 0.0;
+	var sum = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  sum += Math.pow(Math.max(0, x[i]-t), n);
+	}
+	tmpMean = sum/nn;
 	
-	//
-    return dtemp/nn;
+	// Second pass of the mean computation
+	var sum2 = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  sum2 += (Math.pow(Math.max(0, x[i]-t), n) - tmpMean);
+	}
+	
+	// Corrected computed mean
+    return (sum + sum2)/nn;
   }
 
 
@@ -1035,30 +1031,26 @@ PortfolioAnalytics = (function(self) {
     self.assertNumberArray_(x);
 	self.assertPositiveInteger_(n);
 	
-    // Initialisations
+    // The LPM is the mean of the values max(0, t-x[i])^n, i=0..length(x) - 1, so that code below is adapted from a mean computation
+	// Initialisations
     var nn = x.length;
-    var dtemp = 0.0;
 
-	//
-    var m = nn % 4;
-    if (m != 0) {
-      for (var i=0; i<m; i++) {
-		dtemp += Math.pow(Math.max(0, t-x[i]), n);
-      }
-    }
-    
-	//
-	if (nn < 4) {
-      return dtemp/nn;
-    }
-    
-	//
-    for (var i=m; i<nn; i+=4) {
-      dtemp += ((Math.pow(Math.max(0, t-x[i]), n) + Math.pow(Math.max(0, t-x[i+1]), n)) + (Math.pow(Math.max(0, t-x[i+2]), n) + Math.pow(Math.max(0, t-x[i+3]), n)));
-    }
+	// First pass of the mean computation
+	var tmpMean = 0.0;
+	var sum = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  sum += Math.pow(Math.max(0, t-x[i]), n);
+	}
+	tmpMean = sum/nn;
 	
-	//
-    return dtemp/nn;
+	// Second pass of the mean computation
+	var sum2 = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  sum2 += (Math.pow(Math.max(0, t-x[i]), n) - tmpMean);
+	}
+	
+	// Corrected computed mean
+    return (sum + sum2)/nn;
   }
 
 
@@ -1082,26 +1074,24 @@ PortfolioAnalytics = (function(self) {
 	
     // Initialisations
     var nn = x.length;
-    var dtemp = 0.0;
-	var dtemp2 = 0.0;
 
-	// Compute the mean of the values of th input numeric array, first pass
+	// Compute the mean of the values of the input numeric array, first pass
+	var tmpMean = 0.0;
 	var sum = 0.0;
 	for (var i=0; i<nn; ++i) {
 	  sum += x[i];
 	}
-	dtemp = sum/nn;
+	tmpMean = sum/nn;
 	
 	// Compute the correction factor, second pass
-	// C.f. reference, M_3 formula
-	var sum = 0.0;
+	// C.f. M_3 formula of the reference
+	var sum2 = 0.0;
 	for (var i=0; i<nn; ++i) {
-	  sum += (x[i] - dtemp);
+	  sum2 += (x[i] - tmpMean);
 	}
-	dtemp2 = sum/nn;
 	
 	// Return the corrected mean
-    return dtemp + dtemp2;
+    return (sum + sum2)/nn;
   }
 
 
