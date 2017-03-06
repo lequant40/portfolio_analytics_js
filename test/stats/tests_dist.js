@@ -25,6 +25,16 @@ QUnit.test('Mean computation', function(assert) {
     testArray.push(i);
 	assert.equal(PortfolioAnalytics.mean_(testArray), PortfolioAnalytics.sum_(testArray)/i, 'Mean #' + i);
   } 
+  
+  // Test for rounding errors
+  // When the mean computation is not corrected, the (incorrect) fractional part of the computed mean is 5.0049999... in double precision
+  // When corrected, it is equal to 5.005
+  var testArray = [];
+  for (var i=1; i<=1000; ++i) {
+    testArray.push(i*0.01 + 10000000);
+  }
+  assert.equal(PortfolioAnalytics.mean_(testArray), 10000000 + 5.005, 'Mean with no rounding error');
+	
 });
 
 

@@ -123,9 +123,9 @@
   *
   * @description Compute the (percent) value at risk of a portfolio equity curve.
   *
-  * @see <a href="http://onlinelibrary.wiley.com/doi/10.1111/1468-0300.00091/abstract">Expected Shortfall: A Natural Coherent Alternative to Value at Risk, CARLO ACERBI, DIRK TASCHEy, Economic Notes, Volume 31, Issue 2, Pages 379–388 (July 2002)</a>
+  * To be noted that by convention, this value is positive, so that in case there is no loss in the portfolio equity curve, the computed value is then negative.
   *
-  * TODO: Can be negative if no loss !!!
+  * @see <a href="http://onlinelibrary.wiley.com/doi/10.1111/1468-0300.00091/abstract">Expected Shortfall: A Natural Coherent Alternative to Value at Risk, CARLO ACERBI, DIRK TASCHEy, Economic Notes, Volume 31, Issue 2, Pages 379–388 (July 2002)</a>
   *
   * @param {Array.<number>} equityCurve the portfolio equity curve.
   * @param {number} alpha the percent confidence level belonging to interval [0,1].

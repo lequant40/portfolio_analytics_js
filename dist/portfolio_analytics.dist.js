@@ -896,9 +896,9 @@ PortfolioAnalytics = (function(self) {
   *
   * @description Compute the (percent) value at risk of a portfolio equity curve.
   *
-  * @see <a href="http://onlinelibrary.wiley.com/doi/10.1111/1468-0300.00091/abstract">Expected Shortfall: A Natural Coherent Alternative to Value at Risk, CARLO ACERBI, DIRK TASCHEy, Economic Notes, Volume 31, Issue 2, Pages 379–388 (July 2002)</a>
+  * To be noted that by convention, this value is positive, so that in case there is no loss in the portfolio equity curve, the computed value is then negative.
   *
-  * TODO: Can be negative if no loss !!!
+  * @see <a href="http://onlinelibrary.wiley.com/doi/10.1111/1468-0300.00091/abstract">Expected Shortfall: A Natural Coherent Alternative to Value at Risk, CARLO ACERBI, DIRK TASCHEy, Economic Notes, Volume 31, Issue 2, Pages 379–388 (July 2002)</a>
   *
   * @param {Array.<number>} equityCurve the portfolio equity curve.
   * @param {number} alpha the percent confidence level belonging to interval [0,1].
@@ -1062,9 +1062,9 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function mean_
   *
-  * @description Compute the mean of the values of a numeric array.
+  * @description Compute the mean of the values of a numeric array, using a two-pass formula.
   *
-  * @see <a href="https://en.wikipedia.org/wiki/Mean">https://en.wikipedia.org/wiki/Mean</a>
+  * @see <a href="http://dl.acm.org/citation.cfm?doid=365719.365958">Peter M. Neely (1966) Comparison of several algorithms for computation of means, standard deviations and correlation coefficients. Commun ACM 9(7):496–499.</a>
   * 
   * @param {Array.<number>} x the input numeric array.
   * @return {number} the mean of the values of the input array.
@@ -1079,9 +1079,26 @@ PortfolioAnalytics = (function(self) {
 	
     // Initialisations
     var nn = x.length;
+    var dtemp = 0.0;
+	var dtemp2 = 0.0;
 
-	// Compute the mean using the standard one pass formula
-    return self.sum_(x)/nn;
+	// Compute the mean of the values of th input numeric array, first pass
+	var sum = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  sum += x[i];
+	}
+	dtemp = sum/nn;
+	
+	// Compute the correction factor, second pass
+	// C.f. M_3 formula of the reference
+	var sum = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  sum += (x[i] - dtemp);
+	}
+	dtemp2 = sum/nn;
+	
+	// Return the corrected mean
+    return dtemp + dtemp2;
   }
 
 

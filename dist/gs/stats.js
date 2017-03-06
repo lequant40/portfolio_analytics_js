@@ -103,9 +103,9 @@
   /**
   * @function mean_
   *
-  * @description Compute the mean of the values of a numeric array.
+  * @description Compute the mean of the values of a numeric array, using a two-pass formula.
   *
-  * @see <a href="https://en.wikipedia.org/wiki/Mean">https://en.wikipedia.org/wiki/Mean</a>
+  * @see <a href="http://dl.acm.org/citation.cfm?doid=365719.365958">Peter M. Neely (1966) Comparison of several algorithms for computation of means, standard deviations and correlation coefficients. Commun ACM 9(7):496–499.</a>
   * 
   * @param {Array.<number>} x the input numeric array.
   * @return {number} the mean of the values of the input array.
@@ -120,9 +120,26 @@
 	
     // Initialisations
     var nn = x.length;
+    var dtemp = 0.0;
+	var dtemp2 = 0.0;
 
-	// Compute the mean using the standard one pass formula
-    return sum_(x)/nn;
+	// Compute the mean of the values of th input numeric array, first pass
+	var sum = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  sum += x[i];
+	}
+	dtemp = sum/nn;
+	
+	// Compute the correction factor, second pass
+	// C.f. M_3 formula of the reference
+	var sum = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  sum += (x[i] - dtemp);
+	}
+	dtemp2 = sum/nn;
+	
+	// Return the corrected mean
+    return dtemp + dtemp2;
   }
 
 
