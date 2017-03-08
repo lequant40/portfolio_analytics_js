@@ -38,6 +38,53 @@ QUnit.test('Mean computation', function(assert) {
 });
 
 
+QUnit.test('Variance incorrect input arguments', function(assert) {   
+  assert.throws(function() {
+      PortfolioAnalytics.variance_();
+    },
+    new Error("input must be an array of numbers"),
+    "No input arguments"
+  );
+
+  // Other tests are delegated to the unit tests of types.js
+});
+
+QUnit.test('Variance computation', function(assert) {      
+  // Variance of one value is NaN
+  assert.deepEqual(PortfolioAnalytics.variance_([1]), NaN, 'Variance of one number');
+  
+  // Theoretically, Var(X + a) = Var(X), with a a constant
+  // With a two pass formula, this formula should be valid for the case below
+  assert.equal(PortfolioAnalytics.variance_([1000000000 + 4, 1000000000 + 7, 1000000000 + 13, 1000000000 + 16]), 30, 'Variance with no rounding error #1/1');
+  assert.equal(PortfolioAnalytics.variance_([4, 7, 13, 16]), 30, 'Variance with no rounding error #1/2');
+	
+});
+
+
+QUnit.test('Standard deviation incorrect input arguments', function(assert) {   
+  assert.throws(function() {
+      PortfolioAnalytics.stddev_();
+    },
+    new Error("input must be an array of numbers"),
+    "No input arguments"
+  );
+
+  // Other tests are delegated to the unit tests of types.js
+});
+
+QUnit.test('Standard deviation computation', function(assert) {      
+  // Standard deviation of one value is NaN
+  assert.deepEqual(PortfolioAnalytics.stddev_([1]), NaN, 'Standard deviation of one number');
+  
+  // Uses identity stddev(x) = sqrt(var(x))
+  var testArray = [];
+  testArray.push(1);
+  for (var i=2; i<=10; ++i) {
+    testArray.push(i);
+	assert.equal(PortfolioAnalytics.stddev_(testArray), Math.sqrt(PortfolioAnalytics.variance_(testArray)), 'Standard deviation #' + i);
+  } 
+});
+
 QUnit.test('Lpm incorrect input arguments', function(assert) {   
   assert.throws(function() {
       PortfolioAnalytics.lpm_();
