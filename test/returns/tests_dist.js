@@ -44,24 +44,23 @@ QUnit.test('Cagr incorrect input arguments', function(assert) {
     "Negative numeric array input argument"
   );
   
-  assert.throws(function() {
-      PortfolioAnalytics.cagr([100], "hourly");
-    },
-    new Error ("input must be a string equals to any of daily,weekly,monthly,quarterly,yearly"),
-    "Incorrect periodicity input argument"
-  );
+  //TODO: missing second array, second array not dates, arrays length different
 
   // Other tests are delegated to the unit tests of types.js
 });
 
 
 QUnit.test('Cagr computation', function(assert) {    
-  assert.deepEqual(PortfolioAnalytics.cagr([100], "yearly"), NaN, 'CAGR #0');
-  assert.equal(PortfolioAnalytics.cagr([100, 110], "yearly"), 0.10000000000000009, 'CAGR #1');
-  assert.equal(PortfolioAnalytics.cagr([100, 110, 120], "yearly"), 0.09544511501033215, 'CAGR #2');
-  assert.equal(PortfolioAnalytics.cagr([100, 90], "yearly"), -0.09999999999999998, 'CAGR #3');
-  assert.equal(PortfolioAnalytics.cagr([100, 110, 100, 110, 110], "quarterly"), 0.10000000000000009, 'CAGR #4');
-  assert.equal(PortfolioAnalytics.cagr([100, 110, 100, 110, 100, 110, 100, 110, 100, 110, 100, 110, 110], "monthly"), 0.10000000000000009, 'CAGR #5');
+  assert.deepEqual(PortfolioAnalytics.cagr([100], [new Date("2015-12-31")]), NaN, 'CAGR #0');
+  assert.equal(PortfolioAnalytics.cagr([100, 110], [new Date("2016-12-31"), new Date("2017-12-31")]), 0.10007181138351062, 'CAGR #1');
+  assert.equal(PortfolioAnalytics.cagr([100, 110, 120], [new Date("2015-12-31"), new Date("2016-12-31"), new Date("2017-12-31")]), 0.09537681233175466, 'CAGR #2');
+  assert.equal(PortfolioAnalytics.cagr([100, 90], [new Date("2016-12-31"), new Date("2017-12-31")]), -0.10006494591964599, 'CAGR #3');
+  assert.equal(PortfolioAnalytics.cagr([100, 110, 100, 110, 110], 
+                                       [new Date("2014-12-31"), new Date("2015-03-31"), new Date("2015-06-30"), new Date("2015-09-30"), new Date("2015-12-31")]), 	
+                                       0.10007181138351062, 'CAGR #4');
+  assert.equal(PortfolioAnalytics.cagr([100, 110, 100, 110, 100, 110, 100, 110, 100, 110, 100, 110, 110], 
+                                       [new Date("2014-12-31"), new Date("2015-01-31"), new Date("2015-02-28"), new Date("2015-03-31"), new Date("2015-04-30"), new Date("2015-05-31"), new Date("2015-06-30"), new Date("2015-07-31"), new Date("2015-08-31"), new Date("2015-09-30"), new Date("2015-10-31"), new Date("2015-11-30"), new Date("2015-12-31")]), 
+									   0.10007181138351062, 'CAGR #5');
 });
 
 
