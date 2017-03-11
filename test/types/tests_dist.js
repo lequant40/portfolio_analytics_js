@@ -347,6 +347,33 @@ QUnit.test('String', function(assert) {
 });
 
 
+QUnit.test('Date', function(assert) {    
+  assert.throws(function() {
+      PortfolioAnalytics.assertDate_();
+    },
+    new Error("input must be a date"),
+    "No input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertDate_(1.1);
+    },
+    new Error("input must be a date"),
+    "Non date input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertDate_(new Date("2015-02-31"));
+    },
+    new Error("input must be a date"),
+    "Non valid date input argument"
+  );
+  
+  PortfolioAnalytics.assertDate_(new Date("2015-12-31"));
+  assert.ok(true, "Date input argument");
+});
+
+
 QUnit.test('String Enumeration', function(assert) {    
   assert.throws(function() {
       PortfolioAnalytics.assertStringEnumeration_();

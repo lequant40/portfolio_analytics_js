@@ -322,3 +322,24 @@
 	}
 
 
+	/**
+	* @function assertDate_
+	*
+	* @description Throws an error if the input parameter is not a date.
+	* 
+	* @param {date} x input parameter.
+	*
+	* @example
+	* assertDate_(1); 
+	* // Error("input must be a date")
+	*
+	* @example
+	* assertDate_(new Date("2015-12-31")); 
+	*/
+	function assertDate_(x) {
+	  if ( !(x instanceof Date) || isNaN(x.getTime()) ) {
+		throw new Error("input must be a date");
+	  }
+	}
+	
+

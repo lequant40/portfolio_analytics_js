@@ -431,6 +431,7 @@ PortfolioAnalytics = (function(self) {
   self.assertPositiveInteger_ = function(x) { return assertPositiveInteger_(x); }
   self.assertString_ = function(x) { return assertString_(x); }
   self.assertStringEnumeration_ = function(x, allowedValues) { return assertStringEnumeration_(x, allowedValues); }
+  self.assertDate_ = function(x) { return assertDate_(x); }
   /* End Wrapper public methods */
   
 /* End Not to be used as is in Google Sheets */  
@@ -753,6 +754,27 @@ PortfolioAnalytics = (function(self) {
 	}
 
 
+	/**
+	* @function assertDate_
+	*
+	* @description Throws an error if the input parameter is not a date.
+	* 
+	* @param {date} x input parameter.
+	*
+	* @example
+	* assertDate_(1); 
+	* // Error("input must be a date")
+	*
+	* @example
+	* assertDate_(new Date("2015-12-31")); 
+	*/
+	function assertDate_(x) {
+	  if ( !(x instanceof Date) || isNaN(x.getTime()) ) {
+		throw new Error("input must be a date");
+	  }
+	}
+	
+
 /* Start Not to be used as is in Google Sheets */
    
    return self;
@@ -831,7 +853,7 @@ PortfolioAnalytics = (function(self) {
   function cagr(equityCurve, valuationDates) {
     // Input checks
     self.assertPositiveNumberArray_(equityCurve);
-    //TODO : assertDate, assert DateArray
+    //TODO : assert DateArray
 	//TODO: assertSameLengthArrays
 	
     // Extract the initial and the final equity curve values and valuation dates
