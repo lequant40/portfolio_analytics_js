@@ -56,7 +56,7 @@
     // Input checks
     assertPositiveNumberArray_(equityCurve);
 	assertDateArray_(valuationDates);
-	//TODO: assertSameLengthArrays
+	assertSameLengthArrays_(equityCurve, valuationDates);
 	
     // Extract the initial and the final equity curve values and valuation dates
     var initialValue = equityCurve[0];

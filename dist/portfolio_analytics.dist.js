@@ -430,6 +430,7 @@ PortfolioAnalytics = (function(self) {
   self.assertStringEnumeration_ = function(x, allowedValues) { return assertStringEnumeration_(x, allowedValues); }
   self.assertDate_ = function(x) { return assertDate_(x); }
   self.assertDateArray_ = function(x) { return assertDateArray_(x); }
+  self.assertSameLengthArrays_ = function(x, y) { return assertSameLengthArrays_(x, y); }
   /* End Wrapper public methods */
   
 /* End Not to be used as is in Google Sheets */  
@@ -800,22 +801,58 @@ PortfolioAnalytics = (function(self) {
 		throw new Error("input must be an array of dates");
 	  }
 
-     // ... non empty...
-	 if (x.length == 0) {
-	   throw new Error("input must be an array of dates");
-	 }
+      // ... non empty...
+	  if (x.length == 0) {
+	    throw new Error("input must be an array of dates");
+	  }
 	 
-     // ... and made of dates
-     for (var i=0; i<x.length; ++i) {
-  	   try {
-         self.assertDate_(x[i]);
-	   }
-       catch (e) {
-         throw new Error("input must be an array of dates");
+      // ... and made of dates
+      for (var i=0; i<x.length; ++i) {
+  	    try {
+          self.assertDate_(x[i]);
+	    }
+        catch (e) {
+          throw new Error("input must be an array of dates");
         }
 	  }
 	}
 
+	
+	/**
+	* @function assertSameLengthArrays_
+	*
+	* @description Throws an error if the input parameters are not arrays of same length.
+	* 
+	* @param {Array.<Object>} x input parameter.
+	* @param {Array.<Object>} y input parameter.
+	*
+	* @example
+	* assertSameLengthArrays_([1], [2]); 
+	* //
+	*
+	* @example
+	* assertSameLengthArrays_([1], [1, 2]); 
+	* // Error("input must be arrays of same length")
+	*
+    * assertSameLengthArrays_([-1], []); 
+	* // Error("input must be arrays of same length")
+	*/
+	function assertSameLengthArrays_(x, y) {
+	  // The two inputs must be arrays...
+	  try {
+		assertArray_(x);
+		assertArray_(y);
+	  }
+	  catch (e) {
+		throw new Error("input must be arrays of same length");
+	  }
+
+      // ... of same length
+	  if (x.length != y.length) {
+	    throw new Error("input must be arrays of same length");
+	  }
+	}
+	
 	
 	/* Start Not to be used as is in Google Sheets */
    
@@ -896,7 +933,7 @@ PortfolioAnalytics = (function(self) {
     // Input checks
     self.assertPositiveNumberArray_(equityCurve);
 	self.assertDateArray_(valuationDates);
-	//TODO: assertSameLengthArrays
+	self.assertSameLengthArrays_(equityCurve, valuationDates);
 	
     // Extract the initial and the final equity curve values and valuation dates
     var initialValue = equityCurve[0];

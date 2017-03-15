@@ -440,3 +440,37 @@ QUnit.test('String Enumeration', function(assert) {
   PortfolioAnalytics.assertStringEnumeration_("test", ["tes", "test"]);
   assert.ok(true, "String Enumeration input argument");
 });
+
+
+QUnit.test('Same length arrays', function(assert) {     
+  assert.throws(function() {
+      PortfolioAnalytics.assertSameLengthArrays_();
+    },
+    new Error("input must be arrays of same length"),
+    "Empty arrays input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertSameLengthArrays_(['a']);
+    },
+    new Error("input must be arrays of same length"),
+    "Missing array input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertSameLengthArrays_(['a'], []);
+    },
+    new Error("input must be arrays of same length"),
+    "Not same length arrays input argument"
+  );
+ 
+  assert.throws(function() {
+      PortfolioAnalytics.assertSameLengthArrays_(1, [1]);
+    },
+    new Error("input must be arrays of same length"),
+    "String array input argument"
+  );
+  
+  PortfolioAnalytics.assertSameLengthArrays_([new Date("2015-12-31"), 1], [1, 'a']);
+  assert.ok(true, "Same length arrays input argument");
+});
