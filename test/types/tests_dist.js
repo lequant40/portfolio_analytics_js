@@ -374,6 +374,40 @@ QUnit.test('Date', function(assert) {
 });
 
 
+QUnit.test('Date Array', function(assert) {    
+  assert.throws(function() {
+      PortfolioAnalytics.assertDateArray_(1);
+    },
+    new Error("input must be an array of dates"),
+    "No array input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.assertDateArray_();
+    },
+    new Error("input must be an array of dates"),
+    "Empty array input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertDateArray_(['a']);
+    },
+    new Error("input must be an array of dates"),
+    "String array input argument"
+  );
+
+  assert.throws(function() {
+      PortfolioAnalytics.assertDateArray_([new Date("2015-12-31"), new Date("2015-12-32")]);
+    },
+    new Error("input must be an array of dates"),
+    "Wrong dates array input argument"
+  );  
+  
+  PortfolioAnalytics.assertDateArray_([new Date("2015-12-31"), new Date("2015-12-31"), new Date("2015-12-31")]);
+  assert.ok(true, "All dates array input argument");
+});
+
+
 QUnit.test('String Enumeration', function(assert) {    
   assert.throws(function() {
       PortfolioAnalytics.assertStringEnumeration_();

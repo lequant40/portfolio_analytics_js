@@ -429,6 +429,7 @@ PortfolioAnalytics = (function(self) {
   self.assertString_ = function(x) { return assertString_(x); }
   self.assertStringEnumeration_ = function(x, allowedValues) { return assertStringEnumeration_(x, allowedValues); }
   self.assertDate_ = function(x) { return assertDate_(x); }
+  self.assertDateArray_ = function(x) { return assertDateArray_(x); }
   /* End Wrapper public methods */
   
 /* End Not to be used as is in Google Sheets */  
@@ -465,7 +466,7 @@ PortfolioAnalytics = (function(self) {
 	* @param {Array.<Object>} x input parameter.
 	*
 	* @example
-	* assertNumberArray_([]); 
+	* assertNumberArray_([1]); 
 	* //
 	*
 	* @example
@@ -772,7 +773,51 @@ PortfolioAnalytics = (function(self) {
 	}
 	
 
-/* Start Not to be used as is in Google Sheets */
+	/**
+	* @function assertDateArray_
+	*
+	* @description Throws an error if the input parameter is not an array of dates.
+	* 
+	* @param {Array.<Object>} x input parameter.
+	*
+	* @example
+	* assertDateArray_([new Date("2015-12-31")]); 
+	* //
+	*
+	* @example
+	* assertDateArray_(1); 
+	* // Error("input must be an array of dates")
+	*
+    * assertDateArray_([-1]); 
+	* // Error("input must be an array of dates")
+	*/
+	function assertDateArray_(x) {
+	  // A date array is an array...
+	  try {
+		assertArray_(x);
+	  }
+	  catch (e) {
+		throw new Error("input must be an array of dates");
+	  }
+
+     // ... non empty...
+	 if (x.length == 0) {
+	   throw new Error("input must be an array of dates");
+	 }
+	 
+     // ... and made of dates
+     for (var i=0; i<x.length; ++i) {
+  	   try {
+         self.assertDate_(x[i]);
+	   }
+       catch (e) {
+         throw new Error("input must be an array of dates");
+        }
+	  }
+	}
+
+	
+	/* Start Not to be used as is in Google Sheets */
    
    return self;
   
@@ -850,7 +895,7 @@ PortfolioAnalytics = (function(self) {
   function cagr(equityCurve, valuationDates) {
     // Input checks
     self.assertPositiveNumberArray_(equityCurve);
-    //TODO : assert DateArray
+	self.assertDateArray_(valuationDates);
 	//TODO: assertSameLengthArrays
 	
     // Extract the initial and the final equity curve values and valuation dates

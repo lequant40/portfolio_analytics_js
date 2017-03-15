@@ -44,7 +44,20 @@ QUnit.test('Cagr incorrect input arguments', function(assert) {
     "Negative numeric array input argument"
   );
   
-  //TODO: missing second array, second array not dates, arrays length different
+  assert.throws(function() {
+      PortfolioAnalytics.cagr([100]);
+    },
+    new Error ("input must be an array of dates"),
+    "Missing dates array input argument"
+  );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.cagr([100], ['a']);
+    },
+    new Error ("input must be an array of dates"),
+    "No dates array input argument"
+  );
+  //TODO: arrays length different
 
   // Other tests are delegated to the unit tests of types.js
 });

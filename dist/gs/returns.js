@@ -55,7 +55,7 @@
   function cagr(equityCurve, valuationDates) {
     // Input checks
     assertPositiveNumberArray_(equityCurve);
-    //TODO : assert DateArray
+	assertDateArray_(valuationDates);
 	//TODO: assertSameLengthArrays
 	
     // Extract the initial and the final equity curve values and valuation dates

@@ -36,7 +36,7 @@
 	* @param {Array.<Object>} x input parameter.
 	*
 	* @example
-	* assertNumberArray_([]); 
+	* assertNumberArray_([1]); 
 	* //
 	*
 	* @example
@@ -343,3 +343,47 @@
 	}
 	
 
+	/**
+	* @function assertDateArray_
+	*
+	* @description Throws an error if the input parameter is not an array of dates.
+	* 
+	* @param {Array.<Object>} x input parameter.
+	*
+	* @example
+	* assertDateArray_([new Date("2015-12-31")]); 
+	* //
+	*
+	* @example
+	* assertDateArray_(1); 
+	* // Error("input must be an array of dates")
+	*
+    * assertDateArray_([-1]); 
+	* // Error("input must be an array of dates")
+	*/
+	function assertDateArray_(x) {
+	  // A date array is an array...
+	  try {
+		assertArray_(x);
+	  }
+	  catch (e) {
+		throw new Error("input must be an array of dates");
+	  }
+
+     // ... non empty...
+	 if (x.length == 0) {
+	   throw new Error("input must be an array of dates");
+	 }
+	 
+     // ... and made of dates
+     for (var i=0; i<x.length; ++i) {
+  	   try {
+         assertDate_(x[i]);
+	   }
+       catch (e) {
+         throw new Error("input must be an array of dates");
+        }
+	  }
+	}
+
+	
