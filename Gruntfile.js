@@ -21,12 +21,12 @@ module.exports = function(grunt) {
 			pattern: /self\./g
 		},
         files: [
-		  {src: 'lib/drawdowns.js', dest: 'dist/gs/drawdowns.js'},
-		  {src: 'lib/types.js', dest: 'dist/gs/types.js'},
-		  {src: 'lib/returns.js', dest: 'dist/gs/returns.js'},
-		  {src: 'lib/ratios.js', dest: 'dist/gs/ratios.js'},
-		  {src: 'lib/stats.js', dest: 'dist/gs/stats.js'},
-		  {src: 'lib/blas.js', dest: 'dist/gs/blas.js'},
+		  {src: 'lib/drawdowns/drawdowns.js', dest: 'dist/gs/drawdowns.js'},
+		  {src: 'lib/types/types.js', dest: 'dist/gs/types.js'},
+		  {src: 'lib/returns/returns.js', dest: 'dist/gs/returns.js'},
+		  {src: 'lib/ratios/ratios.js', dest: 'dist/gs/ratios.js'},
+		  {src: 'lib/stats/stats.js', dest: 'dist/gs/stats.js'},
+		  {src: 'lib/blas/blas.js', dest: 'dist/gs/blas.js'},
 		]
       },
       portfolio_analytics_dist: {
@@ -38,12 +38,12 @@ module.exports = function(grunt) {
 			]
 		},
         files: [
-		  {src: 'lib/drawdowns.js', dest: 'lib/drawdowns_dist.js'},
-		  {src: 'lib/returns.js', dest: 'lib/returns_dist.js'},
-		  {src: 'lib/ratios.js', dest: 'lib/ratios_dist.js'},
-		  {src: 'lib/types.js', dest: 'lib/types_dist.js'},
-		  {src: 'lib/stats.js', dest: 'lib/stats_dist.js'},
-		  {src: 'lib/blas.js', dest: 'lib/blas_dist.js'},
+		  {src: 'lib/drawdowns/drawdowns.js', dest: 'lib/drawdowns/drawdowns_dist.js'},
+		  {src: 'lib/returns/returns.js', dest: 'lib/returns/returns_dist.js'},
+		  {src: 'lib/ratios/ratios.js', dest: 'lib/ratios/ratios_dist.js'},
+		  {src: 'lib/types/types.js', dest: 'lib/types/types_dist.js'},
+		  {src: 'lib/stats/stats.js', dest: 'lib/stats/stats_dist.js'},
+		  {src: 'lib/blas/blas.js', dest: 'lib/blas/blas_dist.js'},
 		]
       },
     },
@@ -53,11 +53,11 @@ module.exports = function(grunt) {
 	    separator: ';',
     	},
 	  portfolio_analytics_dev: {
-	    src: ['lib/drawdowns.js', 'lib/types.js', 'lib/returns.js', 'lib/stats.js', 'lib/blas.js', 'lib/ratios.js'],
+	    src: ['lib/drawdowns/drawdowns.js', 'lib/types//types.js', 'lib/returns/returns.js', 'lib/stats/stats.js', 'lib/blas/blas.js', 'lib/ratios/ratios.js'],
 	    dest: 'dist/portfolio_analytics.dev.js',
 	  },
 	  portfolio_analytics_dist: {
-	    src: ['lib/drawdowns_dist.js', 'lib/types_dist.js', 'lib/returns_dist.js', 'lib/stats_dist.js', 'lib/blas_dist.js', 'lib/ratios_dist.js'],
+	    src: ['lib/drawdowns/drawdowns_dist.js', 'lib/types//types_dist.js', 'lib/returns/returns_dist.js', 'lib/stats/stats_dist.js', 'lib/blas/blas_dist.js', 'lib/ratios/ratios_dist.js'],
 	    dest: 'dist/portfolio_analytics.dist.js',
 	  },
 	},
