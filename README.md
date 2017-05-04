@@ -1,6 +1,6 @@
 | [French version](readme.fr.md)
 
-# PortfolioAnalytics v0.0.2 ([Changelog](changelog.md))
+# PortfolioAnalytics v0.0.3 ([Changelog](changelog.md))
 
 [![Travis Build Status](https://travis-ci.org/lequant40/portfolio_analytics_js.svg?style=flat)](https://travis-ci.org/lequant40/portfolio_analytics_js)
 
@@ -18,6 +18,7 @@ After several fruitless hours of Googling (incomplete codes, incorrect codes, un
 - Compatible with [Node.js](https://nodejs.org/) (i.e., back-end development)
 - (Performances) Automatically uses JavaScript Typed Arrays
 - (Performances and accuracy) Internally uses LAPACK-inspired linear algebra methods (sum, dot product...)
+- (Accuracy) Internally uses accurate algorithms for statistical computations (mean, variance...)
 - Code continuously tested and integrated by [Travis CI](https://travis-ci.org/)
 - Code documented using [JSDoc](http://usejsdoc.org/)
 
@@ -61,24 +62,46 @@ To be done...
 
 ```js
 PortfolioAnalytics.maxDrawdown([1, 2, 1]); 
-// == 0.5 - the maximum drawdown
+// The maximum drawdown
 
 PortfolioAnalytics.drawdownFunction([1, 2, 1]); 
-// == [0.0, 0.0, 0.5] - the drawdown function
+// The drawdown function
 
 PortfolioAnalytics.topDrawdowns([1, 2, 1], 1); 
-// == [[0.5, 1.0, 2.0]] - the top 'n' drawdowns (second largest drawdown, etc.) with their start/end indexes
+// The top 'n' drawdowns (second largest drawdown, etc.) with their start/end indexes
 
 PortfolioAnalytics.ulcerIndex([1, 2, 1]);
-// == ~0.289 - the Ulcer Index
+// The Ulcer Index
 
 PortfolioAnalytics.painIndex([1, 2, 1]);
-// == ~0.167- the Pain Index, also corresponding to the average of the drawdown function
+// The Pain Index, also corresponding to the average of the drawdown function
 
 PortfolioAnalytics.conditionalDrawdown([100, 90, 80], 0.5);
-// == 0.2 - the conditional drawdown at alpha level 0.5
+// The conditional drawdown
 ```
 
+#### Returns related measures
+
+```js
+PortfolioAnalytics.cumulativeReturn([1, 2, 1]); 
+// The cumulative return from first to last period
+
+PortfolioAnalytics.cagr([1, 2, 1], [new Date("2015-12-31"), new Date("2016-12-31"), new Date("2017-12-31")]); 
+// The compound annual growth rate (CAGR) from first to last date
+
+PortfolioAnalytics.arithmeticReturns([1, 2, 1]); 
+// The arithmetic returns for all periods
+
+PortfolioAnalytics.valueAtRisk([1, 2, 1], 0.7);
+// The (percent) value at risk
+```
+
+#### Returns to variability related measures
+
+```js
+PortfolioAnalytics.gainToPainRatio([1, 2, 1]); 
+// The gain to pain ratio
+```
 
 ## How to contribute ?
 

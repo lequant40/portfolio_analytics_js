@@ -1,4 +1,4 @@
-# PortfolioAnalytics v0.0.2 ([Changelog](changelog.md))
+# PortfolioAnalytics v0.0.3 ([Changelog](changelog.md))
 
 [![Travis Build Status](https://travis-ci.org/lequant40/portfolio_analytics_js.svg?style=flat)](https://travis-ci.org/lequant40/portfolio_analytics_js)
 
@@ -15,6 +15,7 @@ Après avoir cherché en vain mon bonheur sur Internet (codes incomplets, ou ave
 - Compatible avec [Node.js](https://nodejs.org/) (i.e., développement back-end)
 - (Performances) Utilisation automatique des tableaux typés JavaScript
 - (Performances et précision) Utilisation interne de méthodes d'algèbre linéaire similaires à celles de LAPACK (somme, produit scalaire...)
+- (Précision) Utilisation interne de méthodes précises pour les calculs statistiques (moyenne, variance...)
 - Code testé et intégré de manière continue avec [Travis CI](https://travis-ci.org/)
 - Code documenté avec [JSDoc](http://usejsdoc.org/)
 
@@ -55,27 +56,49 @@ A venir...
 ### Exemples
 
 #### Mesures liées aux pertes (drawdowns)
+
 ```js
 PortfolioAnalytics.maxDrawdown([1, 2, 1]); 
-// == 0.5 - la perte maximale (maximum drawdown)
+// == La perte maximale (maximum drawdown)
 
 PortfolioAnalytics.drawdownFunction([1, 2, 1]); 
-// == [0.0, 0.0, 0.5] - la fonction de pertes (drawdown function)
+// == La fonction de pertes (drawdown function)
 
 PortfolioAnalytics.topDrawdowns([1, 2, 1], 1); 
-// == [[0.5, 1.0, 2.0]] - les 'n' pertes maximales (second largest drawdown, etc.) avec leurs indexes de début/fin
+// == Les 'n' pertes maximales (second largest drawdown, etc.) avec leurs indexes de début/fin
 
 PortfolioAnalytics.ulcerIndex([1, 2, 1]);
-// == ~0.289 - l'Ulcer Index
+// == L'Ulcer Index
 
 PortfolioAnalytics.painIndex([1, 2, 1]);
-// == ~0.167- le Pain Index, qui correspond aussi à la valeur moyenne de la fonction de pertes
+// == Le Pain Index, qui correspond aussi à la valeur moyenne de la fonction de pertes
 
 PortfolioAnalytics.conditionalDrawdown([100, 90, 80], 0.5);
-// == 0.2 - la perte conditionelle (conditional drawdown) au niveau alpha 0.5
-  
+// == La perte conditionelle (conditional drawdown)
 ```
 
+#### Mesures liées aux rendements
+
+```js
+PortfolioAnalytics.cumulativeReturn([1, 2, 1]); 
+// Le rendement cumulé de la première à la dernière période
+
+PortfolioAnalytics.cagr([1, 2, 1], [new Date("2015-12-31"), new Date("2016-12-31"), new Date("2017-12-31")]); 
+// Le taux de croissance annuel composé (CAGR) de la première à la dernière date
+
+PortfolioAnalytics.arithmeticReturns([1, 2, 1]); 
+// Les rendements arithmétiques pour toutes les périodes
+
+PortfolioAnalytics.valueAtRisk([1, 2, 1], 0.7);
+// La valeur à risque en pourcentage (value at risk)
+```
+
+#### Mesures liées aux rendements par rapport à la variabilité
+
+```js
+PortfolioAnalytics.gainToPainRatio([1, 2, 1]); 
+// Le ratio gain to pain
+```
 
 ## Comment contribuer ?
 
