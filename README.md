@@ -18,7 +18,7 @@ After several fruitless hours of Googling (incomplete codes, incorrect codes, un
 - Compatible with [Node.js](https://nodejs.org/) (i.e., back-end development)
 - (Performances) Automatically uses JavaScript Typed Arrays
 - (Performances and accuracy) Internally uses LAPACK-inspired linear algebra methods (sum, dot product...)
-- (Accuracy) Internally uses accurate algorithms for statistical computations (mean, variance...)
+- (Accuracy) Internally uses accurate algorithms for statistical computations (e.g., corrected two pass algorithms for mean and variance...)
 - Code continuously tested and integrated by [Travis CI](https://travis-ci.org/)
 - Code documented using [JSDoc](http://usejsdoc.org/)
 

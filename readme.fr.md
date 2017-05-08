@@ -15,7 +15,7 @@ Après avoir cherché en vain mon bonheur sur Internet (codes incomplets, ou ave
 - Compatible avec [Node.js](https://nodejs.org/) (i.e., développement back-end)
 - (Performances) Utilisation automatique des tableaux typés JavaScript
 - (Performances et précision) Utilisation interne de méthodes d'algèbre linéaire similaires à celles de LAPACK (somme, produit scalaire...)
-- (Précision) Utilisation interne de méthodes précises pour les calculs statistiques (moyenne, variance...)
+- (Précision) Utilisation interne de méthodes précises pour les calculs statistiques (algorithmes corrigés en deux passes pour le calcul de la moyenne, de la variance...)
 - Code testé et intégré de manière continue avec [Travis CI](https://travis-ci.org/)
 - Code documenté avec [JSDoc](http://usejsdoc.org/)
 
