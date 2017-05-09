@@ -31,7 +31,53 @@ ou soit :
 
 - Importer les fichiers JavaScript contenus dans [le répertoire dist/gs](https://github.com/lequant40/portfolio_analytics_js/tree/master/dist/gs)
 
-Vous trouverez des exemples d'utilisation spécifiques à Google Sheets (récupération des données depuis une plage de cellules, etc.) dans [cette feuille de calcul](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing).
+Dans les deux cas, vous pouvez ensuite appeler les fonctions de PortfolioAnalytics de la manière que vous préferez :
+
+- En utilisant une fonction qui encapsule ces appels, fonction qui est directement accessible depuis votre feuille de calcul et à laquelle vous pouvez donc fournir une plage de données quelconque (A1:A99...), e.g.:
+
+```js
+function computeUlcerIndexWrapper(iEquityCurveRange) {
+  // La plage d'entree est convertie en tableau
+  var aInternalArray = [];
+  for (var i=0; i<iEquityCurveRange.length; ++i) {
+    aInternalArray.push(iEquityCurveRange[i][0]);
+  }
+    
+  // Calcul de l'index par PortfolioAnalytics
+  var ulcerIndex = PortfolioAnalytics.ulcerIndex(aInternalArray);
+  
+  // Renvoi de cet index a la feuille de calcul
+  return ulcerIndex;
+}
+```
+
+- En utilisant des fonctions internes à Google Apps Script - typiquement la famille de fonctions getRange(...) -, qui sont optimisées pour les performances, e.g.:
+
+```js
+function computeUlcerIndex() {
+  // Adapte de https://developers.google.com/apps-script/reference/spreadsheet/sheet#getrangerow-column-numrows
+ var ss = SpreadsheetApp.getActiveSpreadsheet();
+ var sheet = ss.getSheets()[0];
+ var range = sheet.getRange(1, 1, 100); // A1:A100
+ var values = range.getValues();
+
+ // Conversion de la plage ci-dessus en tableau
+ var aInternalArray = [];
+ for (var row in values) {
+   for (var col in values[row]) {
+     aInternalArray.push(values[row][col]);
+   }
+ }
+ 
+  // Calcul de l'index
+  var ulcerIndex = PortfolioAnalytics.ulcerIndex(aInternalArray);
+  
+  // Utilisation de l'index (nouveau calcul, ecriture dans la feuille de calcul...)
+  ...
+}
+```
+
+Vous trouverez des exemples d'utilisation dans [cette feuille de calcul](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing).
 
 ### Utilisation avec un navigateur
 

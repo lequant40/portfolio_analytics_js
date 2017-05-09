@@ -28,13 +28,59 @@ After several fruitless hours of Googling (incomplete codes, incorrect codes, un
 
 If you would like to use PortfolioAnalytics in Google Sheets, you can either:
 
-- (Recommended) [Import the external Google Apps Script library](https://developers.google.com/apps-script/guide_libraries) with Script ID 1NXwj16pdgcJT-XG5LiWRJyRW604Dj26U4lqgGsJJfOKLum4y9grakXPI from your spreadsheet
+- (Recommended) [Import the external Google Apps Script library](https://developers.google.com/apps-script/guide_libraries) with Script ID 1NXwj16pdgcJT-XG5LiWRJyRW604Dj26U4lqgGsJJfOKLum4y9grakXPI into your spreadsheet script
 
 or:
 
-- Import the JavaScript files from the [dist/gs directory](https://github.com/lequant40/portfolio_analytics_js/tree/master/dist/gs) into your spreadsheet
+- Import the JavaScript files from the [dist/gs directory](https://github.com/lequant40/portfolio_analytics_js/tree/master/dist/gs) into your spreadsheet script
 
-You can find examples of PortfolioAnalytics usage in Google Sheets (data retrieval from cells...) in [this spreadsheet](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing). 
+In both cases, providing data to the PortfolioAnalytics functions is then accomplished your preferred way:
+
+- Using a wrapper function in your spreadsheet script, directly accessible from your spreadsheet, to which you can provide a standard data range (A1:A99...), e.g.:
+
+```js
+function computeUlcerIndexWrapper(iEquityCurveRange) {
+  // Convert the input range coming from the spreadsheet into an array
+  var aInternalArray = [];
+  for (var i=0; i<iEquityCurveRange.length; ++i) {
+    aInternalArray.push(iEquityCurveRange[i][0]);
+  }
+    
+  // Compute the index
+  var ulcerIndex = PortfolioAnalytics.ulcerIndex(aInternalArray);
+  
+  // Return it to the spreadsheet
+  return ulcerIndex;
+}
+```
+
+- Using pure Google Apps Script functions - typically the getRange(...) familly of functions -, optimized for speed, e.g.:
+
+```js
+function computeUlcerIndex() {
+  // Adapted from https://developers.google.com/apps-script/reference/spreadsheet/sheet#getrangerow-column-numrows
+ var ss = SpreadsheetApp.getActiveSpreadsheet();
+ var sheet = ss.getSheets()[0];
+ var range = sheet.getRange(1, 1, 100); // A1:A100
+ var values = range.getValues();
+
+ // Convert the above range into an array
+ var aInternalArray = [];
+ for (var row in values) {
+   for (var col in values[row]) {
+     aInternalArray.push(values[row][col]);
+   }
+ }
+ 
+  // Compute the index
+  var ulcerIndex = PortfolioAnalytics.ulcerIndex(aInternalArray);
+  
+  // Do something with it (use it in a computation, write it back to the spreadsheet, etc.)
+  ...
+}
+```
+
+You can find examples of PortfolioAnalytics usage in [this spreadsheet](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing). 
 
 
 ### Usage inside a browser
