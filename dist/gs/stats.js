@@ -95,12 +95,12 @@
   /**
   * @function mean_
   *
-  * @description Compute the sample mean of the values of a numeric array, using a corrected two-pass formula.
+  * @description Compute the mean of the values of a numeric array, using a corrected two-pass formula.
   *
   * @see <a href="http://dl.acm.org/citation.cfm?doid=365719.365958">Peter M. Neely (1966) Comparison of several algorithms for computation of means, standard deviations and correlation coefficients. Commun ACM 9(7):496–499.</a>
   * 
   * @param {Array.<number>} x the input numeric array.
-  * @return {number} the sample mean of the values of the input array.
+  * @return {number} the mean of the values of the input array.
   *
   * @example
   * mean_([2,4]); 
@@ -134,20 +134,20 @@
 
 
  /**
-  * @function sampleVariance_
+  * @function variance_
   *
-  * @description Compute the sample variance of the values of a numeric array, using a corrected two-pass formula.
+  * @description Compute the (biased) variance of the values of a numeric array, using a corrected two-pass formula.
   *
   * @see <a href="http://dl.acm.org/citation.cfm?doid=365719.365958">Peter M. Neely (1966) Comparison of several algorithms for computation of means, standard deviations and correlation coefficients. Commun ACM 9(7):496–499.</a>
   *
   * @param {Array.<number>} x the input numeric array.
-  * @return {number} the sample variance of the values of the input array.
+  * @return {number} the variance of the values of the input array.
   *
   * @example
-  * sampleVariance_([4, 7, 13, 16]); 
-  * // 30
+  * variance_([4, 7, 13, 16]); 
+  * // 22.5
   */
-  function sampleVariance_(x) {
+  function variance_(x) {
     // Input checks
     assertNumberArray_(x);
 	
@@ -173,31 +173,170 @@
 	}
 	
 	// Compute the corrected sum of squares of the deviations from the mean
-	var S = sumSquareDiff - ((sumDiff * sumDiff)/nn);
+	var S = sumSquareDiff - ((sumDiff * sumDiff) / nn);
 	
 	// Return the corrected variance
-    return S/(nn-1);
+    return S/nn;
   }
 
 
  /**
-  * @function sampleStddev_
+  * @function stddev_
   *
-  * @description Compute the sample standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the sampleVariance_ function)
+  * @description Compute the (biased) standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
   *
   * @param {Array.<number>} x the input numeric array.
-  * @return {number} the sample standard deviation of the values of the input array.
+  * @return {number} the standard deviation of the values of the input array.
   *
   * @example
-  * sampleStddev_([1,2]); 
-  * // ~0.707
+  * stddev_([1,2]); 
+  * // 0.5
   */
-  function sampleStddev_(x) {
-    // Input checks
-    assertNumberArray_(x);
-	
+  function stddev_(x) {
+    // Input checks are delegated
+
     //
-	return Math.sqrt(sampleVariance_(x));
+	return Math.sqrt(variance_(x));
   }
   
 
+ /**
+  * @function skewness_
+  *
+  * @description Compute the (biased) skewness of the values of a numeric array, using a corrected two-pass formula.
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Skewness">https://en.wikipedia.org/wiki/Skewness</a>
+  * 
+  * @see <a href="http://link.springer.com/article/10.1007/s00180-015-0637-z">Pébay, P., Terriberry, T.B., Kolla, H. et al (2016) Numerically stable, scalable formulas for parallel and online computation of higher-order multivariate central moments with arbitrary weights. Comput Stat (2016) 31: 1305.</a>
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the skewness of the values of the input array.
+  *
+  * @example
+  * skewness_([4, 7, 13, 16]); 
+  * // XXX
+  */
+  function skewness_(x) {
+    // Input checks
+    assertNumberArray_(x);
+	
+	// In case the input array is made of less than two elements, the skewness is not defined
+	if (x.length <= 2) {
+	  return NaN;
+	}
+	
+	// Initialisations
+    var nn = x.length;
+	
+    // Compute the mean of the input numeric array (first pass)
+	var meanX = mean_(x);
+	
+	// By definition, the skewness is equals to E[((X-m)/sigma)^3], 
+	// which can be expanded as 1/sigma^3 * ( E[X^3] - 2*E[X]*E[X^2] + 2*E[X]^3 )
+	//
+	// Then, as central moments are invariants when data is translated by a constant
+	// (c.f. formula 3.40 of the reference and explanations thereby), X can be replaced
+	// by X - meanX computed above.
+	
+	// Compute the cubed deviations plus the correction factors (second pass)
+	var sumCubeDiff = 0.0;
+	var sumSquareDiff = 0.0;
+	var sumDiff = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  var diff = (x[i] - meanX);
+	  var squareDiff = diff * diff;
+	  sumCubeDiff += diff * squareDiff;
+	  sumSquareDiff += squareDiff;
+	  sumDiff += diff;
+	}
+	
+	// Compute the corrected sum of cubes of the deviations from the mean
+	var sumDiff_sumDiff = sumDiff * sumDiff;
+	var S = sumCubeDiff - (2 * sumDiff * sumSquareDiff / nn) + (2 * sumDiff_sumDiff * sumDiff / (nn * nn));
+	
+	// Note: To avoid calling the computation of the variance and redo two passes on the data, 
+	// compute the corrected variance here (c.f. the variance_ function)
+	var correctedVariance = (sumSquareDiff - (sumDiff_sumDiff / nn)) / nn;
+	
+	// Return the corrected skewness
+	if (correctedVariance == 0.0) {
+	  return NaN;
+	}
+	else {
+      return S/(nn * Math.sqrt(correctedVariance) * correctedVariance);
+	}
+  }
+  
+
+ /**
+  * @function kurtosis_
+  *
+  * @description Compute the (biased, non excess) kurtosis of the values of a numeric array, using a corrected two-pass formula.
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Kurtosis">https://en.wikipedia.org/wiki/Kurtosis</a>
+  * 
+  * @see <a href="http://link.springer.com/article/10.1007/s00180-015-0637-z">Pébay, P., Terriberry, T.B., Kolla, H. et al (2016) Numerically stable, scalable formulas for parallel and online computation of higher-order multivariate central moments with arbitrary weights. Comput Stat (2016) 31: 1305.</a>
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the skewness of the values of the input array.
+  *
+  * @example
+  * kurtosis_([4, 7, 13, 16]); 
+  * // XXX
+  */
+  function kurtosis_(x) {
+    // Input checks
+    assertNumberArray_(x);
+	
+	// In case the input array is made of less than three elements, the skewness is not defined
+	if (x.length <= 3) {
+	  return NaN;
+	}
+	
+	// Initialisations
+    var nn = x.length;
+	
+    // Compute the mean of the input numeric array (first pass)
+	var meanX = mean_(x);
+	
+	// By definition, the kurtosis is equals to E[((X-m)/sigma)^4], 
+	// which can be expanded as 1/sigma^4 * ( E[X^4] - 4*E[X]*E[X^3] + 6*E[X]^2*E[X^2] - 3*E[X]^4 )
+	//
+	// Then, as central moments are invariants when data is translated by a constant
+	// (c.f. formula 3.40 of the reference and explanations thereby), X can be replaced
+	// by X - meanX computed above.
+	
+	// Compute the bi-squarred deviations plus the correction factors (second pass)
+	var sumBiSquareDiff = 0.0;
+	var sumCubeDiff = 0.0;
+	var sumSquareDiff = 0.0;
+	var sumDiff = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  var diff = (x[i] - meanX);
+	  var squareDiff = diff * diff;
+	  sumBiSquareDiff += squareDiff * squareDiff;
+	  sumCubeDiff += diff * squareDiff;
+	  sumSquareDiff += squareDiff;
+	  sumDiff += diff;
+	}
+	
+	// Compute the corrected sum of bi-squarres of the deviations from the mean
+	var nn_nn = nn * nn;
+	var sumDiff_sumDiff = sumDiff * sumDiff;
+	var S = sumBiSquareDiff - (4 * sumDiff * sumCubeDiff / nn) + (6 * sumDiff_sumDiff * sumSquareDiff / nn_nn)  - (3 * sumDiff_sumDiff * sumDiff_sumDiff / (nn_nn * nn));
+	
+	// Note: To avoid calling the computation of the variance and redo two passes on the data, 
+	// compute the corrected variance here (c.f. the variance_ function)
+	var correctedVariance = (sumSquareDiff - (sumDiff_sumDiff / nn)) / nn;
+	
+	// Return the corrected kurtosis
+	if (correctedVariance == 0.0) {
+	  return NaN;
+	}
+	else {
+      return S/(nn * correctedVariance * correctedVariance);
+	}
+  }
+  
+  
+  

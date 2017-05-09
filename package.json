@@ -1,6 +1,6 @@
 {
   "name": "portfolio_analytics",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "date": "2016-10-06",
   "author": "Roman Rubsamen <roman.rubsamen@gmail.com>",
   "contributors": [],
@@ -14,7 +14,7 @@
     "quantitative analysis",
     "finance",
     "portfolio performances",
-	"statistics"
+    "statistics"
   ],
   "repository": {
     "type": "git",
@@ -22,10 +22,11 @@
   },
   "devDependencies": {
     "grunt": "^1.0.0",
+    "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-qunit": "^1.2.0",
     "grunt-contrib-uglify": "^1.0.2",
-	"grunt-strip-code": "^1.0.4",
-	"grunt-contrib-concat": "^1.0.1"
+    "grunt-replace": "^1.0.1",
+    "grunt-strip-code": "^1.0.4"
   },
   "bugs": {
     "url": "https://github.com/lequant40/portfolio_analytics_js/issues"

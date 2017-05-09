@@ -64,7 +64,7 @@
   * dot_([1,2,3,4], [1,1,1,1]); 
   * // 10
   */
-  function dot_(x,y) {
+  function dot_ (x,y) {
     // Input checks
     assertNumberArray_(x);
 	assertNumberArray_(y);

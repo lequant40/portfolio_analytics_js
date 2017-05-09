@@ -6,6 +6,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-strip-code');
   grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-replace');
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -17,16 +18,10 @@ module.exports = function(grunt) {
 			{ start_block: "/* Start Not to be used as is in Google Sheets */",
 			  end_block: "/* End Not to be used as is in Google Sheets */"
 			}
-			],
-			pattern: /self\./g
+			]
 		},
         files: [
-		  {src: 'lib/drawdowns/drawdowns.js', dest: 'dist/gs/drawdowns.js'},
-		  {src: 'lib/types/types.js', dest: 'dist/gs/types.js'},
-		  {src: 'lib/returns/returns.js', dest: 'dist/gs/returns.js'},
-		  {src: 'lib/ratios/ratios.js', dest: 'dist/gs/ratios.js'},
-		  {src: 'lib/stats/stats.js', dest: 'dist/gs/stats.js'},
-		  {src: 'lib/blas/blas.js', dest: 'dist/gs/blas.js'},
+		  { expand: true, flatten: true, src: ['lib/**/*.js'], dest: 'dist/gs/'}
 		]
       },
       portfolio_analytics_dist: {
@@ -38,26 +33,42 @@ module.exports = function(grunt) {
 			]
 		},
         files: [
-		  {src: 'lib/drawdowns/drawdowns.js', dest: 'lib/drawdowns/drawdowns_dist.js'},
-		  {src: 'lib/returns/returns.js', dest: 'lib/returns/returns_dist.js'},
-		  {src: 'lib/ratios/ratios.js', dest: 'lib/ratios/ratios_dist.js'},
-		  {src: 'lib/types/types.js', dest: 'lib/types/types_dist.js'},
-		  {src: 'lib/stats/stats.js', dest: 'lib/stats/stats_dist.js'},
-		  {src: 'lib/blas/blas.js', dest: 'lib/blas/blas_dist.js'},
+		  { expand: true, flatten: true, src: ['lib/**/*.js'], dest: 'build/'}
 		]
       },
     },
 
+    replace: {
+      portfolio_analytics_gs: {
+        options: {
+		  preserveOrder: true,
+          patterns: [
+            {
+              match: /self\.(\w+)\s=\sfunction/g,
+              replacement: 'function $1'
+            },
+            {
+              match: /self\./g,
+              replacement: ''
+            }			
+          ]
+        },
+        files: [
+          { expand: true, flatten: true, src: ['dist/gs/*.js'], dest: 'dist/gs/'}
+        ]
+      }
+    },
+	
 	concat: {
 	  options: {
 	    separator: ';',
     	},
 	  portfolio_analytics_dev: {
-	    src: ['lib/drawdowns/drawdowns.js', 'lib/types//types.js', 'lib/returns/returns.js', 'lib/stats/stats.js', 'lib/blas/blas.js', 'lib/ratios/ratios.js'],
+	    src: ['lib/**/*.js'],
 	    dest: 'dist/portfolio_analytics.dev.js',
 	  },
 	  portfolio_analytics_dist: {
-	    src: ['lib/drawdowns/drawdowns_dist.js', 'lib/types//types_dist.js', 'lib/returns/returns_dist.js', 'lib/stats/stats_dist.js', 'lib/blas/blas_dist.js', 'lib/ratios/ratios_dist.js'],
+	    src: ['build/**/*.js'],
 	    dest: 'dist/portfolio_analytics.dist.js',
 	  },
 	},
@@ -85,6 +96,7 @@ module.exports = function(grunt) {
 
   });
 
+
   //
   grunt.registerTask('test', 'Tests the app.', function() {
 	// Minify the app in dev mode and run all unit tests
@@ -105,5 +117,6 @@ module.exports = function(grunt) {
 	
     // And generate the Google Spreadsheet version
 	grunt.task.run('strip_code:portfolio_analytics_gs');
+	grunt.task.run('replace:portfolio_analytics_gs');
   });
 };
