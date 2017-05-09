@@ -75,12 +75,12 @@ function computeUlcerIndex() {
   // Compute the index
   var ulcerIndex = PortfolioAnalytics.ulcerIndex(aInternalArray);
   
-  // Do something with it (use it in a computation, write it back to the spreadsheet, etc.
+  // Do something with it (use it in a computation, write it back to the spreadsheet, etc.)
   ...
 }
 ```
 
-You can find examples of PortfolioAnalytics usage in Google Sheets (data retrieval from cells...) in [this spreadsheet](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing). 
+You can find examples of PortfolioAnalytics usage in [this spreadsheet](https://docs.google.com/spreadsheets/d/16FDa3mhrvo8FTD62ravszhMZEkR-gIpipK4uLRNbj-o/edit?usp=sharing). 
 
 
 ### Usage inside a browser
