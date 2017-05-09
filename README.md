@@ -54,7 +54,7 @@ function computeUlcerIndexWrapper(iEquityCurveRange) {
 }
 ```
 
-- Using pure Google Apps Script functions - typically the getRange(...) familly of functions, optimized for speed, e.g.:
+- Using pure Google Apps Script functions - typically the getRange(...) familly of functions -, optimized for speed, e.g.:
 
 ```js
 function computeUlcerIndex() {
