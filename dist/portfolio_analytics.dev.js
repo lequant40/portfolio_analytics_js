@@ -581,6 +581,152 @@ PortfolioAnalytics = (function(self) {
 
 /* End Not to be used as is in Google Sheets */
 ;/**
+ * @file Functions related to Sharpe ratio computation.
+ * @author Roman Rubsamen <roman.rubsamen@gmail.com>
+ */
+
+/* Start Not to be used as is in Google Sheets */
+ 
+var PortfolioAnalytics = PortfolioAnalytics || {};
+
+PortfolioAnalytics = (function(self) {
+  
+/* End Not to be used as is in Google Sheets */  
+  
+  /**
+  * @function sharpeRatio
+  *
+  * @description Compute the (historic) Sharpe ratio associated to a portfolio equity curve v.s. a benchmark equity curve.
+  *
+  * @see <a href="http://www.iijournals.com/doi/abs/10.3905/jpm.1994.409501?journalCode=jpm">The Sharpe Ratio, William F. Sharpe, The Journal of Portfolio Management, Fall 1994, Vol. 21, No. 1: pp.49-58</a>
+  * 
+  * @param {Array.<number>} equityCurvePortfolio the portfolio equity curve.
+  * @param {Array.<number>} equityCurveBenchmark the benchmark equity curve.
+  * @return {number|Array.<number>} the (historic) Sharpe ratio.
+  *
+  * @example
+  * sharpeRatio([1, 2, 3], [1, 1, 1]); 
+  * // XXX
+  */
+  self.sharpeRatio = function(equityCurvePortfolio, equityCurveBenchmark) {
+    // No need for input checks, as done in function below
+	
+	// Compute the arithmetic returns of the portfolio
+	var portfolioReturns = self.arithmeticReturns(equityCurvePortfolio).slice(1); // First value is NaN
+
+	// Compute the arithmetic returns of the benchmark
+	var benchmarkReturns = self.arithmeticReturns(equityCurveBenchmark).slice(1); // First value is NaN
+
+	// If there are no usable returns, exit
+	if (portfolioReturns.length == 0 || benchmarkReturns.length == 0) {
+	  return NaN;
+	}
+
+	// Else, compute the differential returns
+	// TODO : NEW_FLOAT64_ARRAY(differentialReturns, portfolioReturns.length)
+	if (typeof Float64Array === 'function') { var differentialReturns = new Float64Array(portfolioReturns.length); } else { var differentialReturns = new Array(portfolioReturns.length) }
+    for (var i=0; i<portfolioReturns.length; ++i) {
+	  differentialReturns[i] = portfolioReturns[i] - benchmarkReturns[i];
+	}
+	
+    // And compute the Sharpe ratio
+	return self.sharpeRatio_(differentialReturns);	
+  }
+
+  
+  /**
+  * @function sharpeRatio_
+  *
+  * @description Compute the (historic) Sharpe ratio associated to the returns on a portfolio v.s. the returns on a benchmark portfolio.
+  *
+  * @see <a href="http://www.iijournals.com/doi/abs/10.3905/jpm.1994.409501?journalCode=jpm">The Sharpe Ratio, William F. Sharpe, The Journal of Portfolio Management, Fall 1994, Vol. 21, No. 1: pp.49-58</a>
+  * 
+  * @param {Array.<number>} differentialReturns the differential returns between a portfolio returns and a benchmark returns.
+  *
+  * @example
+  * sharpeRatio_([1, 2, 3]); 
+  * // XXX
+  */
+  self.sharpeRatio_ = function(differentialReturns) {
+    // Internal function => no specific checks on the input arguments
+		
+	// The historic Sharpe ratio is defined by the formula (6) of the reference
+      // Compute the average of differential returns 
+	var m = self.mean_(differentialReturns);
+	  
+	  // Compute the sample (i.e., unbiaised) standard deviation of differential returns
+	var sigma = self.sampleStddev_(differentialReturns);
+	  
+	// Return the Sharpe ratio
+	if (sigma == 0.0) {
+	  return NaN; // The Sharpe ratio is undefined in case there is a null variance
+	}
+	else {
+	  return m/sigma;
+	}
+  }
+
+
+  /**
+  * @function biasAdjustedSharpeRatio
+  *
+  * @description Compute the (historic) Sharpe ratio associated to a portfolio equity curve v.s. a benchmark equity curve, adjusted for its (small sample) bias.
+  *
+  * @see <a href="http://link.springer.com/article/10.1057/palgrave.jam.2250084">Comparing Sharpe ratios: So where are the p-values, J.D. Opdyke, Journal of Asset Management (2007) 8, 308–336</a>
+  * 
+  * @param {Array.<number>} equityCurvePortfolio the portfolio equity curve.
+  * @param {Array.<number>} equityCurveBenchmark the benchmark equity curve.
+  * @return {number|Array.<number>} the (historic) Sharpe ratio.
+  *
+  * @example
+  * biasAdjustedSharpeRatio([1, 2, 3], [1, 1, 1]); 
+  * // XXX
+  */
+  self.biasAdjustedSharpeRatio = function(equityCurvePortfolio, equityCurveBenchmark) {
+    // No need for input checks, as done in function below
+	
+	// Compute the arithmetic returns of the portfolio
+	var portfolioReturns = self.arithmeticReturns(equityCurvePortfolio).slice(1); // First value is NaN
+
+	// Compute the arithmetic returns of the benchmark
+	var benchmarkReturns = self.arithmeticReturns(equityCurveBenchmark).slice(1); // First value is NaN
+
+	// If there are no usable returns, exit
+	if (portfolioReturns.length == 0 || benchmarkReturns.length == 0) {
+	  return NaN;
+	}
+	
+	// Else, compute the differential returns
+	// TODO : NEW_FLOAT64_ARRAY(differentialReturns, portfolioReturns.length)
+	if (typeof Float64Array === 'function') { var differentialReturns = new Float64Array(portfolioReturns.length); } else { var differentialReturns = new Array(portfolioReturns.length) }
+    for (var i=0; i<portfolioReturns.length; ++i) {
+	  differentialReturns[i] = portfolioReturns[i] - benchmarkReturns[i];
+	}
+	
+	// Then compute the Sharpe ratio
+	var s = self.sharpeRatio_(differentialReturns);
+	
+	// Then compute its small sample bias, c.f. formula 11b of the reference
+	var bias = 1 + 0.25 * (self.sampleKurtosis_(differentialReturns) - 1)/portfolioReturns.length;
+	
+	// And return it
+	return s/bias
+  }
+  
+
+  
+  //self.sharpeRatioConfidenceInterval (alpha)
+  
+
+  
+/* Start Not to be used as is in Google Sheets */
+   
+   return self;
+  
+})(PortfolioAnalytics || {});
+
+/* End Not to be used as is in Google Sheets */
+;/**
  * @file Functions related to returns computation.
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
  */
@@ -900,7 +1046,7 @@ PortfolioAnalytics = (function(self) {
  /**
   * @function variance_
   *
-  * @description Compute the (biased) variance of the values of a numeric array, using a corrected two-pass formula.
+  * @description Compute the (population) variance of the values of a numeric array, using a corrected two-pass formula.
   *
   * @see <a href="http://dl.acm.org/citation.cfm?doid=365719.365958">Peter M. Neely (1966) Comparison of several algorithms for computation of means, standard deviations and correlation coefficients. Commun ACM 9(7):496–499.</a>
   *
@@ -944,30 +1090,74 @@ PortfolioAnalytics = (function(self) {
   }
 
 
- /**
+/**
+  * @function sampleVariance_
+  *
+  * @description Compute the (sample) variance of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the variance of the values of the input array.
+  *
+  * @example
+  * sampleVariance_([4, 7, 13, 16]); 
+  * // 30
+  */
+  self.sampleVariance_ = function(x) {
+    // Input checks are delegated
+    var v = self.variance_(x);
+	
+    //
+	var nn = x.length;
+	return v * nn/(nn - 1);
+  }
+
+  
+  /**
   * @function stddev_
   *
-  * @description Compute the (biased) standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  * @description Compute the (population) standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Standard_deviation">https://en.wikipedia.org/wiki/Standard_deviation</a>
   *
   * @param {Array.<number>} x the input numeric array.
   * @return {number} the standard deviation of the values of the input array.
   *
   * @example
-  * stddev_([1,2]); 
-  * // 0.5
+  * stddev_([1, 2, 3, 4]); 
+  * // ~1.12
   */
   self.stddev_ = function(x) {
     // Input checks are delegated
 
-    //
+    // 
 	return Math.sqrt(self.variance_(x));
   }
   
+  
+  /**
+  * @function sampleStddev_
+  *
+  * @description Compute the (sample) standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the standard deviation of the values of the input array.
+  *
+  * @example
+  * sampleStddev_([1, 2, 3, 4]); 
+  * // ~1.29
+  */
+  self.sampleStddev_ = function(x) {
+    // Input checks are delegated
 
+    //
+	return Math.sqrt(self.sampleVariance_(x));
+  }
+
+  
  /**
   * @function skewness_
   *
-  * @description Compute the (biased) skewness of the values of a numeric array, using a corrected two-pass formula.
+  * @description Compute the (population) skewness of the values of a numeric array, using a corrected two-pass formula.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Skewness">https://en.wikipedia.org/wiki/Skewness</a>
   * 
@@ -978,7 +1168,7 @@ PortfolioAnalytics = (function(self) {
   *
   * @example
   * skewness_([4, 7, 13, 16]); 
-  * // XXX
+  * // 0
   */
   self.skewness_ = function(x) {
     // Input checks
@@ -1033,9 +1223,33 @@ PortfolioAnalytics = (function(self) {
   
 
  /**
+  * @function sampleSkewness_
+  *
+  * @description Compute the (sample) skewness of the values of a numeric array, using a corrected two-pass formula (c.f. skewness_ function).
+  *
+  * @see <a href="www.jstor.org/stable/2988433">D. N. Joanes and C. A. Gill, Comparing Measures of Sample Skewness and Kurtosis, Journal of the Royal Statistical Society. Series D (The Statistician), Vol. 47, No. 1 (1998), pp. 183-189</a>
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the skewness of the values of the input array.
+  *
+  * @example
+  * sampleSkewness_([4, 7, 13, 16]); 
+  * // 0
+  */
+  self.sampleSkewness_ = function(x) {
+    // Input checks are delegated
+    var s = self.skewness_(x);
+	
+    // Compute the G1 coefficient from the reference
+	var nn = x.length;
+	return s * Math.sqrt(nn * (nn - 1))/(nn - 2);	
+  }
+  
+  
+ /**
   * @function kurtosis_
   *
-  * @description Compute the (biased, non excess) kurtosis of the values of a numeric array, using a corrected two-pass formula.
+  * @description Compute the (population, non excess) kurtosis of the values of a numeric array, using a corrected two-pass formula.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Kurtosis">https://en.wikipedia.org/wiki/Kurtosis</a>
   * 
@@ -1046,7 +1260,7 @@ PortfolioAnalytics = (function(self) {
   *
   * @example
   * kurtosis_([4, 7, 13, 16]); 
-  * // XXX
+  * // 1.36
   */
   self.kurtosis_ = function(x) {
     // Input checks
@@ -1102,6 +1316,29 @@ PortfolioAnalytics = (function(self) {
 	}
   }
   
+  
+ /**
+  * @function sampleKurtosis_
+  *
+  * @description Compute the (sample, non excess) kurtosis of the values of a numeric array, using a corrected two-pass formula (c.f. kurtosis_ function).
+  *
+  * @see <a href="www.jstor.org/stable/2988433">D. N. Joanes and C. A. Gill, Comparing Measures of Sample Skewness and Kurtosis, Journal of the Royal Statistical Society. Series D (The Statistician), Vol. 47, No. 1 (1998), pp. 183-189</a>
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the kurtosis of the values of the input array.
+  *
+  * @example
+  * sampleKurtosis_([4, 7, 13, 16]); 
+  * // ~-0.30
+  */
+  self.sampleKurtosis_ = function(x) {
+    // Input checks are delegated
+    var k = self.kurtosis_(x);
+	
+    // Compute the G2 coefficient from the reference, and add 3 as the excess kurtosis is not computed here
+	var nn = x.length;
+	return (nn - 1)/((nn - 2) * (nn - 3)) * ((nn + 1) * k - 3* (nn - 1)) + 3
+  }
   
   
 /* Start Not to be used as is in Google Sheets */

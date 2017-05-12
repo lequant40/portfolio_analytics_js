@@ -60,17 +60,27 @@ QUnit.test('Variance incorrect input arguments', function(assert) {
     "No input arguments"
   );
 
+  assert.throws(function() {
+      PortfolioAnalytics.sampleVariance_();
+    },
+    new Error("input must be an array of numbers"),
+    "No input arguments (sample)"
+  );
+  
   // Other tests are delegated to the unit tests of types.js
 });
 
 QUnit.test('Variance computation', function(assert) {      
   // Variance of one value is NaN
   assert.deepEqual(PortfolioAnalytics.variance_([1]), NaN, 'Variance of one number');
+  assert.deepEqual(PortfolioAnalytics.sampleVariance_([1]), NaN, 'Sample variance of one number');
   
   // Theoretically, Var(X + a) = Var(X), with a a constant
   // With a two pass formula, this formula should be valid for the case below
   assert.equal(PortfolioAnalytics.variance_([1000000000 + 4, 1000000000 + 7, 1000000000 + 13, 1000000000 + 16]), 22.5, 'Variance with no rounding error #1/2');
   assert.equal(PortfolioAnalytics.variance_([4, 7, 13, 16]), 22.5, 'Variance with no rounding error #2/2');
+  assert.equal(PortfolioAnalytics.sampleVariance_([1000000000 + 4, 1000000000 + 7, 1000000000 + 13, 1000000000 + 16]), 30, 'Sample variance with no rounding error #1/2');
+  assert.equal(PortfolioAnalytics.sampleVariance_([4, 7, 13, 16]), 30, 'Sample variance with no rounding error #2/2');
   
   // Bacon portfolio test
   assert.equal(PortfolioAnalytics.variance_(this.BaconReturns), 0.035974/this.BaconReturns.length + 0.0000000000000000003, 'Bacon variance');
@@ -88,12 +98,20 @@ QUnit.test('Standard deviation incorrect input arguments', function(assert) {
     "No input arguments"
   );
 
+  assert.throws(function() {
+      PortfolioAnalytics.sampleStddev_();
+    },
+    new Error("input must be an array of numbers"),
+    "No input arguments (sample)"
+  );
+  
   // Other tests are delegated to the unit tests of types.js
 });
 
 QUnit.test('Standard deviation computation', function(assert) {      
   // Standard deviation of one value is NaN
   assert.deepEqual(PortfolioAnalytics.stddev_([1]), NaN, 'Standard deviation of one number');
+  assert.deepEqual(PortfolioAnalytics.sampleStddev_([1]), NaN, 'Sample standard deviation of one number');
   
   // Uses identity stddev(x) = sqrt(var(x))
   var testArray = [];
@@ -101,10 +119,15 @@ QUnit.test('Standard deviation computation', function(assert) {
   for (var i=2; i<=10; ++i) {
     testArray.push(i);
 	assert.equal(PortfolioAnalytics.stddev_(testArray), Math.sqrt(PortfolioAnalytics.variance_(testArray)), 'Standard deviation #' + i);
+	assert.equal(PortfolioAnalytics.sampleStddev_(testArray), Math.sqrt(PortfolioAnalytics.sampleVariance_(testArray)), 'Sample standard deviation #' + i);
   } 
   
   // Bacon portfolio test
   assert.equal(PortfolioAnalytics.stddev_(this.BaconReturns), Math.sqrt(0.035974/this.BaconReturns.length + 0.0000000000000000003), 'Bacon standard deviation');
+  assert.equal(PortfolioAnalytics.sampleStddev_(this.BaconReturns), Math.sqrt(0.035974/(this.BaconReturns.length-1) + 0.0000000000000000003), 'Bacon sample standard deviation');
+  
+  // Wikipedia test (https://en.wikipedia.org/wiki/Standard_deviation#Basic_examples)
+  assert.equal(PortfolioAnalytics.stddev_([2, 4, 4, 4, 5, 5, 7, 9]), 2, 'Wikipedia standard deviation');
 });
 
 
@@ -115,6 +138,13 @@ QUnit.test('Skewness incorrect input arguments', function(assert) {
     new Error("input must be an array of numbers"),
     "No input arguments"
   );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.sampleSkewness_();
+    },
+    new Error("input must be an array of numbers"),
+    "No input arguments (sample)"
+  );  
 
   // Other tests are delegated to the unit tests of types.js
 });
@@ -123,11 +153,16 @@ QUnit.test('Skewness computation', function(assert) {
   // Skewness of one or two values is NaN
   assert.deepEqual(PortfolioAnalytics.skewness_([1]), NaN, 'Skewness of one number');
   assert.deepEqual(PortfolioAnalytics.skewness_([1, 2]), NaN, 'Skewness of two numbers');
-  
+  assert.deepEqual(PortfolioAnalytics.sampleSkewness_([1]), NaN, 'Sample skewness of one number');
+  assert.deepEqual(PortfolioAnalytics.sampleSkewness_([1, 2]), NaN, 'Sample skewness of two numbers');
+
   // Spiegel heigths test
   assert.equal(PortfolioAnalytics.skewness_(this.SpiegelHeights), -0.10815437112298999, 'Spiegel skewness'); 
+  assert.equal(PortfolioAnalytics.sampleSkewness_(this.SpiegelHeights), -0.10980840870973678, 'Spiegel sample skewness'); 
   
-  // Sample is  −0.1098
+  // Bacon portfolio test
+  assert.equal(PortfolioAnalytics.skewness_(this.BaconReturns), -114.99/(Math.pow(Math.sqrt(359.74/24),3) * 24) + 0.00000000000000026, 'Bacon skewness');
+  assert.equal(PortfolioAnalytics.sampleSkewness_(this.BaconReturns), -114.99/Math.pow(Math.sqrt(359.74/23),3) * 24 / (23 * 22) + 0.00000000000000026, 'Bacon sample skewness');
 });
 
 
@@ -138,6 +173,13 @@ QUnit.test('Kurtosis incorrect input arguments', function(assert) {
     new Error("input must be an array of numbers"),
     "No input arguments"
   );
+  
+  assert.throws(function() {
+      PortfolioAnalytics.sampleKurtosis_();
+    },
+    new Error("input must be an array of numbers"),
+    "No input arguments sample"
+  );
 
   // Other tests are delegated to the unit tests of types.js
 });
@@ -147,14 +189,23 @@ QUnit.test('Kurtosis computation', function(assert) {
   assert.deepEqual(PortfolioAnalytics.kurtosis_([1]), NaN, 'Kurtosis of one number');
   assert.deepEqual(PortfolioAnalytics.kurtosis_([1, 2]), NaN, 'Kurtosis of two numbers');
   assert.deepEqual(PortfolioAnalytics.kurtosis_([1, 2, 3]), NaN, 'Kurtosis of three numbers');
+  assert.deepEqual(PortfolioAnalytics.sampleKurtosis_([1]), NaN, 'Sample kurtosis of one number');
+  assert.deepEqual(PortfolioAnalytics.sampleKurtosis_([1, 2]), NaN, 'Sample kurtosis of two numbers');
+  assert.deepEqual(PortfolioAnalytics.sampleKurtosis_([1, 2, 3]), NaN, 'Sample kurtosis of three numbers');
   
   // Spiegel heigths test
   assert.equal(PortfolioAnalytics.kurtosis_(this.SpiegelHeights), 2.741758968539624, 'Spiegel kurtosis'); 
+  assert.equal(PortfolioAnalytics.sampleKurtosis_(this.SpiegelHeights), 2.7908529272488636, 'Spiegel sample kurtosis'); 
   
+  // Coming from D. N. Joanes and C. A. Gill, Comparing Measures of Sample Skewness and Kurtosis, Journal of the Royal Statistical Society. Series D (The Statistician), Vol. 47, No. 1 (1998), pp. 183-189
+  assert.equal(PortfolioAnalytics.sampleKurtosis_([10, 11, 12, 12, 12, 13, 13, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 16, 17]), 3.274318984817186, 'Joanes & Grill sample kurtosis'); 
+    
   // Wikipedia test (https://en.wikipedia.org/wiki/Kurtosis#Sample_kurtosis)
   assert.equal(PortfolioAnalytics.kurtosis_([0, 3, 4, 1, 2, 3, 0, 2, 1, 3, 2, 0, 2, 2, 3, 2, 5, 2, 3, 999]), 18.051426543784185, 'Wikipedia kurtosis'); 
   
-  // Sample −0.2091
+  // Bacon portfolio test
+  assert.equal(PortfolioAnalytics.kurtosis_(this.BaconReturns), 13116.28/(Math.pow(Math.sqrt(359.74/24),4) * 24) + 7.789024514259779e-7, 'Bacon kurtosis');
+  assert.equal(PortfolioAnalytics.sampleKurtosis_(this.BaconReturns), 13116.28/Math.pow(Math.sqrt(359.74/23),4) * (24 * 25)/ (23 * 22 * 21) - 3 * (23 * 23)/(22 * 21) + 3 + 9.69413224805038e-7 , 'Bacon sample kurtosis	');
 });
 
 

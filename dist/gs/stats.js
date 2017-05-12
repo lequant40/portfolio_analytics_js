@@ -136,7 +136,7 @@
  /**
   * @function variance_
   *
-  * @description Compute the (biased) variance of the values of a numeric array, using a corrected two-pass formula.
+  * @description Compute the (population) variance of the values of a numeric array, using a corrected two-pass formula.
   *
   * @see <a href="http://dl.acm.org/citation.cfm?doid=365719.365958">Peter M. Neely (1966) Comparison of several algorithms for computation of means, standard deviations and correlation coefficients. Commun ACM 9(7):496–499.</a>
   *
@@ -180,30 +180,74 @@
   }
 
 
- /**
+/**
+  * @function sampleVariance_
+  *
+  * @description Compute the (sample) variance of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the variance of the values of the input array.
+  *
+  * @example
+  * sampleVariance_([4, 7, 13, 16]); 
+  * // 30
+  */
+  function sampleVariance_(x) {
+    // Input checks are delegated
+    var v = variance_(x);
+	
+    //
+	var nn = x.length;
+	return v * nn/(nn - 1);
+  }
+
+  
+  /**
   * @function stddev_
   *
-  * @description Compute the (biased) standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  * @description Compute the (population) standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Standard_deviation">https://en.wikipedia.org/wiki/Standard_deviation</a>
   *
   * @param {Array.<number>} x the input numeric array.
   * @return {number} the standard deviation of the values of the input array.
   *
   * @example
-  * stddev_([1,2]); 
-  * // 0.5
+  * stddev_([1, 2, 3, 4]); 
+  * // ~1.12
   */
   function stddev_(x) {
     // Input checks are delegated
 
-    //
+    // 
 	return Math.sqrt(variance_(x));
   }
   
+  
+  /**
+  * @function sampleStddev_
+  *
+  * @description Compute the (sample) standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the standard deviation of the values of the input array.
+  *
+  * @example
+  * sampleStddev_([1, 2, 3, 4]); 
+  * // ~1.29
+  */
+  function sampleStddev_(x) {
+    // Input checks are delegated
 
+    //
+	return Math.sqrt(sampleVariance_(x));
+  }
+
+  
  /**
   * @function skewness_
   *
-  * @description Compute the (biased) skewness of the values of a numeric array, using a corrected two-pass formula.
+  * @description Compute the (population) skewness of the values of a numeric array, using a corrected two-pass formula.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Skewness">https://en.wikipedia.org/wiki/Skewness</a>
   * 
@@ -214,7 +258,7 @@
   *
   * @example
   * skewness_([4, 7, 13, 16]); 
-  * // XXX
+  * // 0
   */
   function skewness_(x) {
     // Input checks
@@ -269,9 +313,33 @@
   
 
  /**
+  * @function sampleSkewness_
+  *
+  * @description Compute the (sample) skewness of the values of a numeric array, using a corrected two-pass formula (c.f. skewness_ function).
+  *
+  * @see <a href="www.jstor.org/stable/2988433">D. N. Joanes and C. A. Gill, Comparing Measures of Sample Skewness and Kurtosis, Journal of the Royal Statistical Society. Series D (The Statistician), Vol. 47, No. 1 (1998), pp. 183-189</a>
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the skewness of the values of the input array.
+  *
+  * @example
+  * sampleSkewness_([4, 7, 13, 16]); 
+  * // 0
+  */
+  function sampleSkewness_(x) {
+    // Input checks are delegated
+    var s = skewness_(x);
+	
+    // Compute the G1 coefficient from the reference
+	var nn = x.length;
+	return s * Math.sqrt(nn * (nn - 1))/(nn - 2);	
+  }
+  
+  
+ /**
   * @function kurtosis_
   *
-  * @description Compute the (biased, non excess) kurtosis of the values of a numeric array, using a corrected two-pass formula.
+  * @description Compute the (population, non excess) kurtosis of the values of a numeric array, using a corrected two-pass formula.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Kurtosis">https://en.wikipedia.org/wiki/Kurtosis</a>
   * 
@@ -282,7 +350,7 @@
   *
   * @example
   * kurtosis_([4, 7, 13, 16]); 
-  * // XXX
+  * // 1.36
   */
   function kurtosis_(x) {
     // Input checks
@@ -338,5 +406,28 @@
 	}
   }
   
+  
+ /**
+  * @function sampleKurtosis_
+  *
+  * @description Compute the (sample, non excess) kurtosis of the values of a numeric array, using a corrected two-pass formula (c.f. kurtosis_ function).
+  *
+  * @see <a href="www.jstor.org/stable/2988433">D. N. Joanes and C. A. Gill, Comparing Measures of Sample Skewness and Kurtosis, Journal of the Royal Statistical Society. Series D (The Statistician), Vol. 47, No. 1 (1998), pp. 183-189</a>
+  *
+  * @param {Array.<number>} x the input numeric array.
+  * @return {number} the kurtosis of the values of the input array.
+  *
+  * @example
+  * sampleKurtosis_([4, 7, 13, 16]); 
+  * // ~-0.30
+  */
+  function sampleKurtosis_(x) {
+    // Input checks are delegated
+    var k = kurtosis_(x);
+	
+    // Compute the G2 coefficient from the reference, and add 3 as the excess kurtosis is not computed here
+	var nn = x.length;
+	return (nn - 1)/((nn - 2) * (nn - 3)) * ((nn + 1) * k - 3* (nn - 1)) + 3
+  }
   
   
