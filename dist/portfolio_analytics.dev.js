@@ -694,9 +694,28 @@ PortfolioAnalytics = (function(self) {
 	return (1 + 0.25 * sR*sR *(k - 1) - sR * s)/(nbRet - 1);
   }
   
+  // alpha = significance level, e:g: 5%
+  // confidence level is 1 - alpha, P SR belongs to XX = ff, c.f. second reference
+  self.sharpeRatioConfidenceInterval = function(portfolioEquityCurve, benchmarkEquityCurve, alpha) {
+	// First compute the Sharpe ratio
+    var differentialReturns = differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve);
+	var m = self.mean_(differentialReturns);
+	var sigma = self.sampleStddev_(differentialReturns);
+	var sr = sharpeRatio_(m, sigma);
+	
+	// Then compute its standard deviation as defined by formula 8 of the first reference
+	var s = self.sampleSkewness_(differentialReturns);
+	var k = self.sampleKurtosis_(differentialReturns);
+	var srStdDev = Math.sqrt(sharpeRatioVariance_(differentialReturns.length, sr, s, k));
+	
+	// Then compute its confidence interval at the alpha level, as defined by formula 9 of the first reference
+	var zcrit = self.norminv_(1 - alpha/2); // zcrit is commonly known in the scope of statistical tests as Z_alpha/2, c.f. the second reference
+	var srLowerBound = sr - zcrit * srStdDev;
+	var srUpperBound = sr + zcrit * srStdDev;
+  }
   
-  //self.sharpeRatioConfidenceInterval (alpha)
-  
+  //TODO self.probabilisticSharpeRatio (alpha, target)
+  //TODO self.minimumTrackLength (alpha, target)
 
   
 /* Start Not to be used as is in Google Sheets */
@@ -895,7 +914,7 @@ PortfolioAnalytics = (function(self) {
 /* End Not to be used as is in Google Sheets */  
   
   /**
-  * @function normsinv_
+  * @function norminv_
   *
   * @summary Compute the inverse of the standard normal cumulative distribution function.
   *
@@ -919,10 +938,10 @@ PortfolioAnalytics = (function(self) {
   * @return {number} an approximation to the x value satisfying p = Pr{Z <= x} where Z is a random variable following a standard normal distribution law.
   *
   * @example
-  * normsinv_(0.5); 
+  * norminv_(0.5);
   * // 0
   */
-  self.normsinv_ = function(p, extendedPrecision) {
+  self.norminv_ = function(p, extendedPrecision) {
     // By default, standard precision is required
 	if (extendedPrecision === undefined) {
 	  extendedPrecision = false;
@@ -977,13 +996,56 @@ PortfolioAnalytics = (function(self) {
 	return x;
   }
   
-
+  
+  /**
+  * @function normcdf_
+  *
+  * @summary Compute the the standard normal cumulative distribution function.
+  *
+  * @description This function returns an approximation of the standard normal cumulative distribution function, i.e.
+  * given x a real number, it returns an approximation to p = Pr{Z <= x} where Z is a
+  * random variable following a standard normal distribution law.
+  *
+  * This function is also called Phi in the statistical litterature.
+  *
+  * The algorithm uses a Taylor expansion around 0 of a well chosen function of Phi.
+  * The algorithm has an absolute error of less than 8e−16.
+  *
+  * @author George Marsaglia
+  *
+  * @see <a href="https://www.jstatsoft.org/article/view/v011i04/v11i04.pdf"> G. Marsaglia. Evaluating the normal distribution. Journal of Statistical Software, 11(4):1–11, 2004.</a>
+  * 
+  * @param {number} x a real number.
+  * @return {number} an approximation to the p value satisfying p = Pr{Z <= x} where Z is a random variable following a standard normal distribution law.
+  *
+  * @example
+  * normcdf_(0);
+  * // 0.5
+  */
+  self.normcdf_ = function(x) {
+    // Initialisations
+	var s=x;
+	var t=0;
+	var b=x;
+	var q=x*x;
+	var i=1;
+    
+	// The main loop corresponds to the computation of the Taylor serie of the function B around 0, c.f. page 5 of the reference.
+	while (s != t) {
+	  s = (t = s) + (b *= q/(i += 2));
+	}
+    
+	// The formula linking Phi and the Taylor expansion above if Phi = 1/2 + normal density * B, c.f. page 5 of the reference.
+	return 0.5 + s * Math.exp(-0.5 * q - 0.91893853320467274178)
+  }
+  
+  
   /**
   * @function erf_
   *
   * @summary Compute the erf function.
   *
-  * @description This function returns an approximation of the error function erf, defined by erf(x) = 2/sqrt(pi) * Int_0^x{e^(-t^2)dt}.
+  * @description This function returns an approximation of the error function erf, defined, for x a real number, by erf(x) = 2/sqrt(pi) * Int_0^x{e^(-t^2)dt}.
   *
   * C.f. the internal function calerf_ for more details about the computations.
   *
@@ -1003,7 +1065,7 @@ PortfolioAnalytics = (function(self) {
   *
   * @summary Compute the erfc function.
   *
-  * @description This function returns an approximation of the complementary error function erfc, defined by erfc(x) = 2/sqrt(pi) * Int_x^+infinity{e^(-t^2)dt}.
+  * @description This function returns an approximation of the complementary error function erfc, defined, for x a real number, by erfc(x) = 2/sqrt(pi) * Int_x^+infinity{e^(-t^2)dt}.
   *
   * C.f. the internal function calerf_ for more details about the computations.
   *
@@ -1021,7 +1083,8 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function calerf_
   *
-  * @summary Internal function, mimicking the CALERF routine of the second reference, intended to compute erf(x) and erfc(x) functions.
+  * @summary Internal function, mimicking the CALERF routine of the second reference, intended to compute erf(x) and erfc(x) functions
+  * for x a real number.
   *
   * @description This internal function evaluates near-minimax approximations from the first reference.
   *
