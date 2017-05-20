@@ -16,23 +16,15 @@ QUnit.module('Statistics module', {
 });
 
 
-QUnit.test('Mean incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.mean_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments"
-  );
-
-  // Other tests are delegated to the unit tests of types.js
-});
 
 QUnit.test('Mean computation', function(assert) {    
   // Uses identity mean(x) = sum(x)/length(x)
   var testArray = [];
+  var sum = 0.0;
   for (var i=1; i<=10; ++i) {
     testArray.push(i);
-	assert.equal(PortfolioAnalytics.mean_(testArray), PortfolioAnalytics.sum_(testArray)/i, 'Mean #' + i);
+	sum += i;
+	assert.equal(PortfolioAnalytics.mean_(testArray), sum/i, 'Mean #' + i);
   } 
   
   // Test for rounding errors
@@ -51,24 +43,6 @@ QUnit.test('Mean computation', function(assert) {
   assert.equal(PortfolioAnalytics.mean_(this.SpiegelHeights), 67.45, 'Spiegel average return');  
 });
 
-
-QUnit.test('Variance incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.variance_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments"
-  );
-
-  assert.throws(function() {
-      PortfolioAnalytics.sampleVariance_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments (sample)"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
 
 QUnit.test('Variance computation', function(assert) {      
   // Variance of one value is NaN
@@ -89,24 +63,6 @@ QUnit.test('Variance computation', function(assert) {
   assert.equal(PortfolioAnalytics.variance_(this.SpiegelHeights), 8.527499999999993, 'Spiegel variance'); 
 });
 
-
-QUnit.test('Standard deviation incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.stddev_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments"
-  );
-
-  assert.throws(function() {
-      PortfolioAnalytics.sampleStddev_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments (sample)"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
 
 QUnit.test('Standard deviation computation', function(assert) {      
   // Standard deviation of one value is NaN
@@ -131,24 +87,6 @@ QUnit.test('Standard deviation computation', function(assert) {
 });
 
 
-QUnit.test('Skewness incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.skewness_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.sampleSkewness_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments (sample)"
-  );  
-
-  // Other tests are delegated to the unit tests of types.js
-});
-
 QUnit.test('Skewness computation', function(assert) {      
   // Skewness of one or two values is NaN
   assert.deepEqual(PortfolioAnalytics.skewness_([1]), NaN, 'Skewness of one number');
@@ -165,24 +103,6 @@ QUnit.test('Skewness computation', function(assert) {
   assert.equal(PortfolioAnalytics.sampleSkewness_(this.BaconReturns), -114.99/Math.pow(Math.sqrt(359.74/23),3) * 24 / (23 * 22) + 0.00000000000000026, 'Bacon sample skewness');
 });
 
-
-QUnit.test('Kurtosis incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.kurtosis_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.sampleKurtosis_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments sample"
-  );
-
-  // Other tests are delegated to the unit tests of types.js
-});
 
 QUnit.test('Kurtosis computation', function(assert) {      
   // Skewness of one or two or three values is NaN
@@ -210,31 +130,6 @@ QUnit.test('Kurtosis computation', function(assert) {
 
 
 
-QUnit.test('Lpm incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.lpm_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments"
-  );
-
-  assert.throws(function() {
-      PortfolioAnalytics.lpm_([1]);
-    },
-    new Error("input must be a positive integer"),
-    "No input arguments"
-  );
-
-  assert.throws(function() {
-      PortfolioAnalytics.lpm_([1], 1.1);
-    },
-    new Error("input must be a positive integer"),
-    "No input arguments"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
-
 QUnit.test('Lpm computation', function(assert) {    
   // Uses identity lpm(x,1,0) == mean(-x) if x <= 0
   var testArrayNegative = [];
@@ -249,31 +144,6 @@ QUnit.test('Lpm computation', function(assert) {
   assert.equal(PortfolioAnalytics.lpm_(this.BaconReturns, 1, 0.005), 0.329/24 - 0.000000000000000004, 'Lpm Bacon');
 });
 
-
-QUnit.test('Hpm incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.hpm_();
-    },
-    new Error("input must be an array of numbers"),
-    "No input arguments"
-  );
-
-  assert.throws(function() {
-      PortfolioAnalytics.hpm_([1]);
-    },
-    new Error("input must be a positive integer"),
-    "No input arguments"
-  );
-
-  assert.throws(function() {
-      PortfolioAnalytics.hpm_([1], 1.1);
-    },
-    new Error("input must be a positive integer"),
-    "No input arguments"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
 
 QUnit.test('Hpm computation', function(assert) {    
   // Uses identity hpm(x,1,0) == mean(x) if x >= 0

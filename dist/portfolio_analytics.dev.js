@@ -1,119 +1,4 @@
 /**
- * @file Functions related to basic linear algebra computations.
- * @author Roman Rubsamen <roman.rubsamen@gmail.com>
- */
-
-/* Start Not to be used as is in Google Sheets */
- 
-var PortfolioAnalytics = PortfolioAnalytics || {};
-
-PortfolioAnalytics = (function(self) {
-  
-/* End Not to be used as is in Google Sheets */  
-  
-  /**
-  * @function sum_
-  *
-  * @description Compute the sum of the values of a numeric array using a LAPACK like algorithm.
-  *
-  * @see <a href="http://www.netlib.org/lapack/explore-html/de/da4/group__double__blas__level1.html">LAPACK</a>
-  * 
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the sum of the values of the input array.
-  *
-  * @example
-  * sum_([1,2,3,4]); 
-  * // 10
-  */
-  self.sum_ = function(x) {
-    // Input checks
-    self.assertNumberArray_(x);
-	
-    // Initialisations
-    var nn = x.length;
-    var dtemp = 0.0;
-
-	//
-    var m = nn % 4;
-    if (m != 0) {
-      for (var i=0; i<m; i++) {
-        dtemp += x[i];
-      }
-    }
-	
-	//
-	if (nn < 4) {
-      return dtemp;
-    }
-    
-	//
-    for (var i=m; i<nn; i+=4) {
-      dtemp += ((x[i] + x[i+1]) + (x[i+2] + x[i+3]));
-    }
-	
-	//
-    return dtemp;
-  }
-  
-  
-  /**
-  * @function dot_
-  *
-  * @description Compute the dot product of two numeric arrays using a LAPACK like algorithm.
-  *
-  * @see <a href="http://www.netlib.org/lapack/explore-html/de/da4/group__double__blas__level1.html">LAPACK</a>
-  * 
-  * @param {Array.<number>} x the input numeric array.
-  * @param {Array.<number>} y the input numeric array.
-  * @return {number} the dot product of the two input arrays.
-  *
-  * @example
-  * dot_([1,2,3,4], [1,1,1,1]); 
-  * // 10
-  */
-  self.dot_ = function (x,y) {
-    // Input checks
-    self.assertNumberArray_(x);
-	self.assertNumberArray_(y);
-	if (x.length != y.length) {
-	  throw new Error("input arrays must have the same length");
-	}
-	
-    // Initialisations
-    var nn = x.length;
-    var dtemp = 0.0;
-
-	//
-    var m = nn % 4;
-    if (m != 0) {
-      for (var i=0; i<m; i++) {
-        dtemp += x[i]*y[i];
-      }
-    }
-    
-	//
-	if (nn < 4) {
-      return dtemp;
-    }
-    
-	//
-    for (var i=m; i<nn; i+=4) {
-      dtemp += ((x[i]*y[i] + x[i+1]*y[i+1]) + (x[i+2]*y[i+2] + x[i+3]*y[i+3]));
-    }
-	
-	//
-    return dtemp;
-  }
-  
-
-/* Start Not to be used as is in Google Sheets */
-   
-   return self;
-  
-})(PortfolioAnalytics || {});
-
-/* End Not to be used as is in Google Sheets */
-;/**
  * @file Functions related to drawdowns computation.
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
  */
@@ -412,7 +297,10 @@ PortfolioAnalytics = (function(self) {
     var ddFunc = self.drawdownFunction(equityCurve);
     
     // Compute the sum of squares of this function
-	var sumSquares = self.dot_(ddFunc, ddFunc);
+	var sumSquares = 0.0;
+    for (var i=0; i<ddFunc.length; ++i) {
+      sumSquares += ddFunc[i]*ddFunc[i];
+    }
     
     // Compute and return the ulcer index
     return Math.sqrt(sumSquares/ddFunc.length);
@@ -496,12 +384,10 @@ PortfolioAnalytics = (function(self) {
   
       // Compute the remaining part of the integral between alpha percentile and one  
 	var cdd2 = 0.0;
-    //for (var i=idxAlphaDd; i<ddFunc.length; ++i) {
-    //  cdd2 += ddFunc[i];
-    //}
-	if (idxAlphaDd < ddFunc.length) {
-	  cdd2 = self.sum_(ddFunc.slice(idxAlphaDd))/ddFunc.length;
-	}	
+    for (var i=idxAlphaDd; i<ddFunc.length; ++i) {
+      cdd2 += ddFunc[i];
+    }
+	cdd2 /= ddFunc.length;
     
       // Compute and return the average value of the integral above
 	var cdd = (cdd1 + cdd2) / (1 - alpha);
@@ -590,130 +476,224 @@ PortfolioAnalytics = (function(self) {
 var PortfolioAnalytics = PortfolioAnalytics || {};
 
 PortfolioAnalytics = (function(self) {
+  /* Start Wrapper private methods - Unit tests usage only */
+  self.sharpeRatio_ = function(mean, stddev) { return sharpeRatio_(mean, stddev); }
+  /* End Wrapper private methods - Unit tests usage only */
   
 /* End Not to be used as is in Google Sheets */  
   
   /**
   * @function sharpeRatio
   *
-  * @description Compute the (historic) Sharpe ratio associated to a portfolio equity curve v.s. a benchmark equity curve.
+  * @summary Compute the Sharpe ratio of a portfolio v.s. a benchmark.
+  *
+  * @description This function returns the Sharpe ratio of a portfolio v.s. a benchmark, both provided as
+  * equity curves.
+  *
+  * The Sharpe ratio is defined as the arithmetic mean of the differential arithmetic returns 
+  * (arithmetic returns of portfolio minus the arithmetic returns of the benchmark), divided by the sample standard deviation 
+  * of these differential returns, c.f. the reference.
   *
   * @see <a href="http://www.iijournals.com/doi/abs/10.3905/jpm.1994.409501?journalCode=jpm">The Sharpe Ratio, William F. Sharpe, The Journal of Portfolio Management, Fall 1994, Vol. 21, No. 1: pp.49-58</a>
   * 
-  * @param {Array.<number>} equityCurvePortfolio the portfolio equity curve.
-  * @param {Array.<number>} equityCurveBenchmark the benchmark equity curve.
-  * @return {number|Array.<number>} the (historic) Sharpe ratio.
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {Array.<number>} equityCurveBenchmark the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
+  * @return {number} the Sharpe ratio of the portfolio v.s. the benchmark.
   *
   * @example
   * sharpeRatio([1, 2, 3], [1, 1, 1]); 
   * // XXX
   */
-  self.sharpeRatio = function(equityCurvePortfolio, equityCurveBenchmark) {
-    // No need for input checks, as done in function below
-	
+  self.sharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
+	// The Sharpe ratio is defined by the formula (6) of the reference, which uses:
+	// - Differential returns
+	// - Mean of differential returns
+	// - Sample standard deviation of sample returns	
+    var differentialReturns = differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve);
+	var m = self.mean_(differentialReturns);
+	var sigma = self.sampleStddev_(differentialReturns);
+
+    // Effectively computes the Sharpe ratio
+	return sharpeRatio_(m, sigma);	
+  }
+  
+  
+  /**
+  * @function sharpeRatio_
+  *
+  * @summary Internal function intended to compute the Sharpe ratio.
+  *
+  * @description This internal function returns the Sharpe ratio of a serie of differential returns based on their arithmetic
+  * mean and their sample standard deviation.
+  *
+  * The Sharpe ratio is defined as the above mean divided by the above sample standard deviation, c.f. the reference.
+  *
+  * @see <a href="http://www.iijournals.com/doi/abs/10.3905/jpm.1994.409501?journalCode=jpm">The Sharpe Ratio, William F. Sharpe, The Journal of Portfolio Management, Fall 1994, Vol. 21, No. 1: pp.49-58</a>
+  * 
+  * @param {number} m the arithmetic mean of differential returns, a real number.
+  * @param {number} s the sample standard deviation of differential returns, a real number.
+  * @return {number} the Sharpe ratio associated to m and s.
+  *
+  * @example
+  * sharpeRatio_(1, 2); 
+  * // XXX
+  */
+  function sharpeRatio_(m, s) {
+	// The Sharpe ratio is defined by the formula (6) of the reference
+	if (s == 0.0) {
+	  return NaN; // The Sharpe ratio is undefined in case there is a null variance
+	}
+	else {
+	  return m/s;
+	}
+  }
+
+  
+  /**
+  * @function differentialReturns_
+  *
+  * @summary Compute the differential returns (also called excess returns) of a portfolio v.s. a benchmark.
+  *
+  * @description This function returns the differential returns of a portfolio v.s. a benchmark, both provided as
+  * equity curves.
+  *
+  * @see <a href="http://www.iijournals.com/doi/abs/10.3905/jpm.1994.409501?journalCode=jpm">The Sharpe Ratio, William F. Sharpe, The Journal of Portfolio Management, Fall 1994, Vol. 21, No. 1: pp.49-58</a>
+  * 
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {Array.<number>} benchmarkEquityCurve the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
+  * @return {Array.<number>} the differential returns, an array of real numbers of the same length as portfolioEquityCurve minus 1.
+  *
+  * @example
+  * differentialReturns_(1, 2); 
+  * // XXX
+  */
+  function differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve) {
 	// Compute the arithmetic returns of the portfolio
-	var portfolioReturns = self.arithmeticReturns(equityCurvePortfolio).slice(1); // First value is NaN
+	var portfolioReturns = self.arithmeticReturns(portfolioEquityCurve).slice(1); // First value is NaN
 
 	// Compute the arithmetic returns of the benchmark
-	var benchmarkReturns = self.arithmeticReturns(equityCurveBenchmark).slice(1); // First value is NaN
+	var benchmarkReturns = self.arithmeticReturns(benchmarkEquityCurve).slice(1); // First value is NaN
 
 	// If there are no usable returns, exit
 	if (portfolioReturns.length == 0 || benchmarkReturns.length == 0) {
 	  return NaN;
 	}
 
-	// Else, compute the differential returns
-	// TODO : NEW_FLOAT64_ARRAY(differentialReturns, portfolioReturns.length)
-	if (typeof Float64Array === 'function') { var differentialReturns = new Float64Array(portfolioReturns.length); } else { var differentialReturns = new Array(portfolioReturns.length) }
+	// Else, compute and return the differential returns
+	var differentialReturns = new portfolioReturns.constructor(portfolioReturns.length); // Inherit the array type from (ultimately) the input array
     for (var i=0; i<portfolioReturns.length; ++i) {
 	  differentialReturns[i] = portfolioReturns[i] - benchmarkReturns[i];
 	}
-	
-    // And compute the Sharpe ratio
-	return self.sharpeRatio_(differentialReturns);	
+	return differentialReturns;
   }
-
   
-  /**
-  * @function sharpeRatio_
-  *
-  * @description Compute the (historic) Sharpe ratio associated to the returns on a portfolio v.s. the returns on a benchmark portfolio.
-  *
-  * @see <a href="http://www.iijournals.com/doi/abs/10.3905/jpm.1994.409501?journalCode=jpm">The Sharpe Ratio, William F. Sharpe, The Journal of Portfolio Management, Fall 1994, Vol. 21, No. 1: pp.49-58</a>
-  * 
-  * @param {Array.<number>} differentialReturns the differential returns between a portfolio returns and a benchmark returns.
-  *
-  * @example
-  * sharpeRatio_([1, 2, 3]); 
-  * // XXX
-  */
-  self.sharpeRatio_ = function(differentialReturns) {
-    // Internal function => no specific checks on the input arguments
-		
-	// The historic Sharpe ratio is defined by the formula (6) of the reference
-      // Compute the average of differential returns 
-	var m = self.mean_(differentialReturns);
-	  
-	  // Compute the sample (i.e., unbiaised) standard deviation of differential returns
-	var sigma = self.sampleStddev_(differentialReturns);
-	  
-	// Return the Sharpe ratio
-	if (sigma == 0.0) {
-	  return NaN; // The Sharpe ratio is undefined in case there is a null variance
-	}
-	else {
-	  return m/sigma;
-	}
-  }
-
 
   /**
   * @function biasAdjustedSharpeRatio
   *
-  * @description Compute the (historic) Sharpe ratio associated to a portfolio equity curve v.s. a benchmark equity curve, adjusted for its (small sample) bias.
+  * @summary Compute the Sharpe ratio of a portfolio v.s. a benchmark, adjusted for its bias.
   *
+  * @description This function returns the Sharpe ratio of a portfolio v.s. a benchmark, both provided as
+  * equity curves, adjusted for its asymptotic bias.
+  *
+  * The asymptotic bias is computed using a factor dependant on the kurtosis of the differential returns
+  * of the portfolio v.s. the benchmark, c.f. the reference.
+  * 
   * @see <a href="http://link.springer.com/article/10.1057/palgrave.jam.2250084">Comparing Sharpe ratios: So where are the p-values, J.D. Opdyke, Journal of Asset Management (2007) 8, 308–336</a>
   * 
-  * @param {Array.<number>} equityCurvePortfolio the portfolio equity curve.
-  * @param {Array.<number>} equityCurveBenchmark the benchmark equity curve.
-  * @return {number|Array.<number>} the (historic) Sharpe ratio.
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {Array.<number>} benchmarkEquityCurve the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
+  * @return {number} the Sharpe ratio adjusted for its bias.
   *
   * @example
   * biasAdjustedSharpeRatio([1, 2, 3], [1, 1, 1]); 
   * // XXX
   */
-  self.biasAdjustedSharpeRatio = function(equityCurvePortfolio, equityCurveBenchmark) {
-    // No need for input checks, as done in function below
-	
-	// Compute the arithmetic returns of the portfolio
-	var portfolioReturns = self.arithmeticReturns(equityCurvePortfolio).slice(1); // First value is NaN
+  self.biasAdjustedSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
+	// First compute the Sharpe ratio
+    var differentialReturns = differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve);
+	var m = self.mean_(differentialReturns);
+	var sigma = self.sampleStddev_(differentialReturns);
+	var sr = sharpeRatio_(m, sigma);
 
-	// Compute the arithmetic returns of the benchmark
-	var benchmarkReturns = self.arithmeticReturns(equityCurveBenchmark).slice(1); // First value is NaN
-
-	// If there are no usable returns, exit
-	if (portfolioReturns.length == 0 || benchmarkReturns.length == 0) {
-	  return NaN;
-	}
+	// Then compute its sample bias, c.f. formula 11b of the reference
+	var k = self.sampleKurtosis_(differentialReturns);
+	var srBias = 1 + 0.25 * (k - 1)/differentialReturns.length;
 	
-	// Else, compute the differential returns
-	// TODO : NEW_FLOAT64_ARRAY(differentialReturns, portfolioReturns.length)
-	if (typeof Float64Array === 'function') { var differentialReturns = new Float64Array(portfolioReturns.length); } else { var differentialReturns = new Array(portfolioReturns.length) }
-    for (var i=0; i<portfolioReturns.length; ++i) {
-	  differentialReturns[i] = portfolioReturns[i] - benchmarkReturns[i];
-	}
-	
-	// Then compute the Sharpe ratio
-	var s = self.sharpeRatio_(differentialReturns);
-	
-	// Then compute its small sample bias, c.f. formula 11b of the reference
-	var bias = 1 + 0.25 * (self.sampleKurtosis_(differentialReturns) - 1)/portfolioReturns.length;
-	
-	// And return it
-	return s/bias
+	// And return the Sharpe ratio adjusted fot its bias
+	return sr/srBias;
   }
   
 
+  /**
+  * @function doubleSharpeRatio
+  *
+  * @summary Compute the double Sharpe ratio of a portfolio v.s. a benchmark. 
+  *
+  * @description This function returns the double Sharpe ratio of a portfolio v.s. a benchmark, both provided as
+  * equity curves.
+  *
+  . The double Sharpe ratio is defined as the Sharpe ratio adjusted for its estimation risk as computed by its
+  * standard deviation, c.f. the first reference.
+  *
+  * To be noted that the algorithm approximates the standard deviation of the Sharpe ratio through its asymptotic closed form formula,
+  * found in the second reference, and not through a bootstrap procedure as originally described in the first reference.
+  *
+  * @see <a href="https://ssrn.com/abstract=168748">Vinod, Hrishikesh D. and Morey, Matthew R., A Double Sharpe Ratio (June 1, 1999).</a>
+  * @see <a href="http://link.springer.com/article/10.1057/palgrave.jam.2250084">Comparing Sharpe ratios: So where are the p-values, J.D. Opdyke, Journal of Asset Management (2007) 8, 308–336</a>
+  * 
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {Array.<number>} benchmarkEquityCurve the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
+  * @return {number} the double Sharpe ratio.
+  *
+  * @example
+  * doubleSharpeRatio([1, 2, 3], [1, 1, 1]); 
+  * // XXX
+  */
+  self.doubleSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
+	// First compute the Sharpe ratio
+    var differentialReturns = differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve);
+	var m = self.mean_(differentialReturns);
+	var sigma = self.sampleStddev_(differentialReturns);
+	var sr = sharpeRatio_(m, sigma);
+
+	// Then compute its standard deviation as defined by formula 8 of the second reference
+	var s = self.sampleSkewness_(differentialReturns);
+	var k = self.sampleKurtosis_(differentialReturns);
+	var srStdDev = Math.sqrt(sharpeRatioVariance_(differentialReturns.length, sr, s, k));
+	
+	// And return the double Sharpe ratio, as defined by formula 3 of the first reference
+	return sr/srStdDev;
+  }
+  
+  
+  /**
+  * @function sharpeRatioVariance_
+  *
+  * @summary Internal function intended to compute the variance of the Sharpe ratio.
+  *
+  * @description This internal function returns the variance of the Sharpe ratio of a serie of differential returns, based on their 
+  * original Sharpe ratio, their sample skewness and their sample kurtosis.
+  * 
+  * The variance of the Sharpe ratio is approximated by its asymptotic closed form formula, c.f. the reference.
+  *
+  * @see <a href="http://link.springer.com/article/10.1057/palgrave.jam.2250084">Comparing Sharpe ratios: So where are the p-values, J.D. Opdyke, Journal of Asset Management (2007) 8, 308–336</a>
+  * 
+  * @param {number} nbRet the number of differential returns, a positive integer.  
+  * @param {number} sR the Sharpe ratio of the differential returns, a real number.  
+  * @param {number} s the skewness of the differential returns, a real number.
+  * @param {number} k the kurtosis of the differential returns, a real number.
+  * @return {number} the variance of the Sharpe ratio.
+  *
+  * @example
+  * sharpeRatioVariance_(1, 2); 
+  * // XXX
+  */
+  function sharpeRatioVariance_(nbRet, sR, s, k) {
+	// The Sharpe ratio standard deviation is defined by formula 8 of the reference
+	return (1 + 0.25 * sR*sR *(k - 1) - sR * s)/(nbRet - 1);
+  }
+  
   
   //self.sharpeRatioConfidenceInterval (alpha)
   
@@ -902,7 +882,280 @@ PortfolioAnalytics = (function(self) {
 
 /* End Not to be used as is in Google Sheets */
 ;/**
- * @file Functions related to statistics computation.
+ * @file Functions related to distributions computation.
+ * @author Roman Rubsamen <roman.rubsamen@gmail.com>
+ */
+
+/* Start Not to be used as is in Google Sheets */
+ 
+var PortfolioAnalytics = PortfolioAnalytics || {};
+
+PortfolioAnalytics = (function(self) {
+  
+/* End Not to be used as is in Google Sheets */  
+  
+  /**
+  * @function normsinv_
+  *
+  * @summary Compute the inverse of the standard normal cumulative distribution function.
+  *
+  * @description This function returns an approximation of the inverse standard normal cumulative distribution function, i.e.
+  * given p in [0,1] it returns an approximation to the x value satisfying p = Pr{Z <= x} where Z is a
+  * random variable following a standard normal distribution law.
+  *
+  * x is also called a z-score.
+  *
+  * The algorithm uses the fact that if F^-1(p) is the inverse normal cumulative distribution function, then G^-1(p) = F^-1(p+1/2) is an odd function.
+  * The algorithm uses two separate rational minimax approximations: one rational approximation is used for the central region and another one is used for the tails.
+  * The algorithm has a relative error whose absolute value is less than 1.15e-9, but if needed, the approximation of the inverse normal cumulative distribution function can be refined better precision using Halley's method.
+  *
+  * @author Peter John Acklam <jacklam@math.uio.no>
+  *
+  * @see <a href="http://home.online.no/%7Epjacklam/notes/invnorm">http://home.online.no/%7Epjacklam/notes/invnorm</a>
+  * @see <a href="https://web.archive.org/web/20151030215612/http://home.online.no/%7Epjacklam/notes/invnorm/">https://web.archive.org/web/20151030215612/http://home.online.no/%7Epjacklam/notes/invnorm/</a>
+  * 
+  * @param {number} p a probability value, real number belonging to interval [0,1].
+  * @param {boolean} extendedPrecision an optional boolean either false for a standard approximation (default) or true for a refined approximation.
+  * @return {number} an approximation to the x value satisfying p = Pr{Z <= x} where Z is a random variable following a standard normal distribution law.
+  *
+  * @example
+  * normsinv_(0.5); 
+  * // 0
+  */
+  self.normsinv_ = function(p, extendedPrecision) {
+    // By default, standard precision is required
+	if (extendedPrecision === undefined) {
+	  extendedPrecision = false;
+	}
+	
+	// Coefficients in rational approximations.
+    var a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+	var b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+	var c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+	var d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+   
+    // Define break-points.
+    var p_low = 0.02425;
+    var p_high = 1 - p_low;
+   
+    // Regions definition.
+	var x = NaN;
+	if (p == 0.0) {
+	  x = Number.NEGATIVE_INFINITY;
+	}
+	else if (p == 1.0) {
+	  x = Number.POSITIVE_INFINITY;
+	}
+	else if (p < p_low) {
+	  // Rational approximation for lower region.
+	  var q = Math.sqrt(-2*Math.log(p));
+	  x =  (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+		     ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+    }
+	else if (p > p_high) {
+	  // Rational approximation for upper region.
+	  var q  = Math.sqrt(-2*Math.log(1-p));
+	  x = -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) /
+			((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+	}
+	else if (p_low <= p && p <= p_high) {
+	  // Rational approximation for central region.
+      var q = p - 0.5;
+      var r = q*q;
+	  x = (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q /
+			(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+	}
+	
+	// Improve the precision, if required.
+	if (extendedPrecision === true) {
+      var e = 0.5 * self.erfc_(-x/1.4142135623730951) - p; // Constant is equal to sqrt(2)
+      var u = e * 2.5066282746310002 * Math.exp(x*x/2); // Constant is equal to sqrt(2*pi)
+      x = x - u/(1 + x*u/2);
+	}
+	
+	// Return the computed value
+	return x;
+  }
+  
+
+  /**
+  * @function erf_
+  *
+  * @summary Compute the erf function.
+  *
+  * @description This function returns an approximation of the error function erf, defined by erf(x) = 2/sqrt(pi) * Int_0^x{e^(-t^2)dt}.
+  *
+  * C.f. the internal function calerf_ for more details about the computations.
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Error_function">https://en.wikipedia.org/wiki/Error_function</a>
+  * 
+  * @param {number} x a real number.
+  * @return {number} an approximation to erf(x).
+  *
+  */
+  self.erf_ = function(x) {
+    return calerf_(x, 0);
+  }
+  
+  
+  /**
+  * @function erfc_
+  *
+  * @summary Compute the erfc function.
+  *
+  * @description This function returns an approximation of the complementary error function erfc, defined by erfc(x) = 2/sqrt(pi) * Int_x^+infinity{e^(-t^2)dt}.
+  *
+  * C.f. the internal function calerf_ for more details about the computations.
+  *
+  * @see <a href="https://en.wikipedia.org/wiki/Error_function">https://en.wikipedia.org/wiki/Error_function</a>
+  * 
+  * @param {number} x a real number.
+  * @return {number} an approximation to erf(x).
+  *
+  */
+  self.erfc_ = function(x) {
+    return calerf_(x, 1);
+  }
+  
+  
+  /**
+  * @function calerf_
+  *
+  * @summary Internal function, mimicking the CALERF routine of the second reference, intended to compute erf(x) and erfc(x) functions.
+  *
+  * @description This internal function evaluates near-minimax approximations from the first reference.
+  *
+  * The algorithm uses rational functions that theoretically approximate erf(x) and erfc(x) to at least 18 significant
+  * decimal digits.  The accuracy achieved depends on the arithmetic system, the compiler, the intrinsic functions, and proper
+  * selection of the machine-dependent constants.
+  *
+  * The algorithm is supposed to have a maximal relative error of less than 6*10^-19, from the first reference.
+  *
+  * @author W.J. Cody
+  *
+  * @see <a href="http://www.ams.org/journals/mcom/1969-23-107/S0025-5718-1969-0247736-4/S0025-5718-1969-0247736-4.pdf">W.J. Cody, Rational Chebyshev Approximation for the Error Function, Mathematics of Computation 23(107):631-631, July 1969</a>
+  * @see <a href="http://www.netlib.org/specfun/erf">http://www.netlib.org/specfun/erf</a>
+  * 
+  * @param {number} x a real number.
+  * @param {number} j an integer, equals to 0 to compute erf(x) or to 1 to compute erfc(x).
+  * @return {number} an approximation to erf(x) or to erfc(x).
+  *
+  */
+  function calerf_(x, j) {
+    // Machine-dependent constants
+	var xinf = 1.79e308;
+	var xneg = -26.628e0;
+	var xsmall = 1.11e-16;
+	var xbig = 26.543e0;
+	var xhuge = 6.71e7;
+	var xmax = 2.53e307;
+	
+	// Coefficients for approximation to  erf  in first interval
+	var a = [3.16112374387056560e00,1.13864154151050156e02,3.77485237685302021e02,3.20937758913846947e03,1.85777706184603153e-1];
+	var b = [2.36012909523441209e01,2.44024637934444173e02,1.28261652607737228e03,2.84423683343917062e03];
+	
+	// Coefficients for approximation to  erfc  in second interval
+	var c = [5.64188496988670089e-1,8.88314979438837594e0,6.61191906371416295e01,2.98635138197400131e02,8.81952221241769090e02,1.71204761263407058e03,2.05107837782607147e03,1.23033935479799725e03,2.15311535474403846e-8];
+    var d = [1.57449261107098347e01,1.17693950891312499e02,5.37181101862009858e02,1.62138957456669019e03,3.29079923573345963e03,4.36261909014324716e03,3.43936767414372164e03,1.23033935480374942e03];
+
+	// Coefficients for approximation to  erfc  in third interval
+	var p = [3.05326634961232344e-1,3.60344899949804439e-1,1.25781726111229246e-1,1.60837851487422766e-2,6.58749161529837803e-4,1.63153871373020978e-2];
+    var q = [2.56852019228982242e00,1.87295284992346047e00,5.27905102951428412e-1,6.05183413124413191e-2,2.33520497626869185e-3];
+	
+	// ---------------
+	
+	// Computations are dispatched on different intervals based on |x|, c.f. the references
+	var y = Math.abs(x);
+	
+	// Evaluate  erf  for  |X| <= 0.46875
+	if (y <= 0.46875) {
+	  // Initialise ysq
+	  var ysq = 0.0;
+	  if (y >= xsmall) {
+	   ysq = y * y;
+	  }
+
+      // The original loop computing rational functions has been unrolled	  
+	  // The final result is computed directly
+	  var result = x * ((((a[4] * ysq + a[0]) * ysq + a[1]) * ysq + a[2]) * ysq + a[3]) / ((((ysq + b[0]) * ysq + b[1]) * ysq + b[2]) * ysq + b[3]);
+	  
+	  // In case erfc function is required
+	  if (j === 1) {
+	    result = 1.0 - result;
+	  }
+	  
+	  // Return the computed value
+	  return result;
+	}
+
+	// Evaluate  erfc  for 0.46875 <= |X| <= 4.0
+	else if (y <= 4.0) {
+      // The original loop computing rational functions has been unrolled	  
+	  // The final result is computed directly
+	  var result = ((((((((c[8] * y + c[0]) * y + c[1]) * y + c[2]) * y + c[3]) * y + c[4]) * y + c[5]) * y + c[6]) * y + c[7]) / ((((((((y + d[0]) * y + d[1]) * y + d[2]) * y + d[3]) * y + d[4]) * y + d[5]) * y + d[6]) * y + d[7]);
+	  
+	  // Computation tricks to improve precision for the exponential	  
+	  var ysq = y * 16.0;
+	  ysq = (ysq >= 0 ? Math.floor(ysq) : Math.ceil(ysq))/16.0; // Equivalent of FORTAN AINT/INT function
+	  //var ysq = AINT(y*16.0)/16.0;
+	  var del = (y - ysq)*(y + ysq);
+	  result = Math.exp(-ysq * ysq) * Math.exp(-del) * result;
+	}
+	
+	// Evaluate  erfc  for |X| > 4.0
+	else if (y > 4.0) {
+	  var result = 0.0;
+	  
+	  if (y < xbig) {
+	    // Initialise ysq
+	    var ysq = 1.0/(y * y);
+
+        // The original loop computing rational functions has been unrolled	  
+	    // The final result is computed directly
+        result = ysq * (((((p[5] * ysq + p[0]) * ysq + p[1]) * ysq + p[2]) * ysq + p[3]) * ysq + p[4]) / (((((ysq + q[0]) * ysq + q[1]) * ysq + q[2]) * ysq + q[3]) * ysq + q[4]);
+        result = (5.6418958354775628695e-1 - result) / y; // The constant here is equals to SQRPI in the original FORTRAN code
+
+	    // Computation tricks to improve precision for the exponential
+  	    var ysq = y * 16.0;
+	    ysq = (ysq >= 0 ? Math.floor(ysq) : Math.ceil(ysq))/16.0; // Equivalent of FORTAN AINT/INT function
+        var del = (y - ysq) * (y + ysq);
+	    result = Math.exp(-ysq * ysq) * Math.exp(-del) * result;
+	  }
+    }
+    
+    // Fix up for negative argument, erf, etc.
+	// erf computation
+    if (j === 0) {
+        // Using relation erf(x) = 1 - erfc(x), with a computation trick to improve precision
+        result = (0.5 - result) + 0.5;
+        
+        // Using relation erf(-x) = -erf(x)
+        if (x <= 0.0) {
+            result = -result;
+        }
+    }
+	// erfc computation
+    else if (j === 1) {
+        // Using relation erfc(-x) = 2-erfc(x)
+        if (x <= 0.0) {
+            result = 2.0 - result;
+        }
+    }
+    
+    // Return the computed result
+    return result;
+  }
+  
+  
+/* Start Not to be used as is in Google Sheets */
+   
+   return self;
+  
+})(PortfolioAnalytics || {});
+
+/* End Not to be used as is in Google Sheets */
+;/**
+ * @file Functions related to moments computation.
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
  */
 
@@ -917,25 +1170,24 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function hpm_
   *
-  * @description Compute the higher partial moment of the values of a numeric array.
+  * @summary Compute the higher partial moment of a serie of values.
   *
+  * @description This function returns the n-th order higher partial moment of a serie of values [x_1,...,x_p] with respect to a threshold t, 
+  * which is defined as the arithmetic mean of the p values max(0, x_1-t)^n,...,max(0, x_p-t)^n.
+  *  
   * @see <a href="https://en.wikipedia.org/wiki/Moment_(mathematics)">https://en.wikipedia.org/wiki/Moment_(mathematics)</a>
   * 
-  * @param {Array.<number>} x the input numeric array.
-  * @param {number} n the order of the higher partial moment.
-  * @param {number} t the threshold of the higher partial moment.
-  * @return {number} the higher partial moment of order n at threshold t of the values of the input array.
+  * @param {Array.<number>} x an array of real numbers.
+  * @param {number} n the order of the higher partial moment, a positive integer.
+  * @param {number} t the threshold of the higher partial moment, a real number
+  * @return {number} the n-th order higher partial moment of the values of the array x with respect to the threshold t.
   *
   * @example
   * hpm_([0.1,-0.2,-0.3], 2, 0.0); 
   * // 0.0167
   */
   self.hpm_ = function(x, n, t) {
-    // Input checks
-    self.assertNumberArray_(x);
-	self.assertPositiveInteger_(n);
-	
-    // The HPM is the mean of the values max(0, x[i]-t)^n, i=0..length(x) - 1, so that code below is adapted from a mean computation
+    // Code below is adapted from a mean computation, c.f. mean_ function
 	// Initialisations
     var nn = x.length;
 
@@ -961,25 +1213,24 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function lpm_
   *
-  * @description Compute the lower partial moment of the values of a numeric array.
+  * @summary Compute the lower partial moment of a serie of values.
   *
+  * @description This function returns the n-th order lower partial moment of a serie of values [x_1,...,x_p] with respect to a threshold t, 
+  * which is defined as the arithmetic mean of the p values max(0, t-x_1)^n,...,max(0, t-x_p)^n.
+  *  
   * @see <a href="https://en.wikipedia.org/wiki/Moment_(mathematics)">https://en.wikipedia.org/wiki/Moment_(mathematics)</a>
   * 
-  * @param {Array.<number>} x the input numeric array.
-  * @param {number} n the order of the lower partial moment.
-  * @param {number} t the threshold of the lower partial moment.
-  * @return {number} the lower partial moment of order n at threshold t of the values of the input array.
+  * @param {Array.<number>} x an array of real numbers.
+  * @param {number} n the order of the lower partial moment, a positive integer.
+  * @param {number} t the threshold of the lower partial moment, a real number.
+  * @return {number} the n-th order lower partial moment of the values of the array x with respect to the threshold t.
   *
   * @example
   * lpm_([0.1,0.2,-0.3], 2, 0.0); 
   * // 0.03
   */
   self.lpm_ = function(x, n, t) {
-    // Input checks
-    self.assertNumberArray_(x);
-	self.assertPositiveInteger_(n);
-	
-    // The LPM is the mean of the values max(0, t-x[i])^n, i=0..length(x) - 1, so that code below is adapted from a mean computation
+    // Code below is adapted from a mean computation, c.f. mean_ function
 	// Initialisations
     var nn = x.length;
 
@@ -1005,21 +1256,23 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function mean_
   *
-  * @description Compute the mean of the values of a numeric array, using a corrected two-pass formula.
+  * @summary Compute the arithmetic mean of a serie of values.
+  *
+  * @description This function returns the arithmetic mean of a serie of values [x_1,...,x_p], 
+  * which is defined as the sum of the p values x_1,...,x_p, divided by p.
+  *
+  * The algorithm implemented uses a two pass formula in order to reduce the computation error, c.f. the reference.
   *
   * @see <a href="http://dl.acm.org/citation.cfm?doid=365719.365958">Peter M. Neely (1966) Comparison of several algorithms for computation of means, standard deviations and correlation coefficients. Commun ACM 9(7):496–499.</a>
   * 
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the mean of the values of the input array.
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {number} the arithmetic mean of the values of the array x.
   *
   * @example
   * mean_([2,4]); 
   * // 3
   */
   self.mean_ = function(x) {
-    // Input checks
-    self.assertNumberArray_(x);
-	
     // Initialisations
     var nn = x.length;
 
@@ -1046,21 +1299,24 @@ PortfolioAnalytics = (function(self) {
  /**
   * @function variance_
   *
-  * @description Compute the (population) variance of the values of a numeric array, using a corrected two-pass formula.
+  * @summary Compute the variance of a serie of values.
+  *
+  * @description This function returns the variance of a serie of values [x_1,...,x_p], 
+  * which is defined as the arithmetic mean of the p values (x_1-m)^2,...,(x_p-m)^2, where m is the arithmetic mean
+  * of the p values x_1,...,x_p.
+  *
+  * The algorithm implemented uses a two pass formula in order to reduce the computation error, c.f. the reference.
   *
   * @see <a href="http://dl.acm.org/citation.cfm?doid=365719.365958">Peter M. Neely (1966) Comparison of several algorithms for computation of means, standard deviations and correlation coefficients. Commun ACM 9(7):496–499.</a>
   *
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the variance of the values of the input array.
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {number} the variance of the values of the array x.
   *
   * @example
   * variance_([4, 7, 13, 16]); 
   * // 22.5
   */
   self.variance_ = function(x) {
-    // Input checks
-    self.assertNumberArray_(x);
-	
 	// In case the input array is made of only one element, the variance is not defined
 	if (x.length == 1) {
 	  return NaN;
@@ -1093,17 +1349,21 @@ PortfolioAnalytics = (function(self) {
 /**
   * @function sampleVariance_
   *
-  * @description Compute the (sample) variance of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  * @summary Compute the sample variance of a serie of values.
   *
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the variance of the values of the input array.
+  * @description This function returns the sample variance of a serie of values [x_1,...,x_p], 
+  * which is defined as the variance of the p values x_1,...,x_p multiplied by p/(p-1).
+  *
+  * The algorithm implemented uses a two pass formula in order to reduce the computation error, c.f. the function variance_.
+  *
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {number} the variance of the values of the array x.
   *
   * @example
   * sampleVariance_([4, 7, 13, 16]); 
   * // 30
   */
   self.sampleVariance_ = function(x) {
-    // Input checks are delegated
     var v = self.variance_(x);
 	
     //
@@ -1115,21 +1375,23 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function stddev_
   *
-  * @description Compute the (population) standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  * @description Compute the standard deviation of a serie of values.
+  *
+  * @description This function returns the standard deviation of a serie of values [x_1,...,x_p], 
+  * which is defined as the square root of the variance of the p values x_1,...,x_p.
+  *
+  * The algorithm implemented uses a two pass formula in order to reduce the computation error, c.f. the function variance_.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Standard_deviation">https://en.wikipedia.org/wiki/Standard_deviation</a>
   *
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the standard deviation of the values of the input array.
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {number} the standard deviation of the values of the array x.
   *
   * @example
   * stddev_([1, 2, 3, 4]); 
   * // ~1.12
   */
   self.stddev_ = function(x) {
-    // Input checks are delegated
-
-    // 
 	return Math.sqrt(self.variance_(x));
   }
   
@@ -1137,19 +1399,21 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function sampleStddev_
   *
-  * @description Compute the (sample) standard deviation of the values of a numeric array, using a corrected two-pass formula (c.f. the variance_ function)
+  * @description Compute the sample standard deviation of a serie of values.
   *
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the standard deviation of the values of the input array.
+  * @description This function returns the sample standard deviation of a serie of values [x_1,...,x_p], 
+  * which is defined as the square root of the sample variance of the p values x_1,...,x_p.
+  *
+  * The algorithm implemented uses a two pass formula in order to reduce the computation error, c.f. the function sampleVariance_.
+  *
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {number} the standard deviation of the values of the array x.
   *
   * @example
   * sampleStddev_([1, 2, 3, 4]); 
   * // ~1.29
   */
   self.sampleStddev_ = function(x) {
-    // Input checks are delegated
-
-    //
 	return Math.sqrt(self.sampleVariance_(x));
   }
 
@@ -1157,23 +1421,25 @@ PortfolioAnalytics = (function(self) {
  /**
   * @function skewness_
   *
-  * @description Compute the (population) skewness of the values of a numeric array, using a corrected two-pass formula.
+  * @summary Compute the skewness of a serie of values.
+  *
+  * @description This function returns the skewness of a serie of values [x_1,...,x_p], 
+  * which is defined as the arithmetic mean of the p values (x_1-m)^3,...,(x_p-m)^3 divided by sigma^3, where m is the arithmetic mean
+  * of the p values x_1,...,x_p and sigma the standard deviation of the p values x_1,...,x_p.
+  *
+  * The algorithm implemented uses a two pass formula in order to reduce the computation error, c.f. the second reference.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Skewness">https://en.wikipedia.org/wiki/Skewness</a>
-  * 
   * @see <a href="http://link.springer.com/article/10.1007/s00180-015-0637-z">Pébay, P., Terriberry, T.B., Kolla, H. et al (2016) Numerically stable, scalable formulas for parallel and online computation of higher-order multivariate central moments with arbitrary weights. Comput Stat (2016) 31: 1305.</a>
   *
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the skewness of the values of the input array.
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {number} the skewness of the values of the array x.
   *
   * @example
   * skewness_([4, 7, 13, 16]); 
   * // 0
   */
   self.skewness_ = function(x) {
-    // Input checks
-    self.assertNumberArray_(x);
-	
 	// In case the input array is made of less than two elements, the skewness is not defined
 	if (x.length <= 2) {
 	  return NaN;
@@ -1225,19 +1491,23 @@ PortfolioAnalytics = (function(self) {
  /**
   * @function sampleSkewness_
   *
-  * @description Compute the (sample) skewness of the values of a numeric array, using a corrected two-pass formula (c.f. skewness_ function).
+  * @summary Compute the sample skewness of a serie of values.
+  *
+  * @description This function returns the sample skewness of a serie of values [x_1,...,x_p], 
+  * which is defined as the skewness of the p values x_1,...,x_p multiplied by a factor dependant on p, c.f. the reference.
+  *
+  * The algorithm implemented uses a two pass formula in order to reduce the computation error, c.f. the function skewness_.
   *
   * @see <a href="www.jstor.org/stable/2988433">D. N. Joanes and C. A. Gill, Comparing Measures of Sample Skewness and Kurtosis, Journal of the Royal Statistical Society. Series D (The Statistician), Vol. 47, No. 1 (1998), pp. 183-189</a>
   *
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the skewness of the values of the input array.
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {number} the skewness of the values of the array x.
   *
   * @example
   * sampleSkewness_([4, 7, 13, 16]); 
   * // 0
   */
   self.sampleSkewness_ = function(x) {
-    // Input checks are delegated
     var s = self.skewness_(x);
 	
     // Compute the G1 coefficient from the reference
@@ -1249,23 +1519,26 @@ PortfolioAnalytics = (function(self) {
  /**
   * @function kurtosis_
   *
-  * @description Compute the (population, non excess) kurtosis of the values of a numeric array, using a corrected two-pass formula.
+  * @summary Compute the kurtosis of a serie of values.
+  *
+  * @description This function returns the kurtosis of a serie of values [x_1,...,x_p], 
+  * which is defined as the arithmetic mean of the p values (x_1-m)^4,...,(x_p-m)^4 divided by sigma^4, where m is the arithmetic mean
+  * of the p values x_1,...,x_p and sigma the standard deviation of the p values x_1,...,x_p.
+  *
+  * The algorithm implemented uses a two pass formula in order to reduce the computation error, c.f. the second reference.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Kurtosis">https://en.wikipedia.org/wiki/Kurtosis</a>
   * 
   * @see <a href="http://link.springer.com/article/10.1007/s00180-015-0637-z">Pébay, P., Terriberry, T.B., Kolla, H. et al (2016) Numerically stable, scalable formulas for parallel and online computation of higher-order multivariate central moments with arbitrary weights. Comput Stat (2016) 31: 1305.</a>
   *
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the skewness of the values of the input array.
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {number} the skewness of the values of the array x.
   *
   * @example
   * kurtosis_([4, 7, 13, 16]); 
   * // 1.36
   */
   self.kurtosis_ = function(x) {
-    // Input checks
-    self.assertNumberArray_(x);
-	
 	// In case the input array is made of less than three elements, the skewness is not defined
 	if (x.length <= 3) {
 	  return NaN;
@@ -1320,19 +1593,23 @@ PortfolioAnalytics = (function(self) {
  /**
   * @function sampleKurtosis_
   *
-  * @description Compute the (sample, non excess) kurtosis of the values of a numeric array, using a corrected two-pass formula (c.f. kurtosis_ function).
+  * @summary Compute the sample kurtosis of a serie of values.
+  *
+  * @description This function returns the sample kurtosis of a serie of values [x_1,...,x_p], 
+  * which is defined as the kurtosis of the p values x_1,...,x_p multiplied by a factor dependant on p, c.f. the reference.
+  *
+  * The algorithm implemented uses a two pass formula in order to reduce the computation error, c.f. the function kurtosis_.
   *
   * @see <a href="www.jstor.org/stable/2988433">D. N. Joanes and C. A. Gill, Comparing Measures of Sample Skewness and Kurtosis, Journal of the Royal Statistical Society. Series D (The Statistician), Vol. 47, No. 1 (1998), pp. 183-189</a>
   *
-  * @param {Array.<number>} x the input numeric array.
-  * @return {number} the kurtosis of the values of the input array.
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {number} the kurtosis of the values of the array x.
   *
   * @example
   * sampleKurtosis_([4, 7, 13, 16]); 
   * // ~-0.30
   */
   self.sampleKurtosis_ = function(x) {
-    // Input checks are delegated
     var k = self.kurtosis_(x);
 	
     // Compute the G2 coefficient from the reference, and add 3 as the excess kurtosis is not computed here

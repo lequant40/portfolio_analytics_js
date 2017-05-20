@@ -313,14 +313,14 @@ QUnit.test('Conditional drawdown incorrect input arguments', function(assert) {
       PortfolioAnalytics.conditionalDrawdown([100], -0.01);
     },
     new Error ("input must be bounded between 0 and 1"),
-    "Negative numeric array input argument"
+    "Incorrect bound on input argument"
   );
   
   assert.throws(function() {
       PortfolioAnalytics.conditionalDrawdown([100], 1.01);
     },
     new Error ("input must be bounded between 0 and 1"),
-    "Negative numeric array input argument"
+    "Incorrect bound on input argument"
   );
   
   // Other tests are delegated to the unit tests of types.js
