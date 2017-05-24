@@ -30,8 +30,6 @@ QUnit.test('Bias adjusted Sharpe ratio computation', function(assert) {
    assert.equal(PortfolioAnalytics.biasAdjustedSharpeRatio(this.baconPortfolio, this.zeroRiskFree), 0.22385539495710946, 'Bias adjusted Sharpe ratio #1');
    assert.equal(PortfolioAnalytics.biasAdjustedSharpeRatio(this.baconBenchmark, this.zeroRiskFree), 0.2564567137450749, 'Bias adjusted Sharpe ratio #2');
    assert.equal(PortfolioAnalytics.biasAdjustedSharpeRatio(this.baconPortfolio, this.baconBenchmark), -0.09000601734112651, 'Bias adjusted Sharpe ratio #3');
-   
-   console.log(PortfolioAnalytics.sharpeRatioConfidenceInterval([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0.05))
 });
 
 QUnit.test('Double Sharpe ratio computation', function(assert) {    

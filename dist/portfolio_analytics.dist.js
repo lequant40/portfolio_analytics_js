@@ -1577,9 +1577,10 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function differentialReturns_
   *
-  * @summary Compute the differential arithmetic returns (also called excess arithmetic returns) of a portfolio v.s. a benchmark.
+  * @summary Internal function intended to compute the differential arithmetic returns 
+  * (also called excess arithmetic returns) of a portfolio v.s. a benchmark.
   *
-  * @description This function returns the differential arithmetic returns of a portfolio v.s. a benchmark
+  * @description This internal function returns the differential arithmetic returns of a portfolio v.s. a benchmark
   * (arithmetic returns of the portfolio minus arithmetic returns of the benchmark), both provided as
   * equity curves.
   *
