@@ -17,7 +17,7 @@ After several fruitless hours of Googling (incomplete codes, incorrect codes, un
 - Compatible with any browser supporting ECMAScript 5 (i.e., front-end development)
 - Compatible with [Node.js](https://nodejs.org/) (i.e., back-end development)
 - (Performances) Automatically uses JavaScript Typed Arrays
-- (Accuracy) Internally uses accurate algorithms (e.g., corrected two pass algorithms for mean, variance, skewness and kurtosis, accurate algorithm for error function...)
+- (Accuracy) Internally uses accurate numerical algorithms (e.g., corrected two pass algorithms for mean, variance, skewness and kurtosis, accurate algorithm for error function...)
 - Code continuously tested and integrated by [Travis CI](https://travis-ci.org/)
 - Code heavily documented using [JSDoc](http://usejsdoc.org/)
 
