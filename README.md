@@ -1,6 +1,6 @@
 | [French version](readme.fr.md)
 
-# PortfolioAnalytics v0.0.3 ([Changelog](changelog.md))
+# PortfolioAnalytics v0.0.4 ([Changelog](changelog.md))
 
 [![Travis Build Status](https://travis-ci.org/lequant40/portfolio_analytics_js.svg?style=flat)](https://travis-ci.org/lequant40/portfolio_analytics_js)
 
@@ -17,10 +17,9 @@ After several fruitless hours of Googling (incomplete codes, incorrect codes, un
 - Compatible with any browser supporting ECMAScript 5 (i.e., front-end development)
 - Compatible with [Node.js](https://nodejs.org/) (i.e., back-end development)
 - (Performances) Automatically uses JavaScript Typed Arrays
-- (Performances and accuracy) Internally uses LAPACK-inspired linear algebra methods (sum, dot product...)
-- (Accuracy) Internally uses accurate algorithms for statistical computations (e.g., corrected two pass algorithms for mean and variance...)
+- (Accuracy) Internally uses accurate algorithms (e.g., corrected two pass algorithms for mean, variance, skewness and kurtosis, accurate algorithm for error function...)
 - Code continuously tested and integrated by [Travis CI](https://travis-ci.org/)
-- Code documented using [JSDoc](http://usejsdoc.org/)
+- Code heavily documented using [JSDoc](http://usejsdoc.org/)
 
 ## Usage
 
@@ -142,12 +141,37 @@ PortfolioAnalytics.valueAtRisk([1, 2, 1], 0.7);
 // The (percent) value at risk
 ```
 
+#### Sharpe ratio related measures
+
+```js
+PortfolioAnalytics.sharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]); 
+// The Sharpe ratio
+
+PortfolioAnalytics.biasAdjustedSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]); 
+// The Sharpe ratio adjusted for its bias
+
+PortfolioAnalytics.doubleSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]); 
+// The double Sharpe ratio (i.e., the Sharpe ratio, adjusted for its estimation risk)
+
+PortfolioAnalytics.sharpeRatioConfidenceInterval([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0.05); 
+// The confidence interval for the Sharpe ratio (here, at 5% significance level)
+
+PortfolioAnalytics.probabilisticSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0); 
+// The probabilistic Sharpe ratio (i.e., the probability that the Sharpe ratio is greater 
+// than a reference Sharpe ratio, here 0)
+
+PortfolioAnalytics.minimumTrackRecordLength([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0.05, 0); 
+// The minimum track record length (i.e., the minimal length of the track record of the performance 
+// to have statistical confidence, here at 95%, that the Sharpe ratio is greater than a reference Sharpe ratio, here 0)
+```
+
 #### Returns to variability related measures
 
 ```js
 PortfolioAnalytics.gainToPainRatio([1, 2, 1]); 
 // The gain to pain ratio
 ```
+
 
 ## How to contribute ?
 
