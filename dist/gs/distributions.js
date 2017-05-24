@@ -3,13 +3,6 @@
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
  */
 
-/* Start Not to be used as is in Google Sheets */
- 
-var PortfolioAnalytics = PortfolioAnalytics || {};
-
-PortfolioAnalytics = (function(self) {
-  
-/* End Not to be used as is in Google Sheets */  
   
   /**
   * @function norminv_
@@ -39,7 +32,7 @@ PortfolioAnalytics = (function(self) {
   * norminv_(0.5);
   * // 0
   */
-  self.norminv_ = function(p, extendedPrecision) {
+  function norminv_(p, extendedPrecision) {
     // By default, standard precision is required
 	if (extendedPrecision === undefined) {
 	  extendedPrecision = false;
@@ -85,7 +78,7 @@ PortfolioAnalytics = (function(self) {
 	
 	// Improve the precision, if required.
 	if (extendedPrecision === true) {
-      var e = 0.5 * self.erfc_(-x/1.4142135623730951) - p; // Constant is equal to sqrt(2)
+      var e = 0.5 * erfc_(-x/1.4142135623730951) - p; // Constant is equal to sqrt(2)
       var u = e * 2.5066282746310002 * Math.exp(x*x/2); // Constant is equal to sqrt(2*pi)
       x = x - u/(1 + x*u/2);
 	}
@@ -120,7 +113,7 @@ PortfolioAnalytics = (function(self) {
   * normcdf_(0);
   * // 0.5
   */
-  self.normcdf_ = function(x) {
+  function normcdf_(x) {
     // Initialisations
 	var s=x;
 	var t=0;
@@ -153,7 +146,7 @@ PortfolioAnalytics = (function(self) {
   * @return {number} an approximation to erf(x).
   *
   */
-  self.erf_ = function(x) {
+  function erf_(x) {
     return calerf_(x, 0);
   }
   
@@ -173,7 +166,7 @@ PortfolioAnalytics = (function(self) {
   * @return {number} an approximation to erf(x).
   *
   */
-  self.erfc_ = function(x) {
+  function erfc_(x) {
     return calerf_(x, 1);
   }
   
@@ -308,10 +301,3 @@ PortfolioAnalytics = (function(self) {
   }
   
   
-/* Start Not to be used as is in Google Sheets */
-   
-   return self;
-  
-})(PortfolioAnalytics || {});
-
-/* End Not to be used as is in Google Sheets */

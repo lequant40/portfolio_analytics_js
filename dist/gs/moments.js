@@ -3,13 +3,6 @@
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
  */
 
-/* Start Not to be used as is in Google Sheets */
- 
-var PortfolioAnalytics = PortfolioAnalytics || {};
-
-PortfolioAnalytics = (function(self) {
-  
-/* End Not to be used as is in Google Sheets */  
   
   /**
   * @function hpm_
@@ -30,7 +23,7 @@ PortfolioAnalytics = (function(self) {
   * hpm_([0.1,-0.2,-0.3], 2, 0.0); 
   * // 0.0167
   */
-  self.hpm_ = function(x, n, t) {
+  function hpm_(x, n, t) {
     // Code below is adapted from a mean computation, c.f. mean_ function
 	// Initialisations
     var nn = x.length;
@@ -73,7 +66,7 @@ PortfolioAnalytics = (function(self) {
   * lpm_([0.1,0.2,-0.3], 2, 0.0); 
   * // 0.03
   */
-  self.lpm_ = function(x, n, t) {
+  function lpm_(x, n, t) {
     // Code below is adapted from a mean computation, c.f. mean_ function
 	// Initialisations
     var nn = x.length;
@@ -116,7 +109,7 @@ PortfolioAnalytics = (function(self) {
   * mean_([2,4]); 
   * // 3
   */
-  self.mean_ = function(x) {
+  function mean_(x) {
     // Initialisations
     var nn = x.length;
 
@@ -160,12 +153,12 @@ PortfolioAnalytics = (function(self) {
   * variance_([4, 7, 13, 16]); 
   * // 22.5
   */
-  self.variance_ = function(x) {
+  function variance_(x) {
 	// Initialisations
     var nn = x.length;
 
     // Compute the mean of the input numeric array (first pass)
-	var meanX = self.mean_(x);
+	var meanX = mean_(x);
 
 	// Compute the squared deviations plus the correction factor (second pass)
 	// C.f. S_4 formula of the reference
@@ -202,9 +195,9 @@ PortfolioAnalytics = (function(self) {
   * sampleVariance_([4, 7, 13, 16]); 
   * // 30
   */
-  self.sampleVariance_ = function(x) {
+  function sampleVariance_(x) {
     var nn = x.length;
-    return self.variance_(x) * nn/(nn - 1);
+    return variance_(x) * nn/(nn - 1);
   }
 
   
@@ -227,8 +220,8 @@ PortfolioAnalytics = (function(self) {
   * stddev_([1, 2, 3, 4]); 
   * // ~1.12
   */
-  self.stddev_ = function(x) {
-	return Math.sqrt(self.variance_(x));
+  function stddev_(x) {
+	return Math.sqrt(variance_(x));
   }
   
   
@@ -249,8 +242,8 @@ PortfolioAnalytics = (function(self) {
   * sampleStddev_([1, 2, 3, 4]); 
   * // ~1.29
   */
-  self.sampleStddev_ = function(x) {
-	return Math.sqrt(self.sampleVariance_(x));
+  function sampleStddev_(x) {
+	return Math.sqrt(sampleVariance_(x));
   }
 
   
@@ -275,12 +268,12 @@ PortfolioAnalytics = (function(self) {
   * skewness_([4, 7, 13, 16]); 
   * // 0
   */
-  self.skewness_ = function(x) {
+  function skewness_(x) {
 	// Initialisations
     var nn = x.length;
 	
     // Compute the mean of the input numeric array (first pass)
-	var meanX = self.mean_(x);
+	var meanX = mean_(x);
 	
 	// By definition, the skewness is equals to E[((X-m)/sigma)^3], 
 	// which can be expanded as 1/sigma^3 * ( E[X^3] - 2*E[X]*E[X^2] + 2*E[X]^3 )
@@ -333,11 +326,11 @@ PortfolioAnalytics = (function(self) {
   * sampleSkewness_([4, 7, 13, 16]); 
   * // 0
   */
-  self.sampleSkewness_ = function(x) {
+  function sampleSkewness_(x) {
     var nn = x.length;
     
     // Compute the G1 coefficient from the reference
-    return self.skewness_(x) * Math.sqrt(nn * (nn - 1))/(nn - 2);
+    return skewness_(x) * Math.sqrt(nn * (nn - 1))/(nn - 2);
   }
   
   
@@ -363,12 +356,12 @@ PortfolioAnalytics = (function(self) {
   * kurtosis_([4, 7, 13, 16]); 
   * // 1.36
   */
-  self.kurtosis_ = function(x) {
+  function kurtosis_(x) {
 	// Initialisations
     var nn = x.length;
 	
     // Compute the mean of the input numeric array (first pass)
-	var meanX = self.mean_(x);
+	var meanX = mean_(x);
 	
 	// By definition, the kurtosis is equals to E[((X-m)/sigma)^4], 
 	// which can be expanded as 1/sigma^4 * ( E[X^4] - 4*E[X]*E[X^3] + 6*E[X]^2*E[X^2] - 3*E[X]^4 )
@@ -424,11 +417,11 @@ PortfolioAnalytics = (function(self) {
   * sampleKurtosis_([4, 7, 13, 16]); 
   * // ~-0.30
   */
-  self.sampleKurtosis_ = function(x) {
+  function sampleKurtosis_(x) {
     var nn = x.length;
     
     // Compute the G2 coefficient from the reference, and add 3 as the excess kurtosis is not computed here
-    return (nn - 1)/((nn - 2) * (nn - 3)) * ((nn + 1) * self.kurtosis_(x) - 3* (nn - 1)) + 3;
+    return (nn - 1)/((nn - 2) * (nn - 3)) * ((nn + 1) * kurtosis_(x) - 3* (nn - 1)) + 3;
   }
   
   
@@ -453,12 +446,12 @@ PortfolioAnalytics = (function(self) {
   * sampleMoments_([4, 7, 13, 16]); 
   * // [10, 30, ~5.477, 0, ~-0.30]
   */
-  self.sampleMoments_ = function(x) {
+  function sampleMoments_(x) {
 	// Initialisations
     var nn = x.length;
 
     // Compute the mean of the input numeric array (first pass)
-	var meanX = self.mean_(x);
+	var meanX = mean_(x);
 	
 	// Code below is copy pasted from kurtosis computation, for performances reasons
 	// Compute all the deviations necessary to compute the variance, skewness and kurtosis (second pass)
@@ -509,10 +502,3 @@ PortfolioAnalytics = (function(self) {
   }
   
   
-/* Start Not to be used as is in Google Sheets */
-   
-   return self;
-  
-})(PortfolioAnalytics || {});
-
-/* End Not to be used as is in Google Sheets */

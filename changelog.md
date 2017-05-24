@@ -1,3 +1,11 @@
+### 0.0.4, on-going
+
+- Misc. code refactoring
+- Removed all types checks (better performances, and all cases were not covered anyway since ... well, this is Javascript !)
+- To balance previous point, improved documentation (a lot !)
+- Added computations related to the Sharpe ratio
+- Added statistical functions skewness, kurtosis, norminv, normcdf, erf, erfc
+
 ### 0.0.3 - 04/05/2017
 
 - Misc. code refactoring

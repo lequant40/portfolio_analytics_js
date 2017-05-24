@@ -7,11 +7,6 @@ QUnit.module('Drawdowns internal module', {
 });
 
 
-QUnit.test('Max drawdown internal incorrect input arguments', function(assert) {
-  assert.expect(0);
-});
-
-
 QUnit.test('Max drawdown internal computation', function(assert) {    
   assert.deepEqual(PortfolioAnalytics.maxDrawdown_([100], 0, 0), 
                                                    [0, 0, 0], 

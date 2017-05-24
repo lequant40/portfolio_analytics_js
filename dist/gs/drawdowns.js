@@ -27,9 +27,6 @@
   * // 0.0, i.e. no drawdown
   */
   function maxDrawdown(equityCurve) {
-    // Input checks
-    assertPositiveNumberArray_(equityCurve);
-
     // Compute the maximum drawdown and its associated duration
     var maxDd_ = maxDrawdown_(equityCurve, 0, equityCurve.length-1);
     
@@ -80,8 +77,6 @@
     var idxStartMaxDd = -1;
     var idxEndMaxDd = -1;
     
-    // Internal function => no specific checks on the input arguments
-    
     // Loop over all the values to compute the maximum drawdown
     for (var i=idxStart; i<idxEnd+1; ++i) {     
       if (equityCurve[i] > highWaterMark) {
@@ -122,9 +117,6 @@
   function drawdownFunction(equityCurve) {
     // Initialisations
     var highWaterMark = -Infinity;
-    
-    // Input checks
-    assertPositiveNumberArray_(equityCurve);
     
     // Other initialisations
     var ddVector = new equityCurve.constructor(equityCurve.length); // Inherit the array type from the input array
@@ -173,10 +165,6 @@
   * // true
   */
   function topDrawdowns(equityCurve, nbTopDrawdowns) {
-    // Input checks
-    assertPositiveNumberArray_(equityCurve);
-    assertPositiveInteger_(nbTopDrawdowns);
-    
 	// If no drawdowns are required, returns
 	if (nbTopDrawdowns == 0) {
 	  return [];
@@ -281,13 +269,14 @@
   * // ~0.289
   */
   function ulcerIndex(equityCurve) {
-    // No need for input checks, as done in function below
-
     // Compute the drawdown function
     var ddFunc = drawdownFunction(equityCurve);
     
     // Compute the sum of squares of this function
-	var sumSquares = dot_(ddFunc, ddFunc);
+	var sumSquares = 0.0;
+    for (var i=0; i<ddFunc.length; ++i) {
+      sumSquares += ddFunc[i]*ddFunc[i];
+    }
     
     // Compute and return the ulcer index
     return Math.sqrt(sumSquares/ddFunc.length);
@@ -313,8 +302,6 @@
   * // ~0.167
   */
   function painIndex(equityCurve) {
-    // No need for input checks, as done in function below
-    
     // Compute the drawdown function
     var ddFunc = drawdownFunction(equityCurve);
 	
@@ -338,11 +325,7 @@
   * conditionalDrawdown([100, 90, 80, 70, 60, 50, 40, 30, 20], 0.7);
   * // 0.725
   */
-  function conditionalDrawdown(equityCurve, alpha) {
-    // Input checks
-    // No need to check for array positivity, as done in function below
-    assertBoundedNumber_(alpha, 0, 1);
-   
+  function conditionalDrawdown(equityCurve, alpha) {   
     // Compute the drawdown function and
 	// remove the first element, always equals to 0
 	// C.f. definition 3.1
@@ -371,12 +354,10 @@
   
       // Compute the remaining part of the integral between alpha percentile and one  
 	var cdd2 = 0.0;
-    //for (var i=idxAlphaDd; i<ddFunc.length; ++i) {
-    //  cdd2 += ddFunc[i];
-    //}
-	if (idxAlphaDd < ddFunc.length) {
-	  cdd2 = sum_(ddFunc.slice(idxAlphaDd))/ddFunc.length;
-	}	
+    for (var i=idxAlphaDd; i<ddFunc.length; ++i) {
+      cdd2 += ddFunc[i];
+    }
+	cdd2 /= ddFunc.length;
     
       // Compute and return the average value of the integral above
 	var cdd = (cdd1 + cdd2) / (1 - alpha);

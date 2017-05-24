@@ -12,31 +12,6 @@ QUnit.module('Drawdowns module', {
 });
 
 
-QUnit.test('Max drawdown incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.maxDrawdown();
-    },
-    new Error("input must be an array of positive numbers"),
-    "No input arguments"
-  );
-   
-  assert.throws(function() {
-      PortfolioAnalytics.maxDrawdown([-100]);
-    },
-    new Error ("input must be an array of positive numbers"),
-    "Negative numeric array input argument"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.maxDrawdown([]);
-    },
-    new Error ("input must be an array of positive numbers"),
-    "Negative numeric array input argument"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
-
 
 QUnit.test('Max drawdown computation', function(assert) {    
   assert.equal(PortfolioAnalytics.maxDrawdown([100]), 0, 'No max drawdown #1');
@@ -53,25 +28,6 @@ QUnit.test('Max drawdown computation', function(assert) {
                                               'Complex max drawdown #2');
 });
 
-
-
-QUnit.test('Drawdown function incorrect input arguments', function(assert) {    
-  assert.throws(function() {
-      PortfolioAnalytics.drawdownFunction();
-    },
-    new Error("input must be an array of positive numbers"),
-    "No input arguments"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.drawdownFunction([-100]);
-    },
-    new Error ("input must be an array of positive numbers"),
-    "Negative numeric array input argument"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
 
 
 QUnit.test('Drawdown function computation', function(assert) {
@@ -109,46 +65,6 @@ QUnit.test('Drawdown function computation', function(assert) {
                                                        	[0.0, 0.0, 0.0, 0.0, 0.010000000403691738, 0.0, 0.0, 0.0, 0.0, 0.013999999617791537, 0.0, 0.005000000734539523, 
 														0.0, 0.0, 0.03700000011181794, 0.0957430003496455, 0.0803706313368281, 0.1254324703457898, 0.14467295573852484, 0.0848000629253946, 0.031718466812211514, 0.0946567662742993, 0.07292852835869665, 0.0775638856906372, 0.0858658110661319], 
                                                        'Complex drawdown function #2');
-});
-
-
-QUnit.test('Top drawdowns incorrect input arguments', function(assert) {
-  assert.throws(function() {
-      PortfolioAnalytics.topDrawdowns();
-    },
-    new Error("input must be an array of positive numbers"),
-    "No input arguments"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.topDrawdowns([-100.01], 1);
-    },
-    new Error ("input must be an array of positive numbers"),
-    "Negative numeric array input argument"
-  );
-   
-  assert.throws(function() {
-      PortfolioAnalytics.topDrawdowns([1]);
-    },
-    new Error("input must be a positive integer"),
-    "No top drawdowns argument"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.topDrawdowns([1], 'a');
-    },
-    new Error("input must be a positive integer"),
-    "No integer top drawdowns argument"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.topDrawdowns([], 1);
-    },
-    new Error("input must be an array of positive numbers"),
-    "No integer top drawdowns argument"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
 });
 
 
@@ -215,24 +131,6 @@ QUnit.test('Top drawdowns computation', function(assert) {
 });
 
 
-QUnit.test('Ulcer index incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.ulcerIndex();
-    },
-    new Error("input must be an array of positive numbers"),
-    "No input arguments"
-  );
-   
-  assert.throws(function() {
-      PortfolioAnalytics.ulcerIndex([-100]);
-    },
-    new Error ("input must be an array of positive numbers"),
-    "Negative numeric array input argument"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
-
 
 QUnit.test('Ulcer index computation', function(assert) {   
   	// Coming from the Excel Sheet associated to http://www.tangotools.com/ui/ui.htm
@@ -244,24 +142,6 @@ QUnit.test('Ulcer index computation', function(assert) {
 				
 });
 
-
-QUnit.test('Pain index incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.painIndex();
-    },
-    new Error("input must be an array of positive numbers"),
-    "No input arguments"
-  );
-   
-  assert.throws(function() {
-      PortfolioAnalytics.painIndex([-100]);
-    },
-    new Error ("input must be an array of positive numbers"),
-    "Negative numeric array input argument"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
 
 
 QUnit.test('Pain index computation', function(assert) {   
@@ -286,45 +166,6 @@ QUnit.test('Pain index computation', function(assert) {
               'Pain index equals to average of the drawdown function values');
 });
 
-
-QUnit.test('Conditional drawdown incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.conditionalDrawdown();
-    },
-    new Error("input(s) must be a number"),
-    "No input arguments"
-  );
-   
-  assert.throws(function() {
-      PortfolioAnalytics.conditionalDrawdown([-100]);
-    },
-    new Error ("input(s) must be a number"),
-    "Negative numeric array input argument"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.conditionalDrawdown([-100], 1);
-    },
-    new Error ("input must be an array of positive numbers"),
-    "Negative numeric array input argument"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.conditionalDrawdown([100], -0.01);
-    },
-    new Error ("input must be bounded between 0 and 1"),
-    "Incorrect bound on input argument"
-  );
-  
-  assert.throws(function() {
-      PortfolioAnalytics.conditionalDrawdown([100], 1.01);
-    },
-    new Error ("input must be bounded between 0 and 1"),
-    "Incorrect bound on input argument"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
 
 
 QUnit.test('Conditional drawdown computation', function(assert) {   

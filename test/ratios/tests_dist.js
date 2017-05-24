@@ -1,25 +1,6 @@
 // ------------------------------------------------------------
-QUnit.module('Returns module', {
+QUnit.module('Ratios module', {
 });
-
-QUnit.test('Gain to pain ratio incorrect input arguments', function(assert) {   
-  assert.throws(function() {
-      PortfolioAnalytics.gainToPainRatio();
-    },
-    new Error("input must be an array of positive numbers"),
-    "No input arguments"
-  );
-   
-  assert.throws(function() {
-      PortfolioAnalytics.gainToPainRatio([-100]);
-    },
-    new Error ("input must be an array of positive numbers"),
-    "Negative numeric array input argument"
-  );
-  
-  // Other tests are delegated to the unit tests of types.js
-});
-
 
 QUnit.test('Gain to pain ratio computation', function(assert) {    
   assert.deepEqual(PortfolioAnalytics.gainToPainRatio([100]), NaN, 'Gain to pain ratio #1');

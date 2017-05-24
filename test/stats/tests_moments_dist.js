@@ -45,9 +45,14 @@ QUnit.test('Mean computation', function(assert) {
 
 
 QUnit.test('Variance computation', function(assert) {      
-  // Variance of one value is NaN
-  assert.deepEqual(PortfolioAnalytics.variance_([1]), NaN, 'Variance of one number');
+  // Variance of one value is 0
+  assert.equal(PortfolioAnalytics.variance_([1]), 0, 'Variance of one number');
+  
+  // Sample variance of one value is NaN
   assert.deepEqual(PortfolioAnalytics.sampleVariance_([1]), NaN, 'Sample variance of one number');
+  
+  // Variance of constant values is constant
+  assert.equal(PortfolioAnalytics.variance_([1, 1]), 0, 'Variance for constant values');
   
   // Theoretically, Var(X + a) = Var(X), with a a constant
   // With a two pass formula, this formula should be valid for the case below
@@ -65,8 +70,10 @@ QUnit.test('Variance computation', function(assert) {
 
 
 QUnit.test('Standard deviation computation', function(assert) {      
-  // Standard deviation of one value is NaN
-  assert.deepEqual(PortfolioAnalytics.stddev_([1]), NaN, 'Standard deviation of one number');
+  // Standard deviation of one value is 0
+  assert.equal(PortfolioAnalytics.stddev_([1]), 0, 'Standard deviation of one number');
+  
+  // Sample standard deviation of one value is NaN
   assert.deepEqual(PortfolioAnalytics.sampleStddev_([1]), NaN, 'Sample standard deviation of one number');
   
   // Uses identity stddev(x) = sqrt(var(x))
@@ -88,9 +95,14 @@ QUnit.test('Standard deviation computation', function(assert) {
 
 
 QUnit.test('Skewness computation', function(assert) {      
-  // Skewness of one or two values is NaN
+  // Skewness of one value is NaN, as variance is 0
   assert.deepEqual(PortfolioAnalytics.skewness_([1]), NaN, 'Skewness of one number');
-  assert.deepEqual(PortfolioAnalytics.skewness_([1, 2]), NaN, 'Skewness of two numbers');
+  
+  // Skewness of two values can be NaN (if variance is 0), or a number
+  assert.deepEqual(PortfolioAnalytics.skewness_([1, 1]), NaN, 'Skewness of two numbers #1');
+  assert.equal(PortfolioAnalytics.skewness_([1, 2]), 0, 'Skewness of two numbers #2');
+  
+  // Sample skewness of less than 2 numbers is NaN
   assert.deepEqual(PortfolioAnalytics.sampleSkewness_([1]), NaN, 'Sample skewness of one number');
   assert.deepEqual(PortfolioAnalytics.sampleSkewness_([1, 2]), NaN, 'Sample skewness of two numbers');
 
@@ -105,10 +117,16 @@ QUnit.test('Skewness computation', function(assert) {
 
 
 QUnit.test('Kurtosis computation', function(assert) {      
-  // Skewness of one or two or three values is NaN
+  // Kurtosis of one values is NaN, as variance is 0
   assert.deepEqual(PortfolioAnalytics.kurtosis_([1]), NaN, 'Kurtosis of one number');
-  assert.deepEqual(PortfolioAnalytics.kurtosis_([1, 2]), NaN, 'Kurtosis of two numbers');
-  assert.deepEqual(PortfolioAnalytics.kurtosis_([1, 2, 3]), NaN, 'Kurtosis of three numbers');
+  
+  // Kurtosis of 2/3 values can be NaN (if variance is 0) or a number
+  assert.equal(PortfolioAnalytics.kurtosis_([1, 2]), 1, 'Kurtosis of two numbers');
+  assert.equal(PortfolioAnalytics.kurtosis_([1, 2, 3]), 1.5, 'Kurtosis of three numbers');
+  assert.deepEqual(PortfolioAnalytics.kurtosis_([1, 1]), NaN, 'Kurtosis of two numbers #2');
+  assert.deepEqual(PortfolioAnalytics.kurtosis_([1, 1, 1]), NaN, 'Kurtosis of three numbers #2');
+
+  // Sample kurtosis of less than 3 numbers is NaN
   assert.deepEqual(PortfolioAnalytics.sampleKurtosis_([1]), NaN, 'Sample kurtosis of one number');
   assert.deepEqual(PortfolioAnalytics.sampleKurtosis_([1, 2]), NaN, 'Sample kurtosis of two numbers');
   assert.deepEqual(PortfolioAnalytics.sampleKurtosis_([1, 2, 3]), NaN, 'Sample kurtosis of three numbers');
@@ -126,6 +144,24 @@ QUnit.test('Kurtosis computation', function(assert) {
   // Bacon portfolio test
   assert.equal(PortfolioAnalytics.kurtosis_(this.BaconReturns), 13116.28/(Math.pow(Math.sqrt(359.74/24),4) * 24) + 7.789024514259779e-7, 'Bacon kurtosis');
   assert.equal(PortfolioAnalytics.sampleKurtosis_(this.BaconReturns), 13116.28/Math.pow(Math.sqrt(359.74/23),4) * (24 * 25)/ (23 * 22 * 21) - 3 * (23 * 23)/(22 * 21) + 3 + 9.69413224805038e-7 , 'Bacon sample kurtosis	');
+});
+
+
+QUnit.test('Sample moments computation', function(assert) {      
+  // Generate random data
+  var testData = new Array(100);
+  for (var i=0; i<100; ++i) {
+    testData[i] = Math.random();
+  }
+  
+  // Check that the result of the sampleMoments function is the same as the
+  // different functions, using the generated random data
+  var moments = PortfolioAnalytics.sampleMoments_(testData);
+  assert.equal(PortfolioAnalytics.mean_(testData), moments[0], 'Mean equality');
+  assert.equal(PortfolioAnalytics.sampleVariance_(testData), moments[1], 'Sample variance equality');
+  assert.equal(PortfolioAnalytics.sampleStddev_(testData), moments[2], 'Sample standard deviation equality');
+  assert.equal(PortfolioAnalytics.sampleSkewness_(testData), moments[3], 'Sample skewness equality');
+  assert.equal(PortfolioAnalytics.sampleKurtosis_(testData), moments[4], 'Sample kurtosis equality');
 });
 
 

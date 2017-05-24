@@ -37,9 +37,6 @@ PortfolioAnalytics = (function(self) {
   * // 0.0, i.e. no drawdown
   */
   self.maxDrawdown = function(equityCurve) {
-    // Input checks
-    self.assertPositiveNumberArray_(equityCurve);
-
     // Compute the maximum drawdown and its associated duration
     var maxDd_ = maxDrawdown_(equityCurve, 0, equityCurve.length-1);
     
@@ -90,8 +87,6 @@ PortfolioAnalytics = (function(self) {
     var idxStartMaxDd = -1;
     var idxEndMaxDd = -1;
     
-    // Internal function => no specific checks on the input arguments
-    
     // Loop over all the values to compute the maximum drawdown
     for (var i=idxStart; i<idxEnd+1; ++i) {     
       if (equityCurve[i] > highWaterMark) {
@@ -132,9 +127,6 @@ PortfolioAnalytics = (function(self) {
   self.drawdownFunction = function(equityCurve) {
     // Initialisations
     var highWaterMark = -Infinity;
-    
-    // Input checks
-    self.assertPositiveNumberArray_(equityCurve);
     
     // Other initialisations
     var ddVector = new equityCurve.constructor(equityCurve.length); // Inherit the array type from the input array
@@ -183,10 +175,6 @@ PortfolioAnalytics = (function(self) {
   * // true
   */
   self.topDrawdowns = function(equityCurve, nbTopDrawdowns) {
-    // Input checks
-    self.assertPositiveNumberArray_(equityCurve);
-    self.assertPositiveInteger_(nbTopDrawdowns);
-    
 	// If no drawdowns are required, returns
 	if (nbTopDrawdowns == 0) {
 	  return [];
@@ -291,8 +279,6 @@ PortfolioAnalytics = (function(self) {
   * // ~0.289
   */
   self.ulcerIndex = function(equityCurve) {
-    // No need for input checks, as done in function below
-
     // Compute the drawdown function
     var ddFunc = self.drawdownFunction(equityCurve);
     
@@ -326,8 +312,6 @@ PortfolioAnalytics = (function(self) {
   * // ~0.167
   */
   self.painIndex = function(equityCurve) {
-    // No need for input checks, as done in function below
-    
     // Compute the drawdown function
     var ddFunc = self.drawdownFunction(equityCurve);
 	
@@ -351,11 +335,7 @@ PortfolioAnalytics = (function(self) {
   * conditionalDrawdown([100, 90, 80, 70, 60, 50, 40, 30, 20], 0.7);
   * // 0.725
   */
-  self.conditionalDrawdown = function(equityCurve, alpha) {
-    // Input checks
-    // No need to check for array positivity, as done in function below
-    self.assertBoundedNumber_(alpha, 0, 1);
-   
+  self.conditionalDrawdown = function(equityCurve, alpha) {   
     // Compute the drawdown function and
 	// remove the first element, always equals to 0
 	// C.f. definition 3.1
@@ -418,12 +398,19 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function gainToPainRatio
   *
-  * @description Compute the gain to pain ratio associated to a portfolio equity curve.
+  * @summary Compute the gain to pain ratio of a portfolio.
+  *
+  * @description This function returns the gain to pain ratio of a portfolio, provided as an
+  * equity curve.
+  *
+  * The the gain to pain ratio is defined as the sum of all returns divided by the absolute value of the sum of all losses, c.f. the reference.
+  *
+  * From the reference, a gain to pain ratio above 1.0 is very good, and a gain to pain ratio above 1.5 is excellent.
   *
   * @see <a href="http://onlinelibrary.wiley.com/doi/10.1002/9781119203469.app1/summary">Hedge Fund Market Wizards: How Winning Traders Win, Jack D. Schwager, Wiley, 2012</a>
   * 
-  * @param {Array.<number>} equityCurve the portfolio equity curve.
-  * @return {number} the gain to pain ratio.
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @return {number} the gain to pain ratio of the portfolio.
   *
   * @example
   * gainToPainRatio([1, 2, 1]); 
@@ -433,11 +420,9 @@ PortfolioAnalytics = (function(self) {
   * gainToPainRatio([1, 1.1, 1.4]); 
   * // NaN
   */
-  self.gainToPainRatio = function(equityCurve) {
-    // No need for input checks, as done in function below
-	
+  self.gainToPainRatio = function(portfolioEquityCurve) {
 	// Compute the arithmetic returns of the portfolio
-	var returns = self.arithmeticReturns(equityCurve).slice(1); // First value is NaN
+	var returns = self.arithmeticReturns(portfolioEquityCurve).slice(1); // First value is NaN
 	
 	// If there is no usable returns, exit
 	if (returns.length == 0) {
@@ -445,7 +430,7 @@ PortfolioAnalytics = (function(self) {
 	}
 	
     // Else, compute the gain to pain ratio as the the sum of the returns divided by
-	// the sum of the absolute values of the negative returns
+	// the sum of the absolute values of the negative returns, c.f. the reference.
 	var numerator = self.mean_(returns);
 	var denominator = self.lpm_(returns, 1, 0.0);
 
@@ -477,7 +462,8 @@ var PortfolioAnalytics = PortfolioAnalytics || {};
 
 PortfolioAnalytics = (function(self) {
   /* Start Wrapper private methods - Unit tests usage only */
-  self.sharpeRatio_ = function(mean, stddev) { return sharpeRatio_(mean, stddev); }
+  self.sharpeRatioStatistics_ = function(portfolioEquityCurve, benchmarkEquityCurve) { return sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve); }
+  self.differentialReturns_ = function(portfolioEquityCurve, benchmarkEquityCurve) { return differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve); }
   /* End Wrapper private methods - Unit tests usage only */
   
 /* End Not to be used as is in Google Sheets */  
@@ -501,60 +487,80 @@ PortfolioAnalytics = (function(self) {
   * @return {number} the Sharpe ratio of the portfolio v.s. the benchmark.
   *
   * @example
-  * sharpeRatio([1, 2, 3], [1, 1, 1]); 
-  * // XXX
+  * sharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]);
+  * // ~0.585
   */
   self.sharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
-	// The Sharpe ratio is defined by the formula (6) of the reference, which uses:
-	// - Differential returns
-	// - Mean of differential returns
-	// - Sample standard deviation of sample returns	
-    var differentialReturns = differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve);
-	var m = self.mean_(differentialReturns);
-	var sigma = self.sampleStddev_(differentialReturns);
+	// Compute the Sharpe ratio statistics
+	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
+	var sr = srs[0];
+	
+	// Return the Sharpe ratio
+	return sr;
+  }  
 
-    // Effectively computes the Sharpe ratio
-	return sharpeRatio_(m, sigma);	
-  }
-  
   
   /**
-  * @function sharpeRatio_
+  * @function sharpeRatioStatistics_
   *
-  * @summary Internal function intended to compute the Sharpe ratio.
+  * @summary Internal function intended to compute the Sharpe ratio, the Sharpe ratio variance
+  * and the Sharpe ratio asymptotic bias.
   *
-  * @description This internal function returns the Sharpe ratio of a serie of differential returns based on their arithmetic
-  * mean and their sample standard deviation.
+  * @description This internal function returns the Sharpe ratio of a portfolio v.s. a benchmark, both provided as
+  * equity curves, as well as its variance and its asymptotic bias.
+  * 
+  * The Sharpe ratio is defined as the arithmetic mean of the differential arithmetic returns 
+  * (arithmetic returns of the portfolio minus the arithmetic returns of the benchmark), divided by the sample standard deviation 
+  * of these differential returns, c.f. the first reference.
   *
-  * The Sharpe ratio is defined as the above mean divided by the above sample standard deviation, c.f. the reference.
+  * The Sharpe ratio asymptotic bias is computed using a factor dependant on the kurtosis of the differential returns
+  * of the portfolio v.s. the benchmark, c.f. the second reference.
+  *
+  * The Sharpe ratio variance is approximated through its asymptotic closed form formula, dependant on the skewness
+  * and on the kurtosis of these differential returns, c.f. the second reference.
   *
   * @see <a href="http://www.iijournals.com/doi/abs/10.3905/jpm.1994.409501?journalCode=jpm">The Sharpe Ratio, William F. Sharpe, The Journal of Portfolio Management, Fall 1994, Vol. 21, No. 1: pp.49-58</a>
+  * @see <a href="http://link.springer.com/article/10.1057/palgrave.jam.2250084">Comparing Sharpe ratios: So where are the p-values, J.D. Opdyke, Journal of Asset Management (2007) 8, 308–336</a>
   * 
-  * @param {number} m the arithmetic mean of differential returns, a real number.
-  * @param {number} s the sample standard deviation of differential returns, a real number.
-  * @return {number} the Sharpe ratio associated to m and s.
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {Array.<number>} benchmarkEquityCurve the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
+  * @return {Array.<number>} the Sharpe ratio of the portfolio v.s. the benchmark, the variance of the Sharpe ratio and the
+  * asymptotic bias of the Sharpe ratio.
   *
   * @example
-  * sharpeRatio_(1, 2); 
-  * // XXX
+  * sharpeRatioStatistics_([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]);
+  * // [0.5851289093221407, 0.5228801702220195, 1.1019640163238367]
   */
-  function sharpeRatio_(m, s) {
-	// The Sharpe ratio is defined by the formula (6) of the reference
-	if (s == 0.0) {
-	  return NaN; // The Sharpe ratio is undefined in case there is a null variance
-	}
-	else {
-	  return m/s;
-	}
-  }
+  function sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve) {
+	// Compute the differential returns and associated statistics
+    var differentialReturns = differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve);
+    var moments = self.sampleMoments_(differentialReturns);
+    var m = moments[0];
+    var sigma = moments[2];
+    var s = moments[3];	
+    var k = moments[4];
+	
+	// Compute the Sharpe ratio, qs defined by the formula (6) of the first reference
+    var sr = m/sigma;
 
+    // Compute the Sharpe ratio variance, as defined by formula (8) of the second reference
+	var srVar = (1 + 0.25 * sr * sr *(k - 1) - sr * s)/(differentialReturns.length - 1);
+	
+	// Compute the Sharpe ratio asymptotic bias, c.f. formula 11b of the second reference
+	var srBias = 1 + 0.25 * (k - 1)/differentialReturns.length;
+
+	// Return them
+	return [sr, srVar, srBias];
+  }
+  
   
   /**
   * @function differentialReturns_
   *
-  * @summary Compute the differential returns (also called excess returns) of a portfolio v.s. a benchmark.
+  * @summary Compute the differential arithmetic returns (also called excess arithmetic returns) of a portfolio v.s. a benchmark.
   *
-  * @description This function returns the differential returns of a portfolio v.s. a benchmark, both provided as
+  * @description This function returns the differential arithmetic returns of a portfolio v.s. a benchmark
+  * (arithmetic returns of the portfolio minus arithmetic returns of the benchmark), both provided as
   * equity curves.
   *
   * @see <a href="http://www.iijournals.com/doi/abs/10.3905/jpm.1994.409501?journalCode=jpm">The Sharpe Ratio, William F. Sharpe, The Journal of Portfolio Management, Fall 1994, Vol. 21, No. 1: pp.49-58</a>
@@ -564,8 +570,8 @@ PortfolioAnalytics = (function(self) {
   * @return {Array.<number>} the differential returns, an array of real numbers of the same length as portfolioEquityCurve minus 1.
   *
   * @example
-  * differentialReturns_(1, 2); 
-  * // XXX
+  * differentialReturns_([100, 105, 110.25], [100, 100, 100]);
+  * // [0.05, 0.05], special case of constant benchmark (e.g. risk free rate equals to zero)
   */
   function differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve) {
 	// Compute the arithmetic returns of the portfolio
@@ -573,11 +579,6 @@ PortfolioAnalytics = (function(self) {
 
 	// Compute the arithmetic returns of the benchmark
 	var benchmarkReturns = self.arithmeticReturns(benchmarkEquityCurve).slice(1); // First value is NaN
-
-	// If there are no usable returns, exit
-	if (portfolioReturns.length == 0 || benchmarkReturns.length == 0) {
-	  return NaN;
-	}
 
 	// Else, compute and return the differential returns
 	var differentialReturns = new portfolioReturns.constructor(portfolioReturns.length); // Inherit the array type from (ultimately) the input array
@@ -587,7 +588,7 @@ PortfolioAnalytics = (function(self) {
 	return differentialReturns;
   }
   
-
+  
   /**
   * @function biasAdjustedSharpeRatio
   *
@@ -596,29 +597,24 @@ PortfolioAnalytics = (function(self) {
   * @description This function returns the Sharpe ratio of a portfolio v.s. a benchmark, both provided as
   * equity curves, adjusted for its asymptotic bias.
   *
-  * The asymptotic bias is computed using a factor dependant on the kurtosis of the differential returns
+  * The Sharpe ratio asymptotic bias is computed using a factor dependant on the kurtosis of the differential returns
   * of the portfolio v.s. the benchmark, c.f. the reference.
   * 
   * @see <a href="http://link.springer.com/article/10.1057/palgrave.jam.2250084">Comparing Sharpe ratios: So where are the p-values, J.D. Opdyke, Journal of Asset Management (2007) 8, 308–336</a>
   * 
   * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
   * @param {Array.<number>} benchmarkEquityCurve the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
-  * @return {number} the Sharpe ratio adjusted for its bias.
+  * @return {number} the Sharpe ratio of the portfolio v.s. the benchmark, adjusted for bias.
   *
   * @example
-  * biasAdjustedSharpeRatio([1, 2, 3], [1, 1, 1]); 
-  * // XXX
+  * biasAdjustedSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]);
+  * // ~0.53
   */
   self.biasAdjustedSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
-	// First compute the Sharpe ratio
-    var differentialReturns = differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve);
-	var m = self.mean_(differentialReturns);
-	var sigma = self.sampleStddev_(differentialReturns);
-	var sr = sharpeRatio_(m, sigma);
-
-	// Then compute its sample bias, c.f. formula 11b of the reference
-	var k = self.sampleKurtosis_(differentialReturns);
-	var srBias = 1 + 0.25 * (k - 1)/differentialReturns.length;
+	// Compute the Sharpe ratio statistics
+	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
+	var sr = srs[0];
+	var srBias = srs[2];
 	
 	// And return the Sharpe ratio adjusted fot its bias
 	return sr/srBias;
@@ -637,85 +633,163 @@ PortfolioAnalytics = (function(self) {
   * standard deviation, c.f. the first reference.
   *
   * To be noted that the algorithm approximates the standard deviation of the Sharpe ratio through its asymptotic closed form formula,
-  * found in the second reference, and not through a bootstrap procedure as originally described in the first reference.
-  *
+  * dependant on the skewness and on the kurtosis of the differential returns of the portfolio v.s. the benchmark, c.f. the second reference,
+  * and not through a bootstrap procedure originally described in the first reference.
+  *	
   * @see <a href="https://ssrn.com/abstract=168748">Vinod, Hrishikesh D. and Morey, Matthew R., A Double Sharpe Ratio (June 1, 1999).</a>
   * @see <a href="http://link.springer.com/article/10.1057/palgrave.jam.2250084">Comparing Sharpe ratios: So where are the p-values, J.D. Opdyke, Journal of Asset Management (2007) 8, 308–336</a>
   * 
   * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
   * @param {Array.<number>} benchmarkEquityCurve the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
-  * @return {number} the double Sharpe ratio.
+  * @return {number} the double Sharpe ratio of the portfolio v.s. the benchmark.
   *
   * @example
-  * doubleSharpeRatio([1, 2, 3], [1, 1, 1]); 
-  * // XXX
+  * doubleSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]); 
+  * // ~0.809
   */
   self.doubleSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
-	// First compute the Sharpe ratio
-    var differentialReturns = differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve);
-	var m = self.mean_(differentialReturns);
-	var sigma = self.sampleStddev_(differentialReturns);
-	var sr = sharpeRatio_(m, sigma);
-
-	// Then compute its standard deviation as defined by formula 8 of the second reference
-	var s = self.sampleSkewness_(differentialReturns);
-	var k = self.sampleKurtosis_(differentialReturns);
-	var srStdDev = Math.sqrt(sharpeRatioVariance_(differentialReturns.length, sr, s, k));
+	// Compute the Sharpe ratio statistics
+	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
+	var sr = srs[0];
+	var srStdDev = Math.sqrt(srs[1]);
 	
 	// And return the double Sharpe ratio, as defined by formula 3 of the first reference
 	return sr/srStdDev;
   }
+
+  
+  /**
+  * @function sharpeRatioConfidenceInterval
+  *
+  * @summary Compute the confidence interval at a given significance level of a Sharpe ratio 
+  * of a portfolio v.s. a benchmark.
+  *
+  * @description This function returns the confidence interval, at a given significance level alpha%,
+  * of a Sharpe ratio of a portfolio v.s. a benchmark, both provided as equity curves.
+  *
+  * The confidence interval is centered on the Sharpe ratio of the portfolio, with a length
+  * depending on the significance level and on the variance of the Sharpe ratio, approximated 
+  * by its asymptotic closed form formula, c.f. the references.
+  *
+  * @see <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1821643">David H. Bailey, DavisMarcos Lopez de Prado, The Sharpe Ratio Efficient Frontier, Journal of Risk, Vol. 15, No. 2, Winter 2012/13</a>
+  * 
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {Array.<number>} benchmarkEquityCurve the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
+  * @param {number} alpha the significance level, a real number belonging to interval [0,1].
+  * @return {Array.<number>} the confidence interval of the Sharpe ratio of the portfolio v.s. the benchmark.
+  *
+  * @example
+  * sharpeRatioConfidenceInterval([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0.05); 
+  * // [-0.832129939760892, 2.0023877584051735] // This interval is the 95% confidence level interval for the Sharpe ratio,
+  * which implies that a negative/null Sharpe ratio cannot be excluded
+  */
+  self.sharpeRatioConfidenceInterval = function(portfolioEquityCurve, benchmarkEquityCurve, alpha) {
+	// Compute the Sharpe ratio statistics
+	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
+	var sr = srs[0];
+	var srStdDev = Math.sqrt(srs[1]);
+
+	// Then compute its confidence interval at the alpha level, as defined by formula 9 of the reference
+	var zalpha2 = self.norminv_(1 - alpha/2); 
+	var srLowerBound = sr - zalpha2 * srStdDev;
+	var srUpperBound = sr + zalpha2 * srStdDev;
+	
+	// And return it
+	return [srLowerBound, srUpperBound];
+  }
   
   
   /**
-  * @function sharpeRatioVariance_
+  * @function probabilisticSharpeRatio
   *
-  * @summary Internal function intended to compute the variance of the Sharpe ratio.
+  * @summary Compute the probabilistic Sharpe ratio of a portfolio v.s. a benchmark, 
+  * assessed against a reference Sharpe ratio.
   *
-  * @description This internal function returns the variance of the Sharpe ratio of a serie of differential returns, based on their 
-  * original Sharpe ratio, their sample skewness and their sample kurtosis.
+  * @description This function returns the probabilistic Sharpe ratio of a portfolio v.s. a benchmark, both provided as
+  * equity curves, assessed against a reference Sharpe ratio.
+  *
+  * The probabilistic Sharpe ratio is defined as the probability that the computed Sharpe ratio of a portfolio
+  * v.s. a benchmark is greater than a reference Sharpe ratio, c.f. the reference.
+  *
+  * The probabilistic Sharpe ratio takes into account multiple statistical features present in the portfolio returns, 
+  * such as their length, frequency and deviations from normality (through their skewness and their kurtosis) 
+  * and provide a deflated, atemporal measure of performance expressed in terms of probability of skill.
   * 
-  * The variance of the Sharpe ratio is approximated by its asymptotic closed form formula, c.f. the reference.
+  * To be noted that calculations are done in the original frequency of the portfolio valuations,
+  * so that care must be taken when chosing the reference Sharpe ratio.
+  * Standard values for the reference Sharpe ratio are 0 (no investment skill) and 1 (annualized; root square rule can be used for un-annualization).
   *
-  * @see <a href="http://link.springer.com/article/10.1057/palgrave.jam.2250084">Comparing Sharpe ratios: So where are the p-values, J.D. Opdyke, Journal of Asset Management (2007) 8, 308–336</a>
+  * @see <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1821643">David H. Bailey, DavisMarcos Lopez de Prado, The Sharpe Ratio Efficient Frontier, Journal of Risk, Vol. 15, No. 2, Winter 2012/13</a>
   * 
-  * @param {number} nbRet the number of differential returns, a positive integer.  
-  * @param {number} sR the Sharpe ratio of the differential returns, a real number.  
-  * @param {number} s the skewness of the differential returns, a real number.
-  * @param {number} k the kurtosis of the differential returns, a real number.
-  * @return {number} the variance of the Sharpe ratio.
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {Array.<number>} benchmarkEquityCurve the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
+  * @param {number} referenceSharpeRatio the Sharpe ratio against which to assess the computed Sharpe ratio, a real number.
+  * @return {number} the probabilistic Sharpe ratio of the portfolio v.s. the benchmark, expressed as a percentage.
   *
   * @example
-  * sharpeRatioVariance_(1, 2); 
-  * // XXX
+  * probabilisticSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0); 
+  * // ~0.79; // Indicates that the portfolio v.s. benchmark (here, risk free rate of 0) Sharpe ratio is greater than 0 with a confidence level of 79%
   */
-  function sharpeRatioVariance_(nbRet, sR, s, k) {
-	// The Sharpe ratio standard deviation is defined by formula 8 of the reference
-	return (1 + 0.25 * sR*sR *(k - 1) - sR * s)/(nbRet - 1);
-  }
-  
-  // alpha = significance level, e:g: 5%
-  // confidence level is 1 - alpha, P SR belongs to XX = ff, c.f. second reference
-  self.sharpeRatioConfidenceInterval = function(portfolioEquityCurve, benchmarkEquityCurve, alpha) {
-	// First compute the Sharpe ratio
-    var differentialReturns = differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve);
-	var m = self.mean_(differentialReturns);
-	var sigma = self.sampleStddev_(differentialReturns);
-	var sr = sharpeRatio_(m, sigma);
+  self.probabilisticSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve, referenceSharpeRatio) {
+	// Compute the Sharpe ratio statistics
+	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
+	var sr = srs[0];
+	var srStdDev = Math.sqrt(srs[1]);
 	
-	// Then compute its standard deviation as defined by formula 8 of the first reference
-	var s = self.sampleSkewness_(differentialReturns);
-	var k = self.sampleKurtosis_(differentialReturns);
-	var srStdDev = Math.sqrt(sharpeRatioVariance_(differentialReturns.length, sr, s, k));
+	// Then compute the probabilistic Sharpe ratio, as defined by formula 11 of the reference
+	var x = (sr - referenceSharpeRatio)/srStdDev;
+	var psr = self.normcdf_(x);
 	
-	// Then compute its confidence interval at the alpha level, as defined by formula 9 of the first reference
-	var zcrit = self.norminv_(1 - alpha/2); // zcrit is commonly known in the scope of statistical tests as Z_alpha/2, c.f. the second reference
-	var srLowerBound = sr - zcrit * srStdDev;
-	var srUpperBound = sr + zcrit * srStdDev;
+	// And return it
+	return psr;
   }
-  
-  //TODO self.probabilisticSharpeRatio (alpha, target)
-  //TODO self.minimumTrackLength (alpha, target)
+
+
+  /**
+  * @function minimumTrackRecordLength
+  *
+  * @summary Compute the minimum track record length at a given significance level of a portfolio v.s. a benchmark, 
+  * assessed against a reference Sharpe ratio.
+  *
+  * @description This function returns the minimum track record length, at a given significance level alpha%,
+  * of a portfolio v.s. a benchmark, both provided as equity curves, assessed against a reference Sharpe ratio.
+  *
+  * The minimum track record length is defined as the length of the track record of the performance of a 
+  * portfolio v.s. a benchmark required in order to have statistical confidence, at confidence level 1-alpha%,
+  * that its Sharpe ratio is above a reference Sharpe ratio, c.f. the reference.
+  *
+  * The minimum track record length builds on the probabilistic Sharpe ratio, which means that it takes into account
+  * the same statistical features present in the portfolio returns as the probabilistic Sharpe ratio.
+  * 
+  * To be noted that the minimum track record length is expressed in terms of the number of portfolio valuations required,
+  * and not in calendar terms.
+  *
+  * @see <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1821643">David H. Bailey, DavisMarcos Lopez de Prado, The Sharpe Ratio Efficient Frontier, Journal of Risk, Vol. 15, No. 2, Winter 2012/13</a>
+  * 
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {Array.<number>} benchmarkEquityCurve the benchmark equity curve, an array of real numbers of the same length as portfolioEquityCurve.
+  * @param {number} alpha the significance level, a real number belonging to interval [0,1].
+  * @param {number} referenceSharpeRatio the Sharpe ratio against which to test the minimum track record length, a real number.
+  * @return {number} the minimum track record length of the portfolio v.s. the benchmark.
+  *
+  * @example
+  * minimumTrackRecordLength([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100] ,0.05, 0); 
+  * // ~13.4; // Indicates that 13.4 valuations are required to state that the portfolio v.s. benchmark Sharpe ratio 
+  * is greater than 0 with a 95% confidence level (hence, the 6 values provided here are not sufficent)
+  */
+  self.minimumTrackRecordLength = function(portfolioEquityCurve, benchmarkEquityCurve, alpha, referenceSharpeRatio) {
+	// Compute the Sharpe ratio statistics
+	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
+	var sr = srs[0];
+	var srVar = srs[1];
+	
+	// Then compute the minimum track record length, as defined by formula 13 of reference
+	var zalpha = self.norminv_(1 - alpha);
+	var mtl = 1 + srVar * (portfolioEquityCurve.length - 2) * (zalpha/(sr - referenceSharpeRatio)) * (zalpha/(sr - referenceSharpeRatio));
+
+	// And return it
+	return mtl;
+  }
 
   
 /* Start Not to be used as is in Google Sheets */
@@ -741,29 +815,32 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function cumulativeReturn
   *
-  * @description Compute the cumulative return associated to a portfolio equity curve.
+  * @summary Compute the cumulative return of a portfolio.
+  *
+  * @description This function returns the cumulative return of a portfolio, provided as an
+  * equity curve.
+  *
+  * The cumulative return of a portfolio is defined as its rate of return over the period
+  * on which it is provided, c.f. the reference.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Rate_of_return">https://en.wikipedia.org/wiki/Rate_of_return</a>
   * 
-  * @param {Array.<number>} equityCurve the portfolio equity curve.
-  * @return {number} the cumulative return.
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @return {number} the cumulative return of the portfolio, expressed as a percentage.
   *
   * @example
   * cumulativeReturn([1, 2, 1]); 
-  * // 0.0, i.e. 0% return
+  * // 0.0, i.e. 0% return over the period
   *
   * @example
   * cumulativeReturn([1, 2, 2]);
-  * // 1, i.e. 100% return
+  * // 1, i.e. 100% return over the period
   */
-  self.cumulativeReturn = function(equityCurve) {
-    // Input checks
-    self.assertPositiveNumberArray_(equityCurve);
-	
+  self.cumulativeReturn = function(portfolioEquityCurve) {
     // Compute the cumulative return
 	var cumRet = NaN;
-	if (equityCurve.length >= 2) { // In order to compute a proper cumulative return, at least 2 periods are required
-	  cumRet = (equityCurve[equityCurve.length-1] - equityCurve[0])/equityCurve[0];
+	if (portfolioEquityCurve.length >= 2) { // In order to compute a proper cumulative return, at least 2 periods are required
+	  cumRet = (portfolioEquityCurve[portfolioEquityCurve.length-1] - portfolioEquityCurve[0])/portfolioEquityCurve[0];
 	}
     
     // Return it
@@ -774,31 +851,38 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function cagr
   *
-  * @description Compute the compound annual growth rate associated to a portfolio equity curve and its associated valuation dates.
+  * @summary Compute the compound annual growth rate of a portfolio.
+  *
+  * @description This function returns compound annual growth rate of a portfolio, provided as an
+  * equity curve together with its associated valuation dates.
+  *
+  * The compound annual growth rate of a portfolio is defined as the geometric progression ratio
+  * that provides a constant rate of return over the period on which the portfolio valuations are provided, c.f. the reference.
+  *
+  * The algorithm automatically computes the number of (calendar) days between the first portfolio valuation date
+  * and the last portfolio valuation date, which is then converted into a number of years for the cagr computation following the
+  * formula of the reference.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Compound_annual_growth_rate">https://en.wikipedia.org/wiki/Compound_annual_growth_rate</a>
   * 
-  * @param {Array.<number>} equityCurve the portfolio equity curve.
-  * @param {Array.<date>} valuationDates the portfolio equity curve valuation dates.
-  * @return {number} the annualized return.
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {Array.<date>} valuationDates the portfolio valuation dates, an array of Dates of same length as portfolioEquityCurve.
+  * @return {number} the compound annual growth rate of the portfolio, expressed as a percentage.
   *
   * @example
   * cagr([1, 1.1, 1.2], [new Date("2015-12-31"), new Date("2016-12-31"), new Date("2017-12-31")]);
-  * // 0.095, i.e. ~9.5% annualized return
+  * // 0.095, i.e. 9.5% cagr over two years, from 31/12/2015 to 31/12/2017
   */
-  self.cagr = function(equityCurve, valuationDates) {
-    // Input checks
-    self.assertPositiveNumberArray_(equityCurve);
-	self.assertDateArray_(valuationDates);
-	self.assertSameLengthArrays_(equityCurve, valuationDates);
-	
+  self.cagr = function(portfolioEquityCurve, valuationDates) {
     // Extract the initial and the final equity curve values and valuation dates
-    var initialValue = equityCurve[0];
+    var initialValue = portfolioEquityCurve[0];
 	var initialValuationDate = valuationDates[0];
-    var finalValue = equityCurve[equityCurve.length-1];
+    var finalValue = portfolioEquityCurve[portfolioEquityCurve.length-1];
 	var finalValuationDate = valuationDates[valuationDates.length-1];
   
     // Compute the number of invested calendar days and then years
+	// The computation of the number of calendar days is following the algorithm
+	// of Michael Liu - http://stackoverflow.com/questions/542938/how-do-i-get-the-number-of-days-between-two-dates-in-javascript
 	function treatAsUTC(date) {
       var result = new Date(date);
       result.setMinutes(result.getMinutes() - result.getTimezoneOffset());
@@ -819,27 +903,31 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function arithmeticReturns
   *
-  * @description Compute the arithmetic returns associated to a portfolio equity curve.
+  * @summary Compute the period-to-period arithmetic returns of a portfolio.
+  *
+  * @description This function returns the period-to-period arithmetic returns of a portfolio, provided as an
+  * equity curve.
+  *
+  * The period-to-period arithmetic returns of a portfolio are defined as the serie of the arithmetic returns of the portfolio
+  * over each of its valuation period, with the return associated to the first period being undefined.
   *
   * @see <a href="https://en.wikipedia.org/wiki/Rate_of_return">https://en.wikipedia.org/wiki/Rate_of_return</a>
   * 
-  * @param {Array.<number>} equityCurve the portfolio equity curve.
-  * @return {Array.<number>} the arithmetic returns corresponding to the values of the portfolio equity curve,
-  * with the convention that the first return is NaN.
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @return {Array.<number>} the period-to-period arithmetic returns of the portfolio, 
+  * with the convention that the first return is NaN, expressed as percentages.
   *
   * @example
   * arithmeticReturns([1, 2, 1]); 
-  * // [NaN, 1.0, -0.5], i.e. 100% return and then -50% return
+  * // [NaN, 1.0, -0.5], i.e. 100% arithmetic return from the first period to the second period, 
+  * // and -50% arithmetic return from the second period to the third period
   */
-  self.arithmeticReturns = function(equityCurve) {
-    // Input checks
-    self.assertPositiveNumberArray_(equityCurve);
-	
+  self.arithmeticReturns = function(portfolioEquityCurve) {
     // Compute the arithmetic returns
-	var returns = new equityCurve.constructor(equityCurve.length); // Inherit the array type from the input array
+	var returns = new portfolioEquityCurve.constructor(portfolioEquityCurve.length); // Inherit the array type from the input array
 	returns[0] = NaN;
-	for (var i=1; i<equityCurve.length; ++i) {
-	  returns[i] = (equityCurve[i] - equityCurve[i-1])/equityCurve[i-1];
+	for (var i=1; i<portfolioEquityCurve.length; ++i) {
+	  returns[i] = (portfolioEquityCurve[i] - portfolioEquityCurve[i-1])/portfolioEquityCurve[i-1];
 	}
     
     // Return the arithmetic returns
@@ -850,34 +938,37 @@ PortfolioAnalytics = (function(self) {
   /**
   * @function valueAtRisk
   *
-  * @description Compute the (percent) value at risk of a portfolio equity curve.
+  * @summary Compute the value at risk of a portfolio.
   *
-  * To be noted that by convention, this value is positive, so that in case there is no loss in the portfolio equity curve, the computed value is then negative.
+  * @description This function returns the percent value at risk at a given confidence level of a portfolio, provided as an
+  * equity curve.
+  *
+  * The (percent) value at risk of a portfolio at an alpha% confidence level answers to the question:
+  * what is the minimum (percent) loss incurred in the 1-alpha% worst returns of the portfolio?
+  *
+  * By convention from the reference, this value is positive so that the computed value is negative if there is no loss.
   *
   * @see <a href="http://onlinelibrary.wiley.com/doi/10.1111/1468-0300.00091/abstract">Expected Shortfall: A Natural Coherent Alternative to Value at Risk, CARLO ACERBI, DIRK TASCHEy, Economic Notes, Volume 31, Issue 2, Pages 379–388 (July 2002)</a>
   *
-  * @param {Array.<number>} equityCurve the portfolio equity curve.
-  * @param {number} alpha the percent confidence level belonging to interval [0,1].
-  * @return {number} the (percent) value at risk at the 100*(1–alpha) percent confidence level.
+  * @param {Array.<number>} portfolioEquityCurve the portfolio equity curve, an array of real numbers.
+  * @param {number} alpha the percent confidence level, real number belonging to interval [0,1].
+  * @return {number} the value at risk at the alpha percent confidence level, expressed as a percentage.
   *
   * @example
-  * valueAtRisk([100, 90, 80, 70, 60, 50, 40, 30, 20], 0.7);
-  * // 0.725
+  * valueAtRisk([100, 90, 80, 70, 60, 50, 40, 30, 20], 0.80); // 80% confidence level 
+  * // ~0.33, i.e. 33% of minimal loss at a confidence level of 80%
   */
-  self.valueAtRisk = function(equityCurve, alpha) {
-    // Input checks
-    // No need to check for array positivity, as done in function below
-    self.assertBoundedNumber_(alpha, 0, 1);
-   
+  self.valueAtRisk = function(portfolioEquityCurve, alpha) {
     // Compute the returns and remove the first element, always equals to NaN
-    var returns = self.arithmeticReturns(equityCurve).slice(1);
+    var returns = self.arithmeticReturns(portfolioEquityCurve).slice(1);
 	
     // Sort the returns from lowest to highest values
     returns.sort(function(a, b) { return a - b;});
-  
+   
     // Compute w
     // C.f. p. 383 of the reference
-	w = Math.floor(alpha * returns.length)
+	var calpha = 1 - alpha;
+	var w = Math.floor(calpha * returns.length)
     
 	// Limit case (w equals to 0), return NaN
 	if (w == 0) {
@@ -886,7 +977,7 @@ PortfolioAnalytics = (function(self) {
     
     // Otherwise, compute the value at risk as the w-th return
 	// C.f. (2) and (6) of the reference
-	valAtRisk = -returns[w-1];
+	var valAtRisk = -returns[w-1];
 	
 	// Return the value at risk
 	return valAtRisk;
@@ -934,7 +1025,7 @@ PortfolioAnalytics = (function(self) {
   * @see <a href="https://web.archive.org/web/20151030215612/http://home.online.no/%7Epjacklam/notes/invnorm/">https://web.archive.org/web/20151030215612/http://home.online.no/%7Epjacklam/notes/invnorm/</a>
   * 
   * @param {number} p a probability value, real number belonging to interval [0,1].
-  * @param {boolean} extendedPrecision an optional boolean either false for a standard approximation (default) or true for a refined approximation.
+  * @param {boolean} extendedPrecision an optional boolean, either false for a standard approximation (default) or true for a refined approximation.
   * @return {number} an approximation to the x value satisfying p = Pr{Z <= x} where Z is a random variable following a standard normal distribution law.
   *
   * @example
@@ -1380,11 +1471,6 @@ PortfolioAnalytics = (function(self) {
   * // 22.5
   */
   self.variance_ = function(x) {
-	// In case the input array is made of only one element, the variance is not defined
-	if (x.length == 1) {
-	  return NaN;
-	}
-	
 	// Initialisations
     var nn = x.length;
 
@@ -1427,11 +1513,8 @@ PortfolioAnalytics = (function(self) {
   * // 30
   */
   self.sampleVariance_ = function(x) {
-    var v = self.variance_(x);
-	
-    //
-	var nn = x.length;
-	return v * nn/(nn - 1);
+    var nn = x.length;
+    return self.variance_(x) * nn/(nn - 1);
   }
 
   
@@ -1503,11 +1586,6 @@ PortfolioAnalytics = (function(self) {
   * // 0
   */
   self.skewness_ = function(x) {
-	// In case the input array is made of less than two elements, the skewness is not defined
-	if (x.length <= 2) {
-	  return NaN;
-	}
-	
 	// Initialisations
     var nn = x.length;
 	
@@ -1542,12 +1620,7 @@ PortfolioAnalytics = (function(self) {
 	var correctedVariance = (sumSquareDiff - (sumDiff_sumDiff / nn)) / nn;
 	
 	// Return the corrected skewness
-	if (correctedVariance == 0.0) {
-	  return NaN;
-	}
-	else {
-      return S/(nn * Math.sqrt(correctedVariance) * correctedVariance);
-	}
+	return S/(nn * Math.sqrt(correctedVariance) * correctedVariance);
   }
   
 
@@ -1571,11 +1644,10 @@ PortfolioAnalytics = (function(self) {
   * // 0
   */
   self.sampleSkewness_ = function(x) {
-    var s = self.skewness_(x);
-	
+    var nn = x.length;
+    
     // Compute the G1 coefficient from the reference
-	var nn = x.length;
-	return s * Math.sqrt(nn * (nn - 1))/(nn - 2);	
+    return self.skewness_(x) * Math.sqrt(nn * (nn - 1))/(nn - 2);
   }
   
   
@@ -1602,11 +1674,6 @@ PortfolioAnalytics = (function(self) {
   * // 1.36
   */
   self.kurtosis_ = function(x) {
-	// In case the input array is made of less than three elements, the skewness is not defined
-	if (x.length <= 3) {
-	  return NaN;
-	}
-	
 	// Initialisations
     var nn = x.length;
 	
@@ -1644,12 +1711,7 @@ PortfolioAnalytics = (function(self) {
 	var correctedVariance = (sumSquareDiff - (sumDiff_sumDiff / nn)) / nn;
 	
 	// Return the corrected kurtosis
-	if (correctedVariance == 0.0) {
-	  return NaN;
-	}
-	else {
-      return S/(nn * correctedVariance * correctedVariance);
-	}
+	return S/(nn * correctedVariance * correctedVariance);
   }
   
   
@@ -1673,454 +1735,91 @@ PortfolioAnalytics = (function(self) {
   * // ~-0.30
   */
   self.sampleKurtosis_ = function(x) {
-    var k = self.kurtosis_(x);
-	
+    var nn = x.length;
+    
     // Compute the G2 coefficient from the reference, and add 3 as the excess kurtosis is not computed here
-	var nn = x.length;
-	return (nn - 1)/((nn - 2) * (nn - 3)) * ((nn + 1) * k - 3* (nn - 1)) + 3
+    return (nn - 1)/((nn - 2) * (nn - 3)) * ((nn + 1) * self.kurtosis_(x) - 3* (nn - 1)) + 3;
+  }
+  
+  
+ /**
+  * @function sampleMoments_
+  *
+  * @summary Compute the arithmetic mean, the sample variance, the sample standard deviation,
+  * the sample skewness and the sample kurtosis of a serie of values.
+  *
+  * @description This function returns the arithmetic mean, the sample variance, 
+  * the sample standard deviation, the sample skewness and the sample kurtosis of a serie of values [x_1,...,x_p], 
+  * acting as a performances-oriented wrapper aroung the functions mean_, sampleVariance_, 
+  * sampleStddev_, sampleKurtosis_, sampleSkewness_.
+  *
+  * C.f. the mentionned functions for computation details.
+  *
+  * @param {Array.<number>} x an array of real numbers.
+  * @return {Array.<number>} the arithmetic mean, the sample variance, the sample standard deviation,
+  * the sample skewness and the sample kurtosis of the values of the array x, in this order.
+  *
+  * @example
+  * sampleMoments_([4, 7, 13, 16]); 
+  * // [10, 30, ~5.477, 0, ~-0.30]
+  */
+  self.sampleMoments_ = function(x) {
+	// Initialisations
+    var nn = x.length;
+
+    // Compute the mean of the input numeric array (first pass)
+	var meanX = self.mean_(x);
+	
+	// Code below is copy pasted from kurtosis computation, for performances reasons
+	// Compute all the deviations necessary to compute the variance, skewness and kurtosis (second pass)
+	var sumBiSquareDiff = 0.0;
+	var sumCubeDiff = 0.0;
+	var sumSquareDiff = 0.0;
+	var sumDiff = 0.0;
+	for (var i=0; i<nn; ++i) {
+	  var diff = (x[i] - meanX);
+	  var squareDiff = diff * diff;
+	  sumBiSquareDiff += squareDiff * squareDiff;
+	  sumCubeDiff += diff * squareDiff;
+	  sumSquareDiff += squareDiff;
+	  sumDiff += diff;
+	}
+	
+	// Compute the corrected sum of squares of the deviations from the mean
+	// Compute the corrected sum of bi-squarres of the deviations from the mean
+    // Compute the corrected sum of cubes of the deviations from the mean
+	var sumDiff_sumDiff = sumDiff * sumDiff;
+	var nn_nn = nn * nn;
+    var S2 = sumSquareDiff - ((sumDiff * sumDiff) / nn);
+	var S3 = sumCubeDiff - (2 * sumDiff * sumSquareDiff / nn) + (2 * sumDiff_sumDiff * sumDiff / (nn * nn));
+	var S4 = sumBiSquareDiff - (4 * sumDiff * sumCubeDiff / nn) + (6 * sumDiff_sumDiff * sumSquareDiff / nn_nn)  - (3 * sumDiff_sumDiff * sumDiff_sumDiff / (nn_nn * nn));
+	
+	// Compute the sample variance, the sample standard deviation, 
+	// the sample skewness, the sample kurtosis
+	var sampleVarX = NaN;
+	var sampleStddevX = NaN;
+	var sampleSkewX = NaN;
+	var sampleKurtX = NaN;
+
+	// Sample variance
+	var correctedVariance = S2 / nn;
+	var sampleVarX = correctedVariance * nn/(nn - 1); // Not S2/(nn - 1) to make sure computation matches with sampleVariance_ function
+	var sampleStddevX = Math.sqrt(sampleVarX);
+
+    // Sample skewness
+    var skewX = S3/(nn * Math.sqrt(correctedVariance) * correctedVariance);
+    var sampleSkewX = skewX * Math.sqrt(nn * (nn - 1))/(nn - 2);
+
+    // Sample kurtosis
+    var kurtX = S4/(nn * correctedVariance * correctedVariance);
+    var sampleKurtX =  (nn - 1)/((nn - 2) * (nn - 3)) * ((nn + 1) * kurtX - 3* (nn - 1)) + 3;
+
+    // Return the computed values
+    return [meanX, sampleVarX, sampleStddevX, sampleSkewX, sampleKurtX];
   }
   
   
 /* Start Not to be used as is in Google Sheets */
-   
-   return self;
-  
-})(PortfolioAnalytics || {});
-
-/* End Not to be used as is in Google Sheets */
-;/**
- * @file Functions related to types.
- * @author Roman Rubsamen <roman.rubsamen@gmail.com>
- */
-
-/* Start Not to be used as is in Google Sheets */
-
-var PortfolioAnalytics = PortfolioAnalytics || {};
-
-PortfolioAnalytics = (function(self) {
-
-/* End Not to be used as is in Google Sheets */  
-  
-	/**
-	* @function assertArray_
-	*
-	* @description Throws an error if the input parameter is not an array 
-	* or a typed array.
-	* 
-	* @param {Array.<Object>} x input parameter.
-	*
-	* @example
-	* assertArray_([]); 
-	* //
-	*
-	* @example
-	* assertArray_(1); 
-	* // Error("input must be an array")
-	*/
-	self.assertArray_ = function(x) {
-	  if (Object.prototype.toString.call(x).indexOf("Array") == -1) {
-		throw new Error("input must be an array");
-	  }
-	}
-
-
-	/**
-	* @function assertNumberArray_
-	*
-	* @description Throws an error if the input parameter is not an array of numbers 
-	* (or a typed array).
-	* 
-	* @param {Array.<Object>} x input parameter.
-	*
-	* @example
-	* assertNumberArray_([1]); 
-	* //
-	*
-	* @example
-	* assertNumberArray_(1); 
-	* // Error("input must be an array of numbers")
-	*
-    * assertNumberArray_([-1]); 
-	* // Error("input must be an array of numbers")
-	*/
-	self.assertNumberArray_ = function(x) {
-	  // A number array is an array...
-	  try {
-		self.assertArray_(x);
-	  }
-	  catch (e) {
-		throw new Error("input must be an array of numbers");
-	  }
-
-     // ... non empty...
-	 if (x.length == 0) {
-	   throw new Error("input must be an array of numbers");
-	 }
-	 
-     // ... and made of numbers
-     for (var i=0; i<x.length; ++i) {
-  	   try {
-         self.assertNumber_(x[i]);
-	   }
-       catch (e) {
-         throw new Error("input must be an array of numbers");
-        }
-	  }
-	}
-
-
-	/**
-	* @function assertPositiveNumberArray_
-	*
-	* @description Throws an error if the input parameter is not an array of positive numbers 
-	* (or a typed array).
-	* 
-	* @param {Array.<Object>} x input parameter.
-	*
-	* @example
-	* assertPositiveNumberArray_([]); 
-	* //
-	*
-	* @example
-	* assertPositiveNumberArray_(1); 
-	* // Error("input must be an array of positive numbers")
-	*
-    * assertPositiveNumberArray_([-1]); 
-	* // Error("input must be an array of positive numbers")
-	*/
-	self.assertPositiveNumberArray_ = function(x) {
-	  // A positive array is an array...
-	  try {
-		self.assertArray_(x);
-	  }
-	  catch (e) {
-		throw new Error("input must be an array of positive numbers");
-	  }
-
-     // ... non empty...
-	 if (x.length == 0) {
-	   throw new Error("input must be an array of positive numbers");
-	 }
-	 
-     // ... and made of positive numbers
-     for (var i=0; i<x.length; ++i) {
-  	   try {
-         self.assertPositiveNumber_(x[i]);
-	   }
-       catch (e) {
-         throw new Error("input must be an array of positive numbers");
-        }
-	  }
-	}
-
-
-	/**
-	* @function assertNumber_
-	*
-	* @description Throws an error if the input parameter is not a (finite) number.
-	* 
-	* @param {number} x input parameter.
-	*
-	* @example
-	* assertNumber_('1'); 
-	* // Error("input must be a number")
-	*
-	* @example
-	* assertNumber_(1);
-	*
-	* @example
-	* assertNumber_(NaN);
-	* // Error("input must be a number")
-	*/
-	self.assertNumber_ = function(x) {
-	  if (Object.prototype.toString.call(x)!= "[object Number]" || 
-		  isNaN(x) || 
-		  x === Infinity ||
-          x === -Infinity){
-		throw new Error("input must be a number");
-	  }
-	}
-
-
-	 /**
-	* @function assertPositiveNumber_
-	*
-	* @description Throws an error if the input parameter is not a positive (finite) number.
-	* 
-	* @param {number} x input parameter.
-	*
-	* @example
-	* assertPositiveNumber_(-2.3); 
-	* // Error("input must be a positive number")
-	*
-	* @example
-	* assertPositiveNumber_(1.1);
-	*
-	* @example
-	* assertPositiveNumber_(NaN);
-	* // Error("input must be a positive number")
-	*/
-	self.assertPositiveNumber_ = function(x) {
-	  // A positive number is a number...
-	  try {
-		self.assertNumber_(x);
-	  }
-	  catch (e) {
-		throw new Error("input must be a positive number");
-	  }
-	  
-	  // ... as well as positive
-	  if (x < 0.0 ) {
-	    throw new Error("input must be a positive number");
-	  }
-	}
-
-
-	/**
-	* @function assertBoundedNumber_
-	*
-	* @description Throws an error if the input parameter is not a (finite) number
-	* greater than a (finite)lower bound and lower than a (finite) upper bound.
-	* 
-	* @param {number} x input parameter.
-	* @param {number} lowerBound the lower bound.
-	* @param {number} upperBound the upper bound.
-	*
-	* @example
-	* assertBoundedNumber_(2, 0, 1); 
-	* // Error("input must be bounded")
-	*
-	* @example
-	* assertBoundedNumber_(1, 1, 1);
-	*
-	* @example
-	* assertBoundedNumber_(NaN, 0, 1);
-	* // Error("input(s) must be a number")
-	*/
-	self.assertBoundedNumber_ = function(x, lowerBound, upperBound) {
-	  // The bounds and the input must be numbers...
-	  try {
-        self.assertNumber_(x);
-	    self.assertNumber_(lowerBound);
-		self.assertNumber_(upperBound);
-	  }
-	  catch (e) {
-		throw new Error("input(s) must be a number");
-	  }
-	  
-	  // The input parameter must be between the input bounds
-	  if (x < lowerBound || x > upperBound) {
-	    throw new Error("input must be bounded between " + lowerBound + " and " + upperBound);
-	  }
-	}
-	
-	
-	/**
-	* @function assertPositiveInteger_
-	*
-	* @description Throws an error if the input parameter is not a positive integer.
-	* 
-	* @param {number} x input parameter.
-	*
-	* @example
-	* assertPositiveInteger_(-2.3); 
-	* // Error("input must be a positive integer")
-	*
-	* @example
-	* assertPositiveInteger_(1);
-	*
-	* @example
-	* assertPositiveInteger_(NaN);
-	* // Error("input must be a positive integer")
-	*/
-	self.assertPositiveInteger_ = function(x) {
-	  // A positive integer is a positive number...
-	  try {
-		self.assertPositiveNumber_(x);
-	  }
-	  catch (e) {
-		throw new Error("input must be a positive integer");
-	  }
-
-	  // ... as well as an integer
-	  if (Math.floor(x) !== x) {
-		throw new Error("input must be a positive integer");
-	  }
-	}
-
-
-	/**
-	* @function assertString_
-	*
-	* @description Throws an error if the input parameter is not a string.
-	* 
-	* @param {string} x input parameter.
-	*
-	* @example
-	* assertString_(1); 
-	* // Error("input must be a string")
-	*
-	* @example
-	* assertEnumeration_("test"); 
-	*/
-	self.assertString_ = function(x) {
-	  if (!(typeof x === 'string' || x instanceof String)) {
-		throw new Error("input must be a string");
-	  }
-	}
-
-	
-	/**
-	* @function assertStringEnumeration_
-	*
-	* @description Throws an error if the input parameter is not a string belonging to a set of string values.
-	* 
-	* @param {string} x input parameter.
-	* @param {Array.<string>} allowedValues array listing the allowed values for the input parameter.
-	*
-	* @example
-	* assertStringEnumeration_(1, ["test", "test2"]); 
-	* // Error("input must be a string equals to any of test,test2")
-	*
-	* @example
-	* assertStringEnumeration_("test", ["test", "test2"]); 
-	*/
-	self.assertStringEnumeration_ = function(x, allowedValues) {
-	  // Allowed values must be an array...
-	  try {
-        self.assertArray_(allowedValues);
-	  }
-	  catch (e) {
-		throw new Error("input must be an array of strings");
-	  }
-	    
-	  // ... of strings
-	  for (var i=0; i<allowedValues.length; ++i) {
-	    try {
-		  self.assertString_(allowedValues[i]);
-	    }
-	    catch (e) {
-		  throw new Error("input must be an array of strings");
-        }
-	  }
-	  
-	  // A string enumeration is a string...
-	  try {
-		self.assertString_(x);
-	  }
-	  catch (e) {
-		throw new Error("input must be a string equals to any of " + allowedValues.toString());
-	  }
-
-	  // ... with predefinite values
-	  if (allowedValues.indexOf(x) == -1) {
-		throw new Error("input must be a string equals to any of " + allowedValues.toString());
-	  }
-	}
-
-
-	/**
-	* @function assertDate_
-	*
-	* @description Throws an error if the input parameter is not a date.
-	* 
-	* @param {date} x input parameter.
-	*
-	* @example
-	* assertDate_(1); 
-	* // Error("input must be a date")
-	*
-	* @example
-	* assertDate_(new Date("2015-12-31")); 
-	*/
-	self.assertDate_ = function(x) {
-	  if ( !(x instanceof Date) || isNaN(x.getTime()) ) {
-		throw new Error("input must be a date");
-	  }
-	}
-	
-
-	/**
-	* @function assertDateArray_
-	*
-	* @description Throws an error if the input parameter is not an array of dates.
-	* 
-	* @param {Array.<Object>} x input parameter.
-	*
-	* @example
-	* assertDateArray_([new Date("2015-12-31")]); 
-	* //
-	*
-	* @example
-	* assertDateArray_(1); 
-	* // Error("input must be an array of dates")
-	*
-    * assertDateArray_([-1]); 
-	* // Error("input must be an array of dates")
-	*/
-	self.assertDateArray_ = function(x) {
-	  // A date array is an array...
-	  try {
-		self.assertArray_(x);
-	  }
-	  catch (e) {
-		throw new Error("input must be an array of dates");
-	  }
-
-      // ... non empty...
-	  if (x.length == 0) {
-	    throw new Error("input must be an array of dates");
-	  }
-	 
-      // ... and made of dates
-      for (var i=0; i<x.length; ++i) {
-  	    try {
-          self.assertDate_(x[i]);
-	    }
-        catch (e) {
-          throw new Error("input must be an array of dates");
-        }
-	  }
-	}
-
-	
-	/**
-	* @function assertSameLengthArrays_
-	*
-	* @description Throws an error if the input parameters are not arrays of same length.
-	* 
-	* @param {Array.<Object>} x input parameter.
-	* @param {Array.<Object>} y input parameter.
-	*
-	* @example
-	* assertSameLengthArrays_([1], [2]); 
-	* //
-	*
-	* @example
-	* assertSameLengthArrays_([1], [1, 2]); 
-	* // Error("input must be arrays of same length")
-	*
-    * assertSameLengthArrays_([-1], []); 
-	* // Error("input must be arrays of same length")
-	*/
-	self.assertSameLengthArrays_ = function(x, y) {
-	  // The two inputs must be arrays...
-	  try {
-		self.assertArray_(x);
-		self.assertArray_(y);
-	  }
-	  catch (e) {
-		throw new Error("input must be arrays of same length");
-	  }
-
-      // ... of same length
-	  if (x.length != y.length) {
-	    throw new Error("input must be arrays of same length");
-	  }
-	}
-	
-	
-	/* Start Not to be used as is in Google Sheets */
    
    return self;
   
