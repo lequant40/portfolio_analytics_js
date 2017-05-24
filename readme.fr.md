@@ -1,4 +1,4 @@
-# PortfolioAnalytics v0.0.3 ([Changelog](changelog.md))
+# PortfolioAnalytics v0.0.4 ([Changelog](changelog.md))
 
 [![Travis Build Status](https://travis-ci.org/lequant40/portfolio_analytics_js.svg?style=flat)](https://travis-ci.org/lequant40/portfolio_analytics_js)
 
@@ -138,6 +138,32 @@ PortfolioAnalytics.arithmeticReturns([1, 2, 1]);
 PortfolioAnalytics.valueAtRisk([1, 2, 1], 0.7);
 // La valeur à risque en pourcentage (value at risk)
 ```
+
+#### Mesures liéesau ratio de Sharpe
+
+```js
+PortfolioAnalytics.sharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]); 
+// Le ratio de Sharpe
+
+PortfolioAnalytics.biasAdjustedSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]); 
+// Le ratio de Sharpe ajusté de son biais
+
+PortfolioAnalytics.doubleSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]); 
+// Le double ratio de Sharpe (i.e., le ratio de Sharpe ajusté de son risque d'estimation)
+
+PortfolioAnalytics.sharpeRatioConfidenceInterval([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0.05); 
+// L'intervalle de confiance du ratio de Sharpe (ici, à un niveau de significativité de 5%)
+
+PortfolioAnalytics.probabilisticSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0); 
+// Le ratio de Sharpe probabilistique (i.e., la probabilité que le ratio de Sharpe soit plus grand qu'un
+// ratio de Sharpe de référence, ici 0)
+
+PortfolioAnalytics.minimumTrackRecordLength([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0.05, 0); 
+// La longueur minimale de l'historique des performances (i.e., la longueur minimale de l'historique des performances
+// nécessaire à avoir confiance statistiquement, ici à 95%, que le ratio de Sharpe est plus grand qu'un ratio
+// de Sharpe de référence).
+```
+
 
 #### Mesures liées aux rendements par rapport à la variabilité
 
