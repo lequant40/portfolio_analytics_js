@@ -3,12 +3,6 @@
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
  */
 
-/* Start Not to be used as is in Google Sheets */
-var PortfolioAnalytics = PortfolioAnalytics || {};
-
-PortfolioAnalytics = (function(self) {
-
-/* End Not to be used as is in Google Sheets */
 /**
  * @file Functions related to drawdowns computation.
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
@@ -39,7 +33,7 @@ PortfolioAnalytics = (function(self) {
 * maxDrawdown([]);
 * // 0.0, i.e. no drawdown
 */
-self.maxDrawdown = function(equityCurve) {
+function maxDrawdown(equityCurve) {
 	// Compute the maximum drawdown and its associated duration
 	var maxDd_ = maxDrawdown_(equityCurve, 0, equityCurve.length-1);
 
@@ -127,7 +121,7 @@ function maxDrawdown_(equityCurve, idxStart, idxEnd) {
 * drawdownFunction([1, 2, 1]); 
 * // [0.0, 0.0, 0.5], i.e. no drawdowns at indexes 0/1, 50% drawdown at index 2  
 */
-self.drawdownFunction = function(equityCurve) {
+function drawdownFunction(equityCurve) {
 	// Initialisations
 	var highWaterMark = -Infinity;
 
@@ -177,7 +171,7 @@ self.drawdownFunction = function(equityCurve) {
 * topDrawdowns([1,2, 1], 1)[0][0] == maxDrawdown([1, 2, 1]); 
 * // true
 */
-self.topDrawdowns = function(equityCurve, nbTopDrawdowns) {
+function topDrawdowns(equityCurve, nbTopDrawdowns) {
 	// If no drawdowns are required, returns
 	if (nbTopDrawdowns == 0) {
 		return [];
@@ -281,9 +275,9 @@ self.topDrawdowns = function(equityCurve, nbTopDrawdowns) {
 * ulcerIndex([1, 2, 1]);
 * // ~0.289
 */
-self.ulcerIndex = function(equityCurve) {
+function ulcerIndex(equityCurve) {
 	// Compute the drawdown function
-	var ddFunc = self.drawdownFunction(equityCurve);
+	var ddFunc = drawdownFunction(equityCurve);
 
 	// Compute the sum of squares of this function
 	var sumSquares = 0.0;
@@ -314,9 +308,9 @@ self.ulcerIndex = function(equityCurve) {
 * painIndex([1, 2, 1]);
 * // ~0.167
 */
-self.painIndex = function(equityCurve) {
+function painIndex(equityCurve) {
 	// Compute the drawdown function
-	var ddFunc = self.drawdownFunction(equityCurve);
+	var ddFunc = drawdownFunction(equityCurve);
 
 	// Compute and return the mean of this function, which corresponds to the pain index
 	return mean_(ddFunc);
@@ -338,11 +332,11 @@ self.painIndex = function(equityCurve) {
 * conditionalDrawdown([100, 90, 80, 70, 60, 50, 40, 30, 20], 0.7);
 * // 0.725
 */
-self.conditionalDrawdown = function(equityCurve, alpha) {   
+function conditionalDrawdown(equityCurve, alpha) {   
 	// Compute the drawdown function and
 	// remove the first element, always equals to 0
 	// C.f. definition 3.1
-	var ddFunc = self.drawdownFunction(equityCurve).slice(1);
+	var ddFunc = drawdownFunction(equityCurve).slice(1);
 
 	// Sort the drawdown function from lowest to highest values
 	ddFunc.sort(function(a, b) { return a - b;});
@@ -408,9 +402,9 @@ self.conditionalDrawdown = function(equityCurve, alpha) {
 * gainToPainRatio([1, 1.1, 1.4]); 
 * // NaN
 */
-self.gainToPainRatio = function(portfolioEquityCurve) {
+function gainToPainRatio(portfolioEquityCurve) {
 	// Compute the arithmetic returns of the portfolio
-	var returns = self.arithmeticReturns(portfolioEquityCurve).slice(1); // First value is NaN
+	var returns = arithmeticReturns(portfolioEquityCurve).slice(1); // First value is NaN
 
 	// If there is no usable returns, exit
 	if (returns.length == 0) {
@@ -460,7 +454,7 @@ self.gainToPainRatio = function(portfolioEquityCurve) {
 * sharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]);
 * // ~0.585
 */
-self.sharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
+function sharpeRatio(portfolioEquityCurve, benchmarkEquityCurve) {
 	// Compute the Sharpe ratio statistics
 	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
 	var sr = srs[0];
@@ -546,10 +540,10 @@ function sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve) {
 */
 function differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve) {
 	// Compute the arithmetic returns of the portfolio
-	var portfolioReturns = self.arithmeticReturns(portfolioEquityCurve).slice(1); // First value is NaN
+	var portfolioReturns = arithmeticReturns(portfolioEquityCurve).slice(1); // First value is NaN
 
 	// Compute the arithmetic returns of the benchmark
-	var benchmarkReturns = self.arithmeticReturns(benchmarkEquityCurve).slice(1); // First value is NaN
+	var benchmarkReturns = arithmeticReturns(benchmarkEquityCurve).slice(1); // First value is NaN
 
 	// Else, compute and return the differential returns
 	var differentialReturns = new portfolioReturns.constructor(portfolioReturns.length); // Inherit the array type from (ultimately) the input array
@@ -581,7 +575,7 @@ function differentialReturns_(portfolioEquityCurve, benchmarkEquityCurve) {
 * biasAdjustedSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]);
 * // ~0.53
 */
-self.biasAdjustedSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
+function biasAdjustedSharpeRatio(portfolioEquityCurve, benchmarkEquityCurve) {
 	// Compute the Sharpe ratio statistics
 	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
 	var sr = srs[0];
@@ -618,7 +612,7 @@ self.biasAdjustedSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCur
 * doubleSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100]); 
 * // ~0.809
 */
-self.doubleSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
+function doubleSharpeRatio(portfolioEquityCurve, benchmarkEquityCurve) {
 	// Compute the Sharpe ratio statistics
 	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
 	var sr = srs[0];
@@ -654,7 +648,7 @@ self.doubleSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve) {
 * // [-0.832129939760892, 2.0023877584051735] // This interval is the 95% confidence level interval for the Sharpe ratio,
 * which implies that a negative/null Sharpe ratio cannot be excluded
 */
-self.sharpeRatioConfidenceInterval = function(portfolioEquityCurve, benchmarkEquityCurve, alpha) {
+function sharpeRatioConfidenceInterval(portfolioEquityCurve, benchmarkEquityCurve, alpha) {
 	// Compute the Sharpe ratio statistics
 	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
 	var sr = srs[0];
@@ -701,7 +695,7 @@ self.sharpeRatioConfidenceInterval = function(portfolioEquityCurve, benchmarkEqu
 * probabilisticSharpeRatio([100, 110, 105, 107.5, 115], [100, 100, 100, 100, 100], 0); 
 * // ~0.79; // Indicates that the portfolio v.s. benchmark (here, risk free rate of 0) Sharpe ratio is greater than 0 with a confidence level of 79%
 */
-self.probabilisticSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCurve, referenceSharpeRatio) {
+function probabilisticSharpeRatio(portfolioEquityCurve, benchmarkEquityCurve, referenceSharpeRatio) {
 	// Compute the Sharpe ratio statistics
 	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
 	var sr = srs[0];
@@ -748,7 +742,7 @@ self.probabilisticSharpeRatio = function(portfolioEquityCurve, benchmarkEquityCu
 * // ~13.4; // Indicates that 13.4 valuations are required to state that the portfolio v.s. benchmark Sharpe ratio 
 * is greater than 0 with a 95% confidence level (hence, the 6 values provided here are not sufficent)
 */
-self.minimumTrackRecordLength = function(portfolioEquityCurve, benchmarkEquityCurve, alpha, referenceSharpeRatio) {
+function minimumTrackRecordLength(portfolioEquityCurve, benchmarkEquityCurve, alpha, referenceSharpeRatio) {
 	// Compute the Sharpe ratio statistics
 	var srs = sharpeRatioStatistics_(portfolioEquityCurve, benchmarkEquityCurve);
 	var sr = srs[0];
@@ -792,7 +786,7 @@ self.minimumTrackRecordLength = function(portfolioEquityCurve, benchmarkEquityCu
 * cumulativeReturn([1, 2, 2]);
 * // 1, i.e. 100% return over the period
 */
-self.cumulativeReturn = function(portfolioEquityCurve) {
+function cumulativeReturn(portfolioEquityCurve) {
 	// Compute the cumulative return
 	var cumRet = NaN;
 	if (portfolioEquityCurve.length >= 2) { // In order to compute a proper cumulative return, at least 2 periods are required
@@ -829,7 +823,7 @@ self.cumulativeReturn = function(portfolioEquityCurve) {
 * cagr([1, 1.1, 1.2], [new Date("2015-12-31"), new Date("2016-12-31"), new Date("2017-12-31")]);
 * // 0.095, i.e. 9.5% cagr over two years, from 31/12/2015 to 31/12/2017
 */
-self.cagr = function(portfolioEquityCurve, valuationDates) {
+function cagr(portfolioEquityCurve, valuationDates) {
 	// Extract the initial and the final equity curve values and valuation dates
 	var initialValue = portfolioEquityCurve[0];
 	var initialValuationDate = valuationDates[0];
@@ -878,7 +872,7 @@ self.cagr = function(portfolioEquityCurve, valuationDates) {
 * // [NaN, 1.0, -0.5], i.e. 100% arithmetic return from the first period to the second period, 
 * // and -50% arithmetic return from the second period to the third period
 */
-self.arithmeticReturns = function(portfolioEquityCurve) {
+function arithmeticReturns(portfolioEquityCurve) {
 	// Compute the arithmetic returns
 	var returns = new portfolioEquityCurve.constructor(portfolioEquityCurve.length); // Inherit the array type from the input array
 	returns[0] = NaN;
@@ -914,9 +908,9 @@ self.arithmeticReturns = function(portfolioEquityCurve) {
 * valueAtRisk([100, 90, 80, 70, 60, 50, 40, 30, 20], 0.80); // 80% confidence level 
 * // ~0.33, i.e. 33% of minimal loss at a confidence level of 80%
 */
-self.valueAtRisk = function(portfolioEquityCurve, alpha) {
+function valueAtRisk(portfolioEquityCurve, alpha) {
 	// Compute the returns and remove the first element, always equals to NaN
-	var returns = self.arithmeticReturns(portfolioEquityCurve).slice(1);
+	var returns = arithmeticReturns(portfolioEquityCurve).slice(1);
 
 	// Sort the returns from lowest to highest values
 	returns.sort(function(a, b) { return a - b;});
@@ -1753,14 +1747,3 @@ function sampleMoments_(x) {
  * @author Roman Rubsamen <roman.rubsamen@gmail.com>
  */
 
-/* Start Not to be used as is in Google Sheets */
-   return self;
-  
-})(PortfolioAnalytics || {});
-
- 
-if (typeof module !== 'undefined') {
-  module.exports = PortfolioAnalytics;
-}
-
-/* End Not to be used as is in Google Sheets */

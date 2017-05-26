@@ -21,7 +21,7 @@ module.exports = function(grunt) {
 			]
 		},
         files: [
-		  { expand: true, flatten: true, src: ['lib/**/*.js'], dest: 'dist/gs/'}
+		  { src: ['dist/portfolio_analytics.dist.js'], dest: 'dist/gs/portfolio_analytics.gs'}
 		]
       },
       portfolio_analytics_dist: {
@@ -33,7 +33,7 @@ module.exports = function(grunt) {
 			]
 		},
         files: [
-		  { expand: true, flatten: true, src: ['lib/**/*.js'], dest: 'build/'}
+		  { src: ['dist/portfolio_analytics.dist.js'], dest: 'dist/portfolio_analytics.dist.js'}
 		]
       },
     },
@@ -54,21 +54,18 @@ module.exports = function(grunt) {
           ]
         },
         files: [
-          { expand: true, flatten: true, src: ['dist/gs/*.js'], dest: 'dist/gs/'}
+          { src: ['dist/gs/portfolio_analytics.gs'], dest: 'dist/gs/portfolio_analytics.gs'}
         ]
       }
     },
 	
 	concat: {
-	  options: {
-	    separator: ';',
-    	},
 	  portfolio_analytics_dev: {
-	    src: ['lib/**/*.js'],
+	    src: ['lib/header.js', 'lib/*/*.js', 'lib/footer.js'],
 	    dest: 'dist/portfolio_analytics.dev.js',
 	  },
 	  portfolio_analytics_dist: {
-	    src: ['build/**/*.js'],
+	    src: ['lib/header.js', 'lib/*/*.js', 'lib/footer.js'],
 	    dest: 'dist/portfolio_analytics.dist.js',
 	  },
 	},
@@ -90,8 +87,8 @@ module.exports = function(grunt) {
     },
 	
 	qunit: { 
-      dev: ['test/**/*_dev.html'],
-	  dist: ['test/**/*_dist.html']
+      dev: ['test/*/*_dev.html'],
+	  dist: ['test/*/*_dist.html']
     }
 
   });
@@ -99,7 +96,8 @@ module.exports = function(grunt) {
 
   //
   grunt.registerTask('test', 'Tests the app.', function() {
-	// Minify the app in dev mode and run all unit tests
+	// Build the app in dev mode, and run all dev unit tests, 
+	// which are a superset of dist unit tests
 	grunt.task.run('concat:portfolio_analytics_dev');
 	grunt.task.run('uglify:portfolio_analytics_dev');
 	grunt.task.run('qunit:dev');
@@ -107,16 +105,22 @@ module.exports = function(grunt) {
 
   //
   grunt.registerTask('deliver', 'Builds the app into a distributable package.', function() {
-    // Minify the app in dist mode (i.e., removing access to private methods...)
-    grunt.task.run('strip_code:portfolio_analytics_dist');
+    // Build the app in dist mode
 	grunt.task.run('concat:portfolio_analytics_dist');
+    grunt.task.run('strip_code:portfolio_analytics_dist');
 	grunt.task.run('uglify:portfolio_analytics_dist');
-	
+
 	// Run the non-dev unit tests
-	grunt.task.run('qunit:dist');
-	
-    // And generate the Google Spreadsheet version
+	grunt.task.run('qunit:dist');	
+  });
+  
+  //
+  grunt.registerTask('deliver-gs', 'Builds the app into a distributable package for Google Sheets.', function() {
+    // Starting from dist mode, remove header/footer
+    grunt.task.run('deliver');
 	grunt.task.run('strip_code:portfolio_analytics_gs');
-	grunt.task.run('replace:portfolio_analytics_gs');
+	
+	// Then change function definitions
+	grunt.task.run('replace:portfolio_analytics_gs')
   });
 };

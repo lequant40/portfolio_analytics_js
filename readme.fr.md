@@ -85,18 +85,29 @@ Si vous souhaitez utiliser PortfolioAnalytics avec un navigateur, vous pouvez t�
 Il vous suffit ensuite d'inclure ce code dans une page HTML, par exemple :
 
 ```html
-	<script src="portfolio_analytics.dist.min.js" type="text/javascript"></script>
+<script src="portfolio_analytics.dist.min.js" type="text/javascript"></script>
 ```
 
 A noter que si le navigateur prend en charge les tableaux typés JavaScript, vous pouvez utiliser ces tableaux avec PortfolioAnalytics pour de meilleures performances, par exemple :
 ```html
-	PortfolioAnalytics.arithmeticReturns(new Float64Array([100.0, 109.75, 111.25]))
-	// Le type de retour sera un Float64Array
+PortfolioAnalytics.arithmeticReturns(new Float64Array([100.0, 109.75, 111.25]))
+// Le type de retour sera un Float64Array
 ```
 
 ### Utilisation avec Node.js
 
-A venir...
+Si vous souhaitez utiliser PortfolioAnalytics avec [Node.js](https://nodejs.org/en/), vous devez simplement déclarer ce module comme dépendance
+dans votre fichier `package.json`.
+
+Le reste est du code Node.js standard, e.g. :
+
+```js
+var PortfolioAnalytics = require('portfolio-analytics');
+...
+var ui = PortfolioAnalytics.ulcerIndex([100, 110, 105, 102, 95]);
+// ui == 0.07204222820421435
+```
+
 
 ### Exemples
 
@@ -195,7 +206,7 @@ grunt deliver
 - La commande suivante génère les fichiers à utiliser avec Google Sheets dans le répertoire `dist\gs` :
 
 ```
-grunt deliver
+grunt deliver-gs
 ```
 ### Tester
 
