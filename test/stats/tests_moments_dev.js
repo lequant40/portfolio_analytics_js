@@ -3,6 +3,7 @@ QUnit.module('Statistics module', {
   before: function() {
 	// Coming from "Practical Portfolio Performance Measurement and Attribution, 2nd Edition, Carl R. Bacon."
 	this.BaconReturns = [0.003, 0.026, 0.011, -0.01, 0.015, 0.025, 0.016, 0.067, -0.014, 0.04, -0.005, 0.081, 0.04, -0.037, -0.061, 0.017, -0.049, -0.022, 0.07, 0.058, -0.065, 0.024, -0.005, -0.009];
+	this.BaconBenchmarkReturns = [0.002, 0.025, 0.018, -0.011, 0.014, 0.018, 0.014, 0.065, -0.015, 0.042, -0.006, 0.083, 0.039, -0.038, -0.062, 0.015, -0.048, 0.021, 0.06, 0.056, -0.067, 0.019, -0.003, 0];
 	
 	// Coming from Spiegel, Murray R., and Larry J. Stephens. 1999. Theory and Problems of Statistics. 3d ed. McGraw-Hill. 
     var heights = [ [61,5], [64,18], [67,42], [70,27], [73,8] ];
@@ -62,10 +63,36 @@ QUnit.test('Variance computation', function(assert) {
   assert.equal(PortfolioAnalytics.sampleVariance_([4, 7, 13, 16]), 30, 'Sample variance with no rounding error #2/2');
   
   // Bacon portfolio test
-  assert.equal(PortfolioAnalytics.variance_(this.BaconReturns), 0.035974/this.BaconReturns.length + 0.0000000000000000003, 'Bacon variance');
+  assert.equal(Math.abs(PortfolioAnalytics.variance_(this.BaconReturns) - 0.035974/this.BaconReturns.length) <= 1e-16, true, 'Bacon variance');
 
   // Spiegel heigths test
   assert.equal(PortfolioAnalytics.variance_(this.SpiegelHeights), 8.527499999999993, 'Spiegel variance'); 
+});
+
+
+QUnit.test('Covariance computation', function(assert) {      
+  // Test that Var(X) = Cov(X, X), using random data
+  var testX = new Array(10);
+  for (var i=0; i<testX.length; ++i) {
+    testX[i] = Math.random();
+  }
+  assert.equal(PortfolioAnalytics.covariance_(testX, testX), PortfolioAnalytics.variance_(testX), 'Variance X = Cov(X,X)');
+  
+  // Test that Var(X + Y) = Var(X) + Var(Y) + 2*Cov(X, Y), using random data
+  var testY = new Array(10);
+  var testXpY = new Array(10);
+  for (var i=0; i<testY.length; ++i) {
+    testY[i] = Math.random();
+	testXpY[i] = testX[i] + testY[i];
+  }
+  assert.equal(Math.abs(PortfolioAnalytics.variance_(testX) + PortfolioAnalytics.variance_(testY) + 2*PortfolioAnalytics.covariance_(testX, testY)
+               -
+               PortfolioAnalytics.variance_(testXpY)) <= 1e-16,
+			   true,
+			   'Variance X + Y = Var X + Var Y + 2*Cov(X,Y)');
+
+  // Bacon portfolio test
+  assert.equal(Math.abs(PortfolioAnalytics.covariance_(this.BaconReturns, this.BaconBenchmarkReturns) - 0.033844/this.BaconReturns.length) <= 1e-16, true, 'Bacon covariance');
 });
 
 
@@ -86,8 +113,8 @@ QUnit.test('Standard deviation computation', function(assert) {
   } 
   
   // Bacon portfolio test
-  assert.equal(PortfolioAnalytics.stddev_(this.BaconReturns), Math.sqrt(0.035974/this.BaconReturns.length + 0.0000000000000000003), 'Bacon standard deviation');
-  assert.equal(PortfolioAnalytics.sampleStddev_(this.BaconReturns), Math.sqrt(0.035974/(this.BaconReturns.length-1) + 0.0000000000000000003), 'Bacon sample standard deviation');
+  assert.equal(Math.abs(PortfolioAnalytics.stddev_(this.BaconReturns) - Math.sqrt(0.035974/this.BaconReturns.length)) <= 1e-16, true, 'Bacon standard deviation');
+  assert.equal(Math.abs(PortfolioAnalytics.sampleStddev_(this.BaconReturns) - Math.sqrt(0.035974/(this.BaconReturns.length-1))) <= 1e-16, true, 'Bacon sample standard deviation');
   
   // Wikipedia test (https://en.wikipedia.org/wiki/Standard_deviation#Basic_examples)
   assert.equal(PortfolioAnalytics.stddev_([2, 4, 4, 4, 5, 5, 7, 9]), 2, 'Wikipedia standard deviation');
@@ -111,8 +138,8 @@ QUnit.test('Skewness computation', function(assert) {
   assert.equal(PortfolioAnalytics.sampleSkewness_(this.SpiegelHeights), -0.10980840870973678, 'Spiegel sample skewness'); 
   
   // Bacon portfolio test
-  assert.equal(PortfolioAnalytics.skewness_(this.BaconReturns), -114.99/(Math.pow(Math.sqrt(359.74/24),3) * 24) + 0.00000000000000026, 'Bacon skewness');
-  assert.equal(PortfolioAnalytics.sampleSkewness_(this.BaconReturns), -114.99/Math.pow(Math.sqrt(359.74/23),3) * 24 / (23 * 22) + 0.00000000000000026, 'Bacon sample skewness');
+  assert.equal(Math.abs(PortfolioAnalytics.skewness_(this.BaconReturns) + 114.99/(Math.pow(Math.sqrt(359.74/24),3) * 24)) <= 1e-15, true, 'Bacon skewness');
+  assert.equal(Math.abs(PortfolioAnalytics.sampleSkewness_(this.BaconReturns)+ 114.99/Math.pow(Math.sqrt(359.74/23),3) * 24 / (23 * 22)) <= 1e-15, true, 'Bacon sample skewness');
 });
 
 
@@ -142,8 +169,8 @@ QUnit.test('Kurtosis computation', function(assert) {
   assert.equal(PortfolioAnalytics.kurtosis_([0, 3, 4, 1, 2, 3, 0, 2, 1, 3, 2, 0, 2, 2, 3, 2, 5, 2, 3, 999]), 18.051426543784185, 'Wikipedia kurtosis'); 
   
   // Bacon portfolio test
-  assert.equal(PortfolioAnalytics.kurtosis_(this.BaconReturns), 13116.28/(Math.pow(Math.sqrt(359.74/24),4) * 24) + 7.789024514259779e-7, 'Bacon kurtosis');
-  assert.equal(PortfolioAnalytics.sampleKurtosis_(this.BaconReturns), 13116.28/Math.pow(Math.sqrt(359.74/23),4) * (24 * 25)/ (23 * 22 * 21) - 3 * (23 * 23)/(22 * 21) + 3 + 9.69413224805038e-7 , 'Bacon sample kurtosis	');
+  assert.equal(Math.abs(PortfolioAnalytics.kurtosis_(this.BaconReturns) - 13116.28/(Math.pow(Math.sqrt(359.74/24),4) * 24)) <= 1e-6, true, 'Bacon kurtosis');
+  assert.equal(Math.abs(PortfolioAnalytics.sampleKurtosis_(this.BaconReturns) - (13116.28/Math.pow(Math.sqrt(359.74/23),4) * (24 * 25)/ (23 * 22 * 21) - 3 * (23 * 23)/(22 * 21) + 3)) <= 1e-6, true,  'Bacon sample kurtosis	');
 });
 
 

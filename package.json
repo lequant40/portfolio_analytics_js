@@ -4,7 +4,7 @@
   "date": "2017-05-25",
   "author": "Roman Rubsamen <roman.rubsamen@gmail.com>",
   "contributors": [],
-  "description": "A JavaScript library to track and measure stock market portfolio performances.",
+  "description": "A JavaScript library to track and measure stock market portfolios performances.",
   "license": "MIT",
   "directories": {
     "lib": "lib",
